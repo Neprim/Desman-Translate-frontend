@@ -46,3 +46,7 @@ export async function fetchUser(user_id, fetch_projects = false) {
 export async function fetchUserInvites(fetch_users = true, fetch_projects = true) {
     return await fetchSomeAPI(`/api/invites?fetch_users=${fetch_users}&fetch_projects=${fetch_projects}`)
 }
+
+export async function fetchProjectInvites(project_id, fetch_users = true) {
+    return await fetchSomeAPI(`/api/projects/${project_id}/invites?fetch_users=${fetch_users}`)
+}

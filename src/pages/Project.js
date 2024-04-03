@@ -7,7 +7,7 @@ import placeholder from "../images/placeholder.png";
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
-import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers } from "../APIController";
+import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites } from "../APIController";
 import { ProgressBar } from "react-bootstrap";
 
 function Project(props) {
@@ -18,6 +18,7 @@ function Project(props) {
     const [members, setMembers] = useState([]);
     const [sections, setSections] = useState([]);
     const [roles, setRoles] = useState([]);
+    const [invites, setInvites] = useState([]);
     const [userRole, setUserRole] = useState(null);
 
     const [progressCount, setProgressCount] = useState(0);
@@ -72,6 +73,7 @@ function Project(props) {
         try {
             const user = await fetchUser(fieldInviteUser)
             await fetchSomeAPI(`/api/projects/${project.id}/invites`, "POST", { user_id: user.id })
+            await GetInvites()
         } catch (err) {
             // TODO
             // В зависимости от типа ошибки выводить то-то то-то на экране
@@ -90,6 +92,30 @@ function Project(props) {
         }
     }
 
+    async function DeleteInvite(invite_id) {
+        try {
+            await fetchSomeAPI(`/api/projects/${link["project_id"]}/invites/${invite_id}`, "DELETE")
+            await GetInvites()
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function GetInvites() {
+        if (!project)
+            return
+
+        if (!userRole || !userRole.permissions.can_manage_members)
+            return
+
+        try {
+            const invites = await fetchProjectInvites(project.id)
+            setInvites(invites)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
         GetProject();
     }, []);
@@ -101,6 +127,10 @@ function Project(props) {
     useEffect(() => {
         GetSections();
     }, []);
+
+    useEffect(() => {
+        GetInvites();
+    }, [userRole, project]);
     
     return (
         <>
@@ -193,10 +223,9 @@ function Project(props) {
                                     <thead>
                                         <tr>
                                             <th scope="col">№</th>
-                                            <th scope="col">Ник</th>
+                                            <th scope="col">Пользователь</th>
                                             <th scope="col">Роль</th>
                                             <th scope="col">Рейтинг</th>
-                                            {/* <th scope="col" style={{ display: 'inline-flexbox' }}>Модерация</th> */}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -213,6 +242,34 @@ function Project(props) {
                                         )}
                                     </tbody>
                                 </table>
+                                {invites.length > 0 &&
+                                <>
+                                    <h2>Приглашённые</h2>
+                                    <table className="table table-striped align-items-center">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">№</th>
+                                                <th scope="col">Пользователь</th>
+                                                <th scope="col">Приглашён</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {invites.map((invite, index) =>
+                                            // Соня, сделай список приглашений красиво
+                                            <tr key={invite.user.id}>
+                                                <th scope="row">{index + 1}</th>
+                                                <td>{invite.user.username}</td>
+                                                <td>{invite.inviter.username}</td>
+                                                {userRole && userRole.permissions.can_manage_members &&
+                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>Отменить</button></td>
+                                                }
+                                            </tr>
+                                            )
+                                        }
+                                        </tbody>
+                                    </table>
+                                </>
+                                }
                             </div>
                             {userRole && userRole.permissions.can_manage_members &&
                             <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
