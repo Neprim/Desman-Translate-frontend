@@ -6,7 +6,7 @@ import { AuthContext } from "../AuthContext";
 
 function Navbar() {
 	const [input, setInput] = useState("");
-	const { user } = useContext(AuthContext);
+	const { user, gotUser } = useContext(AuthContext);
 
 	async function Logout() {
 		await fetch("/api/logout",
@@ -66,7 +66,8 @@ function Navbar() {
 							</Link>
 						</li>
 					</ul>
-					{user ? 
+					{user 
+				? 
 					<ul className="nav" style={{ display: "flex" }}>
 						<li className="nav-item">
 							<Link to={"/users/" + user.id} reloadDocument className="nav-link link-primary px-2">
@@ -82,7 +83,8 @@ function Navbar() {
 						</Button>
 
 					</ul> 
-				:	<ul className="nav" style={{ display: "flex" }}>
+				: gotUser &&
+					<ul className="nav" style={{ display: "flex" }}>
 						<li className="nav-item">
 							<Link to="/login" className="nav-link link-body-emphasis px-2">
 								Войти

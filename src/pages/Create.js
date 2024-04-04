@@ -53,10 +53,64 @@ export default function Create() {
 	const [nameError, setNameError] = useState("")
 	const [descriptionError, setDescriptionError] = useState("")
 
-	const nameChange = event => setName(event.target.value);
 	const handleChange = event => setHandle(event.target.value);
 	const desciptionChange = event => setDescription(event.target.value);
 
+	function translit(str) {
+		let letters = {}
+		letters['А'] = 'a';     letters['а'] = 'a';  
+		letters['Б'] = 'b';     letters['б'] = 'b';  
+		letters['В'] = 'v';     letters['в'] = 'v';  
+		letters['Г'] = 'g';     letters['г'] = 'g';  
+		letters['Д'] = 'd';     letters['д'] = 'd';  
+		letters['Е'] = 'e';     letters['е'] = 'e';  
+		letters['Ё'] = 'yo';    letters['ё'] = 'yo'; 
+		letters['Ж'] = 'zh';    letters['ж'] = 'zh'; 
+		letters['З'] = 'z';     letters['з'] = 'z';  
+		letters['И'] = 'i';     letters['и'] = 'i';  
+		letters['Й'] = 'j';     letters['й'] = 'j';  
+		letters['К'] = 'k';     letters['к'] = 'k';  
+		letters['Л'] = 'l';     letters['л'] = 'l';  
+		letters['М'] = 'm';     letters['м'] = 'm';  
+		letters['Н'] = 'n';     letters['н'] = 'n';  
+		letters['О'] = 'o';     letters['о'] = 'o';  
+		letters['П'] = 'p';     letters['п'] = 'p';  
+		letters['Р'] = 'r';     letters['р'] = 'r';  
+		letters['С'] = 's';     letters['с'] = 's';  
+		letters['Т'] = 't';     letters['т'] = 't';  
+		letters['У'] = 'u';     letters['у'] = 'u';  
+		letters['Ф'] = 'f';     letters['ф'] = 'f';  
+		letters['Х'] = 'x';     letters['х'] = 'x';  
+		letters['Ц'] = 'c';     letters['ц'] = 'c';  
+		letters['Ч'] = 'ch';    letters['ч'] = 'ch'; 
+		letters['Ш'] = 'sh';    letters['ш'] = 'sh'; 
+		letters['Щ'] = 'shh';   letters['щ'] = 'shh';
+		letters['Ы'] = 'y';     letters['ы'] = 'y';  
+		letters['Э'] = 'e';     letters['э'] = 'e';  
+		letters['Ю'] = 'yu';    letters['ю'] = 'yu'; 
+		letters['Я'] = 'ya';    letters['я'] = 'ya'; 
+
+		str = str.toLowerCase()
+		let tr = ""
+		for (let i = 0; i < str.length; i++) {
+			if (/[a-z]/.test(str[i]))
+				tr += str[i]
+			else if (letters[str[i]])
+				tr += letters[str[i]]
+		}
+
+		return tr
+	}
+
+	const nameChange = (event) => {
+		const name = event.target.value
+		setName(name)
+
+		const tr = translit(name)
+		document.getElementById("inputHandle").value = tr
+		setHandle(tr)
+	}
+	
 	async function CreateProject(event) {
 		try {
 			setHandleError("")
@@ -108,8 +162,8 @@ export default function Create() {
 					</div>
 					<div className="mb-3">
 						
-						<label htmlFor="inputUnique" className="form-label">Уникальная ссылка</label>
-						<input type="text" className="form-control" id="inputUnique" aria-describedby="linkDesc handleError" onChange={handleChange} />
+						<label htmlFor="inputHandle" className="form-label">Уникальная ссылка</label>
+						<input type="text" className="form-control" id="inputHandle" aria-describedby="linkDesc handleError" onChange={handleChange} />
 						{/* <div id="linkDesc" className="form-text">Можно придумать позже</div> */}
 						{handleError != "" && <div id="handleError" className="form-text">
                             {handleError}
