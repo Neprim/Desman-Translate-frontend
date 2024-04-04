@@ -14,7 +14,7 @@ function Project(props) {
 
     const { user } = useContext(AuthContext);
 
-    const [project, setProject] = useState({});
+    const [project, setProject] = useState(null);
     const [members, setMembers] = useState([]);
     const [sections, setSections] = useState([]);
     const [roles, setRoles] = useState([]);
@@ -31,7 +31,9 @@ function Project(props) {
 
     async function GetProject() {
         try {
-            let project = await fetchProject(link["project_id"], true, true)
+            let project = await fetchProject(link["project_id"], true, true, true)
+            project.statistics.completeness = project.statistics.translated_strings_amount / project.statistics.strings_amount * 100
+            project.statistics.completeness = Math.floor(project.statistics.completeness * 100) / 100
             setProject(project)
             setMembers(project.members)
             setRoles(project.roles)
@@ -44,7 +46,11 @@ function Project(props) {
 
     async function GetSections() {
         try {
-            let sections = await fetchSections(link["project_id"])
+            let sections = await fetchSections(link["project_id"], true)
+            for (let sec of sections) {
+                sec.statistics.completeness = sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100
+                sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
+            }
             setSections(sections)
         } catch (err) {
 
@@ -149,42 +155,44 @@ function Project(props) {
                                 <h3>Описание проекта</h3>
                                 <p>{project?.description}</p>
                             </div>
-                            <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
-                                <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>Информация</h3>
-                                <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {project?.source_lang}</div>
-                                <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {project?.target_lang}</div>
-                                <div className="py-2 border-bottom"><b>Дата создания:</b> {project?.created_at?.toLocaleString()}</div>
-                                <div className="py-2 border-bottom"><b>Статус:</b> {project?.status}</div>
-                                <div className="py-2 border-bottom"><b>Прогресс: {progressCount}%</b>
-                                    <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
-                                        {/* <ProgressBar className="progress" style={{ width: '100%' }} aria-valuenow={100} aria-valuemin={0} aria-valuemax={100}>
-                                            <div className="progress-bar progress-bar-striped progress-bar-animated bg-success">40%</div>
-                                        </ProgressBar> */}
-                                        <ProgressBar className="progress" striped animated label={`${progressCount}%`} style={{ width: progressCount + '%' }} aria-valuenow={progressCount} aria-valuemin={0} aria-valuemax={100}/>
+                            {project &&
+                                <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
+                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>Информация</h3>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {project?.source_lang}</div>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {project?.target_lang}</div>
+                                    <div className="py-2 border-bottom"><b>Дата создания:</b> {project?.created_at?.toLocaleString()}</div>
+                                    <div className="py-2 border-bottom"><b>Статус:</b> {project?.status}</div>
+                                    <div className="py-2 border-bottom"><b>Прогресс: {project.statistics.completeness}%</b>
+                                        <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
+                                            {/* <ProgressBar className="progress" style={{ width: '100%' }} aria-valuenow={100} aria-valuemin={0} aria-valuemax={100}>
+                                                <div className="progress-bar progress-bar-striped progress-bar-animated bg-success">40%</div>
+                                            </ProgressBar> */}
+                                            <ProgressBar className="progress" striped animated label={`${project.statistics.completeness}%`} style={{ width: project.statistics.completeness + '%' }} aria-valuenow={project.statistics.completeness} aria-valuemin={0} aria-valuemax={100}/>
+                                        </div>
                                     </div>
-                                </div>
-                                { userRole &&
-                                <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
-                                }
-                                {/* <h3 className="py-2 border-bottom" style={{ marginTop: '5px' }}>Участники</h3>
-                                <table className="table table-hover">
-                                    <thead>
+                                    { userRole &&
+                                    <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
+                                    }
+                                    {/* <h3 className="py-2 border-bottom" style={{ marginTop: '5px' }}>Участники</h3>
+                                    <table className="table table-hover">
+                                        <thead>
 
-                                        <tr>
-                                            <th key="username" scope="col">Ник</th>
-                                            <th key="roles" scope="col">Роль</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {members.map((member) =>
-                                            <tr key={member.member_id.id} className="table-light">
-                                                <th scope="row">{member.member_id.username}</th>
-                                                <td>{member.role_name}</td>
+                                            <tr>
+                                                <th key="username" scope="col">Ник</th>
+                                                <th key="roles" scope="col">Роль</th>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table> */}
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            {members.map((member) =>
+                                                <tr key={member.member_id.id} className="table-light">
+                                                    <th scope="row">{member.member_id.username}</th>
+                                                    <td>{member.role_name}</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table> */}
+                                </div>
+                            }
                         </div>
                         <h2>Разделы</h2>
                         {userRole && userRole.permissions.can_manage_sections && 
@@ -208,7 +216,7 @@ function Project(props) {
                                                 {section.name}
                                             </Link>
                                         </td>
-                                        <td>50 / 100 (50%)</td>
+                                        <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
                                         <td>Оригинал / Переведено</td>
                                     </tr>
                                 )}

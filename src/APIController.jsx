@@ -18,8 +18,8 @@ export async function fetchSomeAPI(link, method = "GET", body) {
     }
 }
 
-export async function fetchProject(project_id, fetch_members = false, fetch_roles = false) {
-    let project = await fetchSomeAPI(`/api/projects/${project_id}?fetch_members=${fetch_members}&fetch_roles=${fetch_roles}`)
+export async function fetchProject(project_id, fetch_members = false, fetch_roles = false, generate_statistics = false) {
+    let project = await fetchSomeAPI(`/api/projects/${project_id}?fetch_members=${fetch_members}&fetch_roles=${fetch_roles}&generate_statistics=${generate_statistics}`)
     project.created_at = new Date(project.created_at)
     console.log("look project => ")
     console.log(project)
@@ -35,8 +35,8 @@ export async function fetchMembers(project_id, fetch_members = true) {
     return await fetchSomeAPI(`/api/projects/${project_id}/members?fetch_members=${fetch_members}`)
 }
 
-export async function fetchSections(project_id) {
-    return await fetchSomeAPI(`/api/projects/${project_id}/sections`)
+export async function fetchSections(project_id, generate_statistics = false) {
+    return await fetchSomeAPI(`/api/projects/${project_id}/sections?generate_statistics=${generate_statistics}`)
 }
 
 export async function fetchUser(user_id, fetch_projects = false) {
