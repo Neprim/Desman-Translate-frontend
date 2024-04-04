@@ -5,6 +5,7 @@ import Button from "react-bootstrap/Button"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
+import { fetchSomeAPI } from "../APIController"
 
 const errors_to_message = {
     name: {
@@ -56,37 +57,26 @@ export default function Create() {
 	const handleChange = event => setHandle(event.target.value);
 	const desciptionChange = event => setDescription(event.target.value);
 
-	async function Create_project(event) {
-		event.preventDefault()
-        event.target.disabled = true
-
-		const response = await fetch("/api/projects", {
-			method: "POST",
-			body: JSON.stringify({
+	async function CreateProject(event) {
+		try {
+			setHandleError("")
+			setNameError("")
+			setDescriptionError("")
+			
+			const project = await fetchSomeAPI(`/api/projects`, "POST", {
 				"name": name,
 				"handle": handle,
 				"target_lang": langTarget,
 				"source_lang": langSource,
 				"visibility": visibility,
 				"description": description,
-			}),
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8'
-			},
-			credentials: "include"
+			})
 
-		})
-
-		setHandleError("")
-        setNameError("")
-        setDescriptionError("")
-
-        const resp_json = await response.json()
-        if (!response.ok) {
-            event.target.disabled = false
-            const errors = resp_json.errors
-            for (const error of errors) {
-                switch (error.key) {
+			window.location.replace(`/projects/${project.id}`)
+		} catch (err) {
+			event.target.disabled = false
+			for (const error of err.errors) {
+				switch (error.key) {
 					case "name":
 						setNameError(errors_to_message.name[error.kind] || "Какая-то ошибка")
 						break;
@@ -97,11 +87,8 @@ export default function Create() {
 						setDescriptionError(errors_to_message.description[error.kind] || "Какая-то ошибка")
 						break;
 				}
-            }
-            console.log(errors)
-        } else {
-            window.location.replace(`/projects/${resp_json.id}`)
-        }
+			}
+		}
 	}
 
 	return (
@@ -165,7 +152,7 @@ export default function Create() {
 					
 					<Button variant="primary"
 						style={{ marginTop: "20px" }}
-						onClick={Create_project}
+						onClick={CreateProject}
 					>
 						Создать проект
 					</Button>

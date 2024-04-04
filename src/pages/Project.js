@@ -32,12 +32,15 @@ function Project(props) {
     async function GetProject() {
         try {
             let project = await fetchProject(link["project_id"], true, true, true)
-            project.statistics.completeness = project.statistics.translated_strings_amount / project.statistics.strings_amount * 100
+            project.statistics.completeness = project.statistics.strings_amount ? project.statistics.translated_strings_amount / project.statistics.strings_amount * 100 : 0
             project.statistics.completeness = Math.floor(project.statistics.completeness * 100) / 100
             setProject(project)
+            console.log("members")
+            console.log(project.members)
             setMembers(project.members)
             setRoles(project.roles)
         } catch (err) {
+            console.log(err)
             if (err.status == 404) {
                 window.location.replace("/404")
             }
@@ -48,7 +51,7 @@ function Project(props) {
         try {
             let sections = await fetchSections(link["project_id"], true)
             for (let sec of sections) {
-                sec.statistics.completeness = sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100
+                sec.statistics.completeness = sec.statistics.strings_amount ? sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100 : 0
                 sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
             }
             setSections(sections)
@@ -216,7 +219,10 @@ function Project(props) {
                                                 {section.name}
                                             </Link>
                                         </td>
-                                        <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
+                                        {section.statistics.strings_amount > 0
+                                            ? <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
+                                            : <td>Пусто</td>
+                                        }
                                         <td>Оригинал / Переведено</td>
                                     </tr>
                                 )}
