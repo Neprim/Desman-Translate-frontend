@@ -35,15 +35,13 @@ function Project(props) {
             project.statistics.completeness = project.statistics.strings_amount ? project.statistics.translated_strings_amount / project.statistics.strings_amount * 100 : 0
             project.statistics.completeness = Math.floor(project.statistics.completeness * 100) / 100
             setProject(project)
-            console.log("members")
-            console.log(project.members)
             setMembers(project.members)
             setRoles(project.roles)
         } catch (err) {
             console.log(err)
-            if (err.status == 404) {
-                window.location.replace("/404")
-            }
+            // if (err.status == 404) {
+            //     window.location.replace("/404")
+            // }
         }
     }
 
@@ -140,6 +138,21 @@ function Project(props) {
     useEffect(() => {
         GetInvites();
     }, [userRole, project]);
+
+    async function SubmitChanges() {
+        try {
+            const prj = await fetchSomeAPI(`/api/projects/${project.id}`, "PATCH", {
+                name:           document.getElementById("settings-name").value,
+                handle:         document.getElementById("settings-handle").value,
+                description:    document.getElementById("settings-description").value,
+                source_lang:    document.getElementById("settings-source-lang").value,
+                target_lang:    document.getElementById("settings-target-lang").value,
+            })
+            GetProject()
+        } catch (err) {
+            console.log(err)
+        }
+    }
     
     return (
         <>
@@ -176,30 +189,12 @@ function Project(props) {
                                     { userRole &&
                                     <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
                                     }
-                                    {/* <h3 className="py-2 border-bottom" style={{ marginTop: '5px' }}>Участники</h3>
-                                    <table className="table table-hover">
-                                        <thead>
-
-                                            <tr>
-                                                <th key="username" scope="col">Ник</th>
-                                                <th key="roles" scope="col">Роль</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {members.map((member) =>
-                                                <tr key={member.member_id.id} className="table-light">
-                                                    <th scope="row">{member.member_id.username}</th>
-                                                    <td>{member.role_name}</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table> */}
                                 </div>
                             }
                         </div>
                         <h2>Разделы</h2>
                         {userRole && userRole.permissions.can_manage_sections && 
-                        <Link to={`/projects/${link["project_id"]}/addchapters.html`} type="button" className="btn btn-primary" style={{ marginTop: '0px', marginBottom: '5px' }}>Добавить раздел</Link>
+                        <Link to={`/projects/${link["project_id"]}/sections/1/load`} type="button" className="btn btn-primary" style={{ marginTop: '0px', marginBottom: '5px' }}>Добавить раздел</Link>
                         }
                         <table className="table table-striped">
                             <thead>
@@ -215,7 +210,7 @@ function Project(props) {
                                     <tr key={section.id}>
                                         <th scope="row">{index + 1}</th>
                                         <td>
-                                            <Link to={"/projects/" + project?.id + "/sections/" + section.id} className="link-primary">
+                                            <Link to={"/projects/" + project?.id + "/sections/" + section.id + "/editor"} className="link-primary">
                                                 {section.name}
                                             </Link>
                                         </td>
@@ -296,84 +291,87 @@ function Project(props) {
                             }
                         </div>
                     </Tab>
-                    {/* <Tab eventKey="settings" title="Настройки">
-                        <h2 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки проекта</h2>
-                        <div className="row">
-                            <div className="border rounded py-3" style={{ padding: '0px 20px', margin: '0px 20px' }}>
-                                <form className="row">
-                                    <label htmlFor="settings-id" className="form-label">Уникальная ссылка</label>
-                                    <div className="col-3">
-                                        <input type="text" className="form-control is-valid" id="settings-id" minLength={4} maxLength={100} />
-                                    </div>
-                                    <div className="col">
-                                        <button className="btn btn-primary" type="submit">Применить</button>
-                                    </div>
-                                </form>
-                                <form>
-                                    <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>Название проекта</label>
-                                    <input type="text" className="form-control" id="settings-name" defaultValue="Нынешнее название" minLength={4} maxLength={100} />
-                                    <label htmlFor="settings-description" className="form-label" style={{ marginTop: '10px' }}>Описание проекта</label>
-                                    <textarea className="form-control" aria-label="With textarea" id="settings-description" maxLength={1000} defaultValue={"Нынешнее описание"} />
-                                    <label htmlFor="settings-logo" className="form-label" style={{ marginTop: '10px' }}>Сменить обложку</label>
-                                    <input type="file" className="form-control" id="settings-logo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
-                                    <div id="logo-desc" className="form-text">Принимаются картинки в формате png и jpeg.</div>
-                                    <label htmlFor="settings-author" className="form-label" style={{ marginTop: '10px' }}>Владелец проекта</label>
-                                    <input type="text" className="form-control" id="settings-author" defaultValue="Нынешний владелец" />
-                                    <label htmlFor="settings-src-lang" className="form-label" style={{ marginTop: '10px' }}>Язык оригинала</label>
-                                    <select className="form-select" defaultValue="en" id="settings-src-lang">
-                                        <option value="ru">русский</option>
-                                        <option value="en">английский</option>
-                                        <option value="de">немецкий</option>
-                                        <option value="fr">французский</option>
-                                    </select>
-                                    <label htmlFor="settings-category" className="form-label" style={{ marginTop: '10px' }}>Язык перевода</label>
-                                    <select className="form-select" defaultValue="ru" id="settings-category">
-                                        <option value="ru">русский</option>
-                                        <option value="en">английский</option>
-                                        <option value="de">немецкий</option>
-                                        <option value="fr">французский</option>
-                                    </select>
-                                    <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>Язык перевода</label>
-                                    <div className="form-check">
-                                        <input type="radio" name="radios" className="form-check-input" id="settings-access-private" defaultValue="private" defaultChecked />
-                                        <label className="form-check-label" htmlFor="settings-access-private">Приватный проект</label>
-                                    </div>
-                                    <div className="form-check">
-                                        <input type="radio" name="radios" className="form-check-input" id="settings-access-public" defaultValue="public" />
-                                        <label className="form-check-label" htmlFor="settings-access-public">Публичный проект</label>
-                                    </div>
-                                    <label htmlFor="settings-category" className="form-label" style={{ marginTop: '10px' }}>Категория</label>
-                                    <select className="form-select" defaultValue="none" id="settings-category" aria-describedby="category-desc">
-                                        <option value="none">Не выбрано</option>
-                                        <option value="movie">Фильмы</option>
-                                        <option value="text">Тексты</option>
-                                        <option value="program">Программы</option>
-                                    </select>
-                                    <div id="category-desc" className="form-text">* Если вы выбрали категорию, и ваш проект публичный,
-                                        он будет отображаться в соответствующей категории во вкладке "Публичные переводы".
-                                        Приватные проекты не будут отображаться в этой вкладке вне зависимости от категории.
-                                    </div>
-                                    <label htmlFor="settings-status" className="form-label" style={{ marginTop: '10px' }}>Статус</label>
-                                    <div className="form-check">
-                                        <input type="radio" name="radios" className="form-check-input" id="settings-status-opened" defaultValue="opened" defaultChecked />
-                                        <label className="form-check-label" htmlFor="settings-status-opened">Проект открыт</label>
-                                    </div>
-                                    <div className="form-check">
-                                        <input type="radio" name="radios" className="form-check-input" id="settings-status-frozen" defaultValue="frozen" />
-                                        <label className="form-check-label" htmlFor="settings-status-frozen">Проект заморожен</label>
-                                    </div>
-                                    <div className="form-check">
-                                        <input type="radio" name="radios" className="form-check-input" id="settings-status-closed" defaultValue="closed" />
-                                        <label className="form-check-label" htmlFor="settings-status-closed">Проект закрыт</label>
-                                    </div>
-                                    <div id="status-desc" className="form-text">* Статус проекта отображается на странице проекта. Вы можете пометить проект как замороженный, чтобы обозначить,
-                                        что временно не будете над ним работать, или как закрытый, если работа завершена и не будет продолжаться.
-                                    </div>
-                                    <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }}>Применить</button>
-                                </form>
+                    {userRole && userRole.permissions.can_manage_project &&
+                        <Tab eventKey="settings" title="Настройки">
+                            <h2 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки проекта</h2>
+                            <div className="row">
+                                <div className="border rounded py-3" style={{ padding: '0px 20px', margin: '0px 20px' }}>
+                                    <form className="row">
+                                        <label htmlFor="settings-handle" className="form-label">Уникальная ссылка</label>
+                                        <div className="col-3">
+                                            <input type="text" className="form-control" id="settings-handle" minLength={4} maxLength={100} defaultValue={project.handle}/>
+                                        </div>
+                                        {/* <div className="col">
+                                            <button className="btn btn-primary" type="submit">Применить</button>
+                                        </div> */}
+                                    </form>
+                                    <form>
+                                        <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>Название проекта</label>
+                                        <input type="text" className="form-control" id="settings-name" defaultValue={project.name} minLength={4} maxLength={100} />
+                                        <label htmlFor="settings-description" className="form-label" style={{ marginTop: '10px' }}>Описание проекта</label>
+                                        <textarea className="form-control" aria-label="With textarea" id="settings-description" maxLength={1000} defaultValue={project.description} />
+                                        {/* <label htmlFor="settings-logo" className="form-label" style={{ marginTop: '10px' }}>Сменить обложку</label>
+                                        <input type="file" className="form-control" id="settings-logo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
+                                        <div id="logo-desc" className="form-text">Принимаются картинки в формате png и jpeg.</div> */}
+                                        {/* <label htmlFor="settings-author" className="form-label" style={{ marginTop: '10px' }}>Владелец проекта</label>
+                                        <input type="text" className="form-control" id="settings-author" defaultValue="Нынешний владелец" /> */}
+                                        <label htmlFor="settings-source-lang" className="form-label" style={{ marginTop: '10px' }}>Язык оригинала</label>
+                                        <select className="form-select" defaultValue={project.source_lang} id="settings-source-lang">
+                                            <option value="ru">русский</option>
+                                            <option value="en">английский</option>
+                                            <option value="de">немецкий</option>
+                                            <option value="fr">французский</option>
+                                        </select>
+                                        <label htmlFor="settings-target-lang" className="form-label" style={{ marginTop: '10px' }}>Язык перевода</label>
+                                        <select className="form-select" defaultValue={project.target_lang} id="settings-target-lang">
+                                            <option value="ru">русский</option>
+                                            <option value="en">английский</option>
+                                            <option value="de">немецкий</option>
+                                            <option value="fr">французский</option>
+                                        </select>
+                                        { // Надо сделать нормальные рабочие кнопочки выбора
+                                        /* <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>Видимость проекта</label>
+                                        <div className="form-check">
+                                            <input type="radio" name="radios" className="form-check-input" id="settings-access-private" value="private" defaultChecked />
+                                            <label className="form-check-label" htmlFor="settings-access-private">Приватный проект</label>
+                                        </div>
+                                        <div className="form-check">
+                                            <input type="radio" name="radios" className="form-check-input" id="settings-access-public" value="public" />
+                                            <label className="form-check-label" htmlFor="settings-access-public">Публичный проект</label>
+                                        </div> */}
+                                        {/* <label htmlFor="settings-category" className="form-label" style={{ marginTop: '10px' }}>Категория</label>
+                                        <select className="form-select" defaultValue="none" id="settings-category" aria-describedby="category-desc">
+                                            <option value="none">Не выбрано</option>
+                                            <option value="movie">Фильмы</option>
+                                            <option value="text">Тексты</option>
+                                            <option value="program">Программы</option>
+                                        </select>
+                                        <div id="category-desc" className="form-text">* Если вы выбрали категорию, и ваш проект публичный,
+                                            он будет отображаться в соответствующей категории во вкладке "Публичные переводы".
+                                            Приватные проекты не будут отображаться в этой вкладке вне зависимости от категории.
+                                        </div>
+                                        <label htmlFor="settings-status" className="form-label" style={{ marginTop: '10px' }}>Статус</label>
+                                        <div className="form-check">
+                                            <input type="radio" name="radios" className="form-check-input" id="settings-status-opened" defaultValue="opened" defaultChecked />
+                                            <label className="form-check-label" htmlFor="settings-status-opened">Проект открыт</label>
+                                        </div>
+                                        <div className="form-check">
+                                            <input type="radio" name="radios" className="form-check-input" id="settings-status-frozen" defaultValue="frozen" />
+                                            <label className="form-check-label" htmlFor="settings-status-frozen">Проект заморожен</label>
+                                        </div>
+                                        <div className="form-check">
+                                            <input type="radio" name="radios" className="form-check-input" id="settings-status-closed" defaultValue="closed" />
+                                            <label className="form-check-label" htmlFor="settings-status-closed">Проект закрыт</label>
+                                        </div>
+                                        <div id="status-desc" className="form-text">* Статус проекта отображается на странице проекта. Вы можете пометить проект как замороженный, чтобы обозначить,
+                                            что временно не будете над ним работать, или как закрытый, если работа завершена и не будет продолжаться.
+                                        </div> */}
+                                    </form>
+                                    <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>Применить</button>
+                                </div>
                             </div>
-                        </div>
-                    </Tab> */}
+                        </Tab>
+                    }
                 </Tabs>
             </div>
             <Footer />

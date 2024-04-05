@@ -97,6 +97,8 @@ export default function Create() {
 				tr += str[i]
 			else if (letters[str[i]])
 				tr += letters[str[i]]
+			else if (letters[str[i]] == ' ')
+				tr += '_'
 		}
 
 		return tr

@@ -13,6 +13,7 @@ import { Link, useParams } from "react-router-dom";
 import React, { setState, useEffect, useState, formData, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { OverlayTrigger, Tooltip } from "react-bootstrap"
+import { fetchSomeAPI, fetchProject } from "../APIController"
 
 function LinkWithTooltip({ id, children, href, tooltip, where }) {
 	return (
@@ -73,19 +74,17 @@ export default function Editor() {
 	}
 
 	async function GetProject() {
-        const response = await fetch("/api/projects/" + link["project_id"] + "?fetch_members=1&fetch_roles=1")
-        if (!response.ok) {
-            window.location.replace("/404")
-            return
+        try {
+            let project = await fetchProject(link["project_id"], true, true)
+            setProject(project)
+            setMembers(project.members)
+            setRoles(project.roles)
+        } catch (err) {
+            console.log(err)
+            if (err.status == 404) {
+                window.location.replace("/404")
+            }
         }
-        let project = await response.json()
-        project.created_at = new Date(project.created_at)
-        setProject(project)
-        setMembers(project.members)
-        setRoles(project.roles)
-        console.log("look project => ")
-        console.log(project)
-        console.log(project.members)
     }
 
 	useEffect(() => {
@@ -93,24 +92,17 @@ export default function Editor() {
     }, []);
 
 	async function GetStrings() {
-		let rsp = await fetch(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings?fetch_translations=1`)
-		if (!rsp.ok) {
-			console.log("Грустное")
-			return
-		}
 		try {
-			rsp = await rsp.json()
+			let strings = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings?fetch_translations=1`)
+
+			for (let i = 0; i < strings.length; i++) {
+				strings[i].translations.sort((a, b) => (new Date(b.updated_at) - new Date(a.updated_at)))
+			}
+
+			setStrings(strings)
 		} catch (err) {
-			console.log("Очень грустное")
-			return
+			console.log(err)
 		}
-		console.log(rsp)
-
-		for (let i = 0; i < rsp.length; i++) {
-			rsp[i].translations.sort((a, b) => (new Date(b.updated_at) - new Date(a.updated_at)))
-		}
-
-		setStrings(rsp)
 	}
 
 	useEffect(() => {
@@ -119,31 +111,15 @@ export default function Editor() {
 
 	async function AddTranslation() {
 		const ind = curStringIndex
-		console.log(curString)
-		let rsp = await fetch(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations`,
-			{
-				method: "POST",
-				body: JSON.stringify({
-					"text": inputTranslation
-				}),
-				headers: {
-					'Content-Type': 'application/json; charset=UTF-8',
-				},
-				credentials: "include",
-			})
-		if (!rsp.ok) {
-			console.log("=(")
-			return
-		}
 		try {
-			rsp = await rsp.json()
-			let rsp2 = await fetch(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}?fetch_translations=1`)
-			rsp2 = await rsp2.json()
-			strings[curStringIndex] = rsp2
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations`, "POST", { "text": inputTranslation },)
+			const str = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}?fetch_translations=1`)
+			console.log(str)
+			strings[ind] = str
+
 			setStrings(strings)
-			setCurString(strings[curStringIndex])
+			setCurString(strings[ind])
 		} catch (err) {
-			console.log("=( =(")
 			console.log(err)
 		}
 	}

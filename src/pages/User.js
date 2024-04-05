@@ -12,7 +12,7 @@ import { fetchUser, fetchSomeAPI } from "../APIController";
 
 export default function User() {
 
-    const { gotUser } = useContext(AuthContext)
+    const { gotUser, ReAuth } = useContext(AuthContext)
     const cur_user = useContext(AuthContext).user;
     console.log("cur_user")
     console.log(cur_user)
@@ -21,7 +21,6 @@ export default function User() {
     const [projects, setProjects] = useState([]);
     const [user, setUser] = useState(null);
     const link = useParams()
-    console.log(link["user_id"])
 
     let navigate = useNavigate();
     const routeChange = () => {
@@ -37,10 +36,11 @@ export default function User() {
             console.log("user:")
             console.log(user)
             let projects = (await fetchUser(user.id, true)).projects
+            setProjects(projects)
             for (let project of projects) {
                 project.user_role = (await fetchSomeAPI(`/api/projects/${project.id}/members/${user.id}`)).role_name
             }
-            setProjects(projects)
+            setProjects([...projects])
         } catch (err) {
             console.log(err)
         }
@@ -62,6 +62,20 @@ export default function User() {
         }
     }
 
+    async function SubmitChanges() {
+        try {
+            const user = await fetchSomeAPI("/api/users", "PATCH", {
+                about: document.getElementById("settings-user-about").value,
+                gender: document.getElementById("settings-user-gender").value,
+            })
+
+            await ReAuth()
+            setUser(user)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
         GetUserInfo()
     }, []);
@@ -72,7 +86,7 @@ export default function User() {
 
     useEffect(() => {
         setFlagCurrentUser(cur_user && cur_user?.id === user?.id)
-    }, [cur_user])
+    }, [cur_user, user])
 
     return (
         <>
@@ -122,33 +136,33 @@ export default function User() {
                         <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки пользователя</h3>
                         <div id="settings-user" className="border rounded py-3" style={{ padding: '0px 20px', marginBottom: '10px' }}>
                             <form className="row">
-                                <label htmlFor="settings-user-id" className="form-label">Уникальный хэндл</label>
+                                {/* <label htmlFor="settings-user-id" className="form-label">Уникальный хэндл</label>
                                 <div className="col-auto">
-                                    <input type="text" className="form-control is-valid" id="settings-user-id" minLength={4} maxLength={100} defaultValue="LazyDesman" />
+                                    <input type="text" className="form-control" id="settings-user-id" minLength={4} maxLength={100} defaultValue={cur_user.username} />
                                     <div className="valid-feedback">Можно использовать!</div>
                                     <div className="invalid-feedback">Такая ссылка уже занята!</div>
-                                </div>
-                                <div className="col">
+                                </div> */}
+                                {/* <div className="col">
                                     <button className="btn btn-primary" type="submit">Применить</button>
-                                </div>
+                                </div> */}
                             </form>
                             <form>
-                                <label htmlFor="settings-user-name" className="form-label">Имя пользователя</label>
-                                <input type="text" className="form-control" id="settings-user-name" defaultValue="Ленивая выхухоль" minLength={4} maxLength={100} />
-                                <label htmlFor="settings-user-description" className="form-label" style={{ marginTop: '10px' }}>Описание пользователя</label>
-                                <textarea className="form-control" aria-label="With textarea" id="settings-user-description" maxLength={1000} placeholder="Напишите здесь все, что хотели бы рассказать о себе: род деятельности, любимые жанры, какими языками вы владеете..." defaultValue={""} />
-                                <label htmlFor="settings-user-avatar" className="form-label" style={{ marginTop: '10px' }}>Сменить аватар</label>
+                                {/* <label htmlFor="settings-user-name" className="form-label">Имя пользователя</label>
+                                <input type="text" className="form-control" id="settings-user-name" defaultValue="Ленивая выхухоль" minLength={4} maxLength={100} /> */}
+                                <label htmlFor="settings-user-about" className="form-label" style={{ marginTop: '10px' }}>Описание</label>
+                                <textarea className="form-control" aria-label="With textarea" id="settings-user-about" maxLength={1000} placeholder="Напишите здесь все, что хотели бы рассказать о себе: род деятельности, любимые жанры, какими языками вы владеете..." defaultValue={cur_user.about} />
+                                {/* <label htmlFor="settings-user-avatar" className="form-label" style={{ marginTop: '10px' }}>Сменить аватар</label>
                                 <input type="file" className="form-control" id="settings-user-avatar" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
                                 <div id="logo-desc" className="form-text">
                                     Принимаются картинки в формате .png и .jpeg
-                                </div>
+                                </div> */}
                                 <label htmlFor="settings-user-gender" className="form-label" style={{ marginTop: '10px' }}>Пол</label>
-                                <select className="form-select" defaultValue="none" id="settings-user-gender">
-                                    <option value="none">не выбрано</option>
-                                    <option value="m">мужской</option>
-                                    <option value="f">женский</option>
+                                <select className="form-select" defaultValue={cur_user.gender || "hidden"} id="settings-user-gender">
+                                    <option value="hidden">Не скажу</option>
+                                    <option value="male">Мужской</option>
+                                    <option value="female">Женский</option>
                                 </select>
-                                <label htmlFor="settings-user-access" className="form-label" style={{ marginTop: '10px' }}>Доступ к аккаунту</label>
+                                {/* <label htmlFor="settings-user-access" className="form-label" style={{ marginTop: '10px' }}>Доступ к аккаунту</label>
                                 <div className="form-check">
                                     <input type="radio" name="radios" className="form-check-input" id="settings-account-private" defaultValue="private" defaultChecked />
                                     <label className="form-check-label" htmlFor="settings-account-private">Открытый</label>
@@ -156,9 +170,9 @@ export default function User() {
                                 <div className="form-check">
                                     <input type="radio" name="radios" className="form-check-input" id="settings-account-public" defaultValue="public" />
                                     <label className="form-check-label" htmlFor="settings-account-public">Закрытый</label>
-                                </div>
+                                </div> */}
                             </form>
-                            <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }}>Применить</button>
+                            <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>Применить</button>
                         </div>
                     </Tab>
                     }

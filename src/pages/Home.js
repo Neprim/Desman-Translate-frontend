@@ -85,7 +85,7 @@ function Home() {
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
-                                        <br /> Полезная информация
+                                        <br /> {project.description}
                                     </div>
                                 </div>
                             </div>
@@ -112,7 +112,7 @@ function Home() {
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
-                                        <br /> Полезная информация
+                                        <br /> {project.description}
                                     </div>
                                 </div>
                             </div>

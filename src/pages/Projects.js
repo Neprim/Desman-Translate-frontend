@@ -22,10 +22,11 @@ function Projects() {
 
         try {
             let projects = (await fetchUser(user.id, true)).projects
+            setProjects(projects)
             for (let project of projects) {
                 project.user_role = (await fetchSomeAPI(`/api/projects/${project.id}/members/${user.id}`)).role_name
             }
-            setProjects(projects)
+            setProjects([...projects])
         } catch (err) {
             console.log(err)
         }

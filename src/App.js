@@ -11,7 +11,7 @@ import Project from './pages/Project.js';
 import Create from './pages/Create.js';
 import Editor from './pages/Editor.js';
 import Notfound from './pages/Error.js';
-import Load from './pages/Load.js';
+import LoadSection from './pages/LoadSection.js';
 import { AuthProvider } from "./AuthContext";
 
 const api_link = "127.0.0.1:3000"
@@ -31,10 +31,10 @@ function App() {
           <Route path="signup" element={<Signup />} />
           <Route path="projects/:project_id" element={<Project />} />
           <Route path="create" element={<Create />} />
-          <Route path="projects/:project_id/sections/:section_id" element={<Editor />} />
+          <Route path="projects/:project_id/sections/:section_id/editor" element={<Editor />} />
           <Route path="notfound" element={<Notfound />} />
           <Route path="users/:user_id" element={<User />} />
-          <Route path="load" element={<Load />} />
+          <Route path="projects/:project_id/sections/:section_id/load" element={<LoadSection />} />
         </Routes>
       </AuthProvider>
     </div>
