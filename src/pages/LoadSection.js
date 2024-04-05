@@ -2,6 +2,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Container from "react-bootstrap/Container";
 import { useEffect, useState, useContext } from "react"
 // import { AuthContext } from "../AuthContext";
 import { fetchSection, fetchSomeAPI } from "../APIController";
@@ -78,34 +79,41 @@ export default function LoadSection() {
     return (
         <>
             <Navbar />
-            <div
-                className="container text-left"
+            <Container
+                className="text-left"
                 style={{
                     marginTop: 50,
                     marginLeft: "auto",
                     marginRight: "auto",
-                    width: "20%",
-                    minWidth: 300
+                    width: '40%',
+                    minWidth: '300px'
                 }}
             >
                 {section && !strings &&
                     <>
-                    <h1 style={{ marginBottom: 20 }}>Загрузка строк для раздела {section.name}</h1>
-                    <label htmlFor="settings-strings-type" className="form-label" style={{ marginTop: '10px' }}>Тип строк</label>
-                    <select className="form-select" defaultValue="text" id="settings-strings-type">
-                        <option value="text">Текст</option>
-                        <option value="json">JSON</option>
-                    </select>
-                    <label htmlFor="settings-loaded-strings" className="form-label" style={{ marginTop: '10px' }}>Текст для загрузки</label>
-                    <textarea className="form-control" aria-label="With textarea" id="settings-loaded-strings"/>
-                    {stringsError && 
-                        <div id="stringsError" className="form-text">
-                            {stringsError}
-                        </div>
-                    }
+                    <h1 style={{ marginBottom: 20 }}>Загрузка строк для раздела "{section.name}"</h1>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label htmlFor="settings-strings-type" style={{ marginTop: '10px' }}>Тип строк</Form.Label>
+                            <Form.Select defaultValue="text" id="settings-strings-type">
+                                <option value="text">Текст</option>
+                                <option value="json">JSON</option>
+                            </Form.Select>
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label htmlFor="settings-loaded-strings" className="form-label" style={{ marginTop: '10px' }}>Текст для загрузки</Form.Label>
+                        <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-strings"/>
+                        {stringsError && 
+                            <div id="stringsError" className="form-text">
+                                {stringsError}
+                            </div>
+                        }
+                    </Form.Group>
                     <Button style={{ marginTop: '10px' }} type="submit" variant="primary" onClick={TransformStrings}>
                         Преобразовать
                     </Button>
+
+                    </Form>
                     </>
                 }
                 {section && strings && // Нужно сделать красиво
@@ -126,7 +134,7 @@ export default function LoadSection() {
                     </Button>
                     </>
                 }
-            </div>
+            </Container>
             <Footer />
         </>
     );

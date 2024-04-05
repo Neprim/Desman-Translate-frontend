@@ -3,8 +3,11 @@ import Navbar from "./Navbar"
 import Footer from "./Footer"
 import placeholder from "../images/placeholder.png"
 import { useEffect, useState, useContext } from "react"
-import { AuthContext } from "../AuthContext";
+import { AuthContext } from "../AuthContext"
 import Button from "react-bootstrap/Button"
+import Container from "react-bootstrap/Container"
+import Row from "react-bootstrap/Row"
+import Col from "react-bootstrap/Col"
 import { useNavigate } from "react-router-dom"
 
 import api_link from "../App"
@@ -61,17 +64,16 @@ function Home() {
     return (
         <>
             <Navbar />
-            <div className="container" style={{ marginTop: 50 }}>
-                <div className="row">
-                    <div className="col-6 text-left" style={{ paddingRight: "5%" }}>
+            <Container style={{ marginTop: 50 }}>
+                <Row>
+                    <Col sm={6} className="text-left" style={{ paddingRight: "5%" }}>
                         <h2>Недавние проекты:</h2>
                         {recentProjects.map((project, i) =>
-                            <div className="container text-left" style={{ paddingBottom: 10 }} key={project.id}>
-                                <div
-                                    className="row border rounded py-3 align-items-center"
-                                    style={{ marginTop: 5 }}
+                            <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
+                                <Row className="border rounded py-3 align-items-center"
+                                     style={{ marginTop: 5 }}
                                 >
-                                    <div className="col-2">
+                                    <Col sm={2} xs={5}>
                                         <img
                                             width={60}
                                             height={60}
@@ -79,26 +81,25 @@ function Home() {
                                             alt="thumbnail"
                                             style={{ marginRight: 10 }}
                                         />
-                                    </div>
-                                    <div className="col text-left">
+                                    </Col>
+                                    <Col className="text-left">
 
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
                                         <br /> {project.description}
-                                    </div>
-                                </div>
-                            </div>
+                                    </Col>
+                                </Row>
+                            </Container>
                         )}
 
                         <h2 style={{ marginTop: 20 }}>Популярные проекты:</h2>
                         {popularProjects.map((project, i) =>
-                            <div className="container text-left" style={{ paddingBottom: 10 }} key={project.id}>
-                                <div
-                                    className="row border rounded py-3 align-items-center"
+                            <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
+                                <Row className="border rounded py-3 align-items-center"
                                     style={{ marginTop: 5 }}
                                 >
-                                    <div className="col-2">
+                                    <Col sm={2} xs={5}>
                                         <img
                                             width={60}
                                             height={60}
@@ -106,20 +107,19 @@ function Home() {
                                             alt="thumbnail"
                                             style={{ marginRight: 10 }}
                                         />
-                                    </div>
-                                    <div className="col text-left">
-
+                                    </Col>
+                                    <Col className="text-left">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
                                         <br /> {project.description}
-                                    </div>
-                                </div>
-                            </div>
+                                    </Col>
+                                </Row>
+                            </Container>
                         )}
 
 
-                    </div>
+                    </Col>
                     <div
                         className="col border-top border-start rounded py-3"
                         style={{ marginTop: 5, paddingLeft: 20 }}
@@ -155,8 +155,8 @@ function Home() {
                             Создать проект
                         </Button>
                     </div>
-                </div>
-            </div>
+                </Row>
+            </Container>
             <Footer />
         </>
     );
