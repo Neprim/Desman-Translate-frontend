@@ -158,7 +158,7 @@ export default function Create() {
 				<Form>
 					<Form.Group className="mb-3">
 						<Form.Label htmlFor="inputName">Название проекта</Form.Label>
-						<Form.Control type="text" id="inputName" onChange={nameChange} aria-describedby="nameError"/>
+						<Form.Control type="text" id="inputName" onChange={nameChange} aria-describedby="nameError" required/>
 						{nameError != "" && <Form.Text id="nameError">
                             {nameError}
                         </Form.Text>}
@@ -166,7 +166,7 @@ export default function Create() {
 
 					<Form.Group className="mb-3">
 						<Form.Label htmlFor="inputHandle">Уникальная ссылка</Form.Label>
-						<Form.Control type="text" id="inputHandle" aria-describedby="linkDesc handleError" onChange={handleChange} />
+						<Form.Control type="text" id="inputHandle" aria-describedby="linkDesc handleError" onChange={handleChange} required/>
 						{/* <Form.Text id="linkDesc">Можно придумать позже</Form.Text> */}
 						{handleError != "" && <Form.Text id="handleError">
                             {handleError}
