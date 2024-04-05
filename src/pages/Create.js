@@ -58,6 +58,7 @@ export default function Create() {
 
 	function translit(str) {
 		let letters = {}
+		letters[' '] = '_'
 		letters['А'] = 'a';     letters['а'] = 'a';  
 		letters['Б'] = 'b';     letters['б'] = 'b';  
 		letters['В'] = 'v';     letters['в'] = 'v';  
@@ -92,13 +93,12 @@ export default function Create() {
 
 		str = str.toLowerCase()
 		let tr = ""
-		for (let i = 0; i < str.length; i++) {
-			if (/[a-z]/.test(str[i]))
-				tr += str[i]
-			else if (letters[str[i]])
-				tr += letters[str[i]]
-			else if (letters[str[i]] == ' ')
-				tr += '_'
+		for (const ch of str) {
+			console.log(ch)
+			if (/[a-z]/.test(ch))
+				tr += ch
+			else if (letters[ch])
+				tr += letters[ch]
 		}
 
 		return tr
