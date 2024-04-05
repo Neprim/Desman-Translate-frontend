@@ -69,7 +69,7 @@ export default function Create() {
 		letters['Ж'] = 'zh';    letters['ж'] = 'zh'; 
 		letters['З'] = 'z';     letters['з'] = 'z';  
 		letters['И'] = 'i';     letters['и'] = 'i';  
-		letters['Й'] = 'j';     letters['й'] = 'j';  
+		letters['Й'] = 'y';     letters['й'] = 'y';  
 		letters['К'] = 'k';     letters['к'] = 'k';  
 		letters['Л'] = 'l';     letters['л'] = 'l';  
 		letters['М'] = 'm';     letters['м'] = 'm';  
@@ -86,7 +86,7 @@ export default function Create() {
 		letters['Ч'] = 'ch';    letters['ч'] = 'ch'; 
 		letters['Ш'] = 'sh';    letters['ш'] = 'sh'; 
 		letters['Щ'] = 'shh';   letters['щ'] = 'shh';
-		letters['Ы'] = 'y';     letters['ы'] = 'y';  
+		letters['Ы'] = 'i';     letters['ы'] = 'i';  
 		letters['Э'] = 'e';     letters['э'] = 'e';  
 		letters['Ю'] = 'yu';    letters['ю'] = 'yu'; 
 		letters['Я'] = 'ya';    letters['я'] = 'ya'; 
