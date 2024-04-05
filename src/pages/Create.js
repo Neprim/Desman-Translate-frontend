@@ -128,7 +128,7 @@ export default function Create() {
 				"description": description,
 			})
 
-			window.location.replace(`/projects/${project.id}`)
+			window.location.href = `/projects/${project.id}`
 		} catch (err) {
 			event.target.disabled = false
 			for (const error of err.errors) {

@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom"
 import Navbar from "./Navbar"
 import Footer from "./Footer"
 
-import React, { setState, useEffect, useState, formData } from "react"
+import React, { useState } from "react"
 
 const errors_to_message = {
     email: {
@@ -29,15 +28,11 @@ export default function Signup() {
     const [inputMail, setInputMail] = useState("");
     const [inputLogin, setInputLogin] = useState("");
     const [inputPass, setInputPass] = useState("");
-    const [inputRepeatPass, setInputRepeatPass] = useState("");
     const [usernameError, setUsernameError] = useState("");
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
 
-    const [users, setUsers] = useState([])
-
     async function Submit(event) {
-        console.log(inputMail + inputLogin + inputPass + inputRepeatPass)
         event.preventDefault()
 
         event.target.disabled = true
@@ -79,7 +74,7 @@ export default function Signup() {
             }
             console.log(errors)
         } else {
-            window.location.replace("/login")
+            window.location.href = "/login"
         }
 
         //console.log(await jopa.json())
@@ -89,9 +84,6 @@ export default function Signup() {
     const mailChange = event => setInputMail(event.target.value);
     const loginChange = event => setInputLogin(event.target.value);
     const passChange = event => setInputPass(event.target.value);
-    const repeatPassChange = event => setInputRepeatPass(event.target.value);
-
-    console.log(users)
 
     return (
         <>
@@ -113,7 +105,7 @@ export default function Signup() {
                             Электронная почта
                         </label>
                         <input type="email" value={inputMail} className="form-control" id="inputEmail" onChange={mailChange} aria-describedby="emailError" />
-                        {emailError != "" && <div id="emailError" className="form-text">
+                        {emailError && <div id="emailError" className="form-text">
                             {emailError}
                         </div>}
                     </div>
@@ -129,7 +121,7 @@ export default function Signup() {
                             id="inputLogin"
                             aria-describedby="usernameError"
                         />
-                        {usernameError != "" && <div id="usernameError" className="form-text">
+                        {usernameError && <div id="usernameError" className="form-text">
                             {usernameError}
                         </div>}
                     </div>
@@ -138,9 +130,11 @@ export default function Signup() {
                             Пароль
                         </label>
                         <input type="password" value={inputPass} onChange={passChange} className="form-control" id="inputPassword" aria-describedby="passwordError" />
-                        {passwordError != "" && <div id="passwordError" className="form-text">
-                            {passwordError}
-                        </div>}
+                        {passwordError && 
+                            <div id="passwordError" className="form-text">
+                                {passwordError}
+                            </div>
+                        }
                     </div>
                     {/* <div className="mb-3">
                     <label htmlFor="repeatPassword" className="form-label">

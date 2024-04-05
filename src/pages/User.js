@@ -1,9 +1,8 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import placeholder from "../images/placeholder.png";
-import { Col, Button, Container, Row, Tab, Tabs } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"
+import { Col, Button, Row, Tab, Tabs } from "react-bootstrap";
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -17,7 +16,7 @@ export default function User() {
     console.log("cur_user")
     console.log(cur_user)
 
-    const [is_current_user, setFlagCurrentUser] = useState(false)
+    const [flagCurrentUser, setFlagCurrentUser] = useState(false)
     const [projects, setProjects] = useState([]);
     const [user, setUser] = useState(null);
     const link = useParams()
@@ -55,7 +54,7 @@ export default function User() {
             setUser(user)
         } catch (err) {
             if (err.status == 404) {
-                window.location.replace("/404")
+                window.location.href = "/404"
                 return
             }
             console.log(err)
@@ -107,13 +106,13 @@ export default function User() {
                                 <img src={placeholder} height={200} alt="project cover" style={{ float: 'left', padding: '10px', margin: '0px 10px 0px 0px' }} className="border rounded" />
                                 <h3>{user?.username}</h3>
                                 {gotUser &&
-                                    <h3>{is_current_user ? "О вас" : "О пользователе"}</h3>
+                                    <h3>{flagCurrentUser ? "О вас" : "О пользователе"}</h3>
                                 }
                                 <p>{user?.about}</p>
                             </Col>
                             <Col className="py-3" style={{ marginLeft: '10px', marginRight: '20px', paddingLeft: '20px' }}>
                                 <h2 style={{ marginBottom: '20px' }}>Участие в проектах</h2>
-                                { is_current_user &&
+                                { flagCurrentUser &&
                                     <Button variant="primary" style={{ marginTop: '0px', marginBottom: '5px' }} onClick={routeChange}>Создать проект</Button>
                                 }
                                 <div className="container text-left" style={{ paddingBottom: '10px' }}>
@@ -131,7 +130,7 @@ export default function User() {
                             </Col>
                         </Row>
                     </Tab>
-                    { is_current_user &&
+                    { flagCurrentUser &&
                     <Tab eventKey="settings" title="Настройки">
                         <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки пользователя</h3>
                         <div id="settings-user" className="border rounded py-3" style={{ padding: '0px 20px', marginBottom: '10px' }}>

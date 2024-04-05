@@ -3,12 +3,14 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import Button from "react-bootstrap/Button";
 import placeholder from "../images/placeholder.png";
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites } from "../APIController";
 import { ProgressBar } from "react-bootstrap";
+import { FaRegTrashAlt } from "react-icons/fa"
 
 function Project(props) {
 
@@ -20,8 +22,6 @@ function Project(props) {
     const [roles, setRoles] = useState([]);
     const [invites, setInvites] = useState([]);
     const [userRole, setUserRole] = useState(null);
-
-    const [progressCount, setProgressCount] = useState(0);
 
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
 
@@ -39,9 +39,9 @@ function Project(props) {
             setRoles(project.roles)
         } catch (err) {
             console.log(err)
-            // if (err.status == 404) {
-            //     window.location.replace("/404")
-            // }
+            if (err.status == 404) {
+                window.location.href = "/404"
+            }
         }
     }
 
@@ -112,7 +112,7 @@ function Project(props) {
         if (!project)
             return
 
-        if (!userRole || !userRole.permissions.can_manage_members)
+        if (!userRole?.permissions?.can_manage_members)
             return
 
         try {
@@ -139,9 +139,11 @@ function Project(props) {
         GetInvites();
     }, [userRole, project]);
 
+    // TODO
+    // Поменять всё на ref вместо getElementById
     async function SubmitChanges() {
         try {
-            const prj = await fetchSomeAPI(`/api/projects/${project.id}`, "PATCH", {
+            await fetchSomeAPI(`/api/projects/${project.id}`, "PATCH", {
                 name:           document.getElementById("settings-name").value,
                 handle:         document.getElementById("settings-handle").value,
                 description:    document.getElementById("settings-description").value,
@@ -149,6 +151,27 @@ function Project(props) {
                 target_lang:    document.getElementById("settings-target-lang").value,
             })
             GetProject()
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function AddChapter() {
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/sections`, "POST", {
+                name: document.getElementById("inputSectionName").value
+            })
+            GetSections()
+            document.getElementById('divAddChapter').hidden = true
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function DeleteSection(section_id) {
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/sections/${section_id}`, "DELETE")
+            GetSections()
         } catch (err) {
             console.log(err)
         }
@@ -193,8 +216,8 @@ function Project(props) {
                             }
                         </div>
                         <h2>Разделы</h2>
-                        {userRole && userRole.permissions.can_manage_sections && 
-                        <Link to={`/projects/${link["project_id"]}/sections/1/load`} type="button" className="btn btn-primary" style={{ marginTop: '0px', marginBottom: '5px' }}>Добавить раздел</Link>
+                        {userRole?.permissions?.can_manage_sections && 
+                        <Button type="submit" variant="primary" onClick={(e) => document.getElementById('divAddChapter').hidden = false} >Добавить раздел</Button>
                         }
                         <table className="table table-striped">
                             <thead>
@@ -210,19 +233,38 @@ function Project(props) {
                                     <tr key={section.id}>
                                         <th scope="row">{index + 1}</th>
                                         <td>
-                                            <Link to={"/projects/" + project?.id + "/sections/" + section.id + "/editor"} className="link-primary">
+                                            <Link to={`/projects/${project.id}/sections/${section.id}/editor`} className="link-primary">
                                                 {section.name}
                                             </Link>
                                         </td>
                                         {section.statistics.strings_amount > 0
-                                            ? <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
-                                            : <td>Пусто</td>
+                                            ?   <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
+                                            :   <td>
+                                                    <Link to={`/projects/${project.id}/sections/${section.id}/load`} className="link-primary">
+                                                        Загрузить строки
+                                                    </Link>
+                                                </td>
                                         }
                                         <td>Оригинал / Переведено</td>
+                                        <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
+                        <div className="mb-3" id="divAddChapter" hidden>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="inputSectionName"
+                                placeholder="Название главы"
+                            />
+                            <Button type="submit" variant="primary" onClick={AddChapter}>
+                                Добавить
+                            </Button>
+                            <Button type="cancel" variant="outline-secondary" onClick={(e) => e.target.closest("div").hidden = true}>
+                                Отмена
+                            </Button>
+                        </div>
                     </Tab>
                     <Tab eventKey="members" title="Участники">
                         <div className="row">
@@ -244,7 +286,7 @@ function Project(props) {
                                                 <td>{member.user.username}</td>
                                                 <td>{roles[member.role_id].name}</td>
                                                 <td>0</td>
-                                                {!roles[member.role_id].permissions.can_manage_members && userRole && userRole.permissions.can_manage_members &&
+                                                {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members &&
                                                     <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Исключить</button></td>
                                                 }
                                             </tr>
@@ -269,7 +311,7 @@ function Project(props) {
                                                 <th scope="row">{index + 1}</th>
                                                 <td>{invite.user.username}</td>
                                                 <td>{invite.inviter.username}</td>
-                                                {userRole && userRole.permissions.can_manage_members &&
+                                                {userRole?.permissions?.can_manage_members &&
                                                     <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>Отменить</button></td>
                                                 }
                                             </tr>
@@ -280,7 +322,7 @@ function Project(props) {
                                 </>
                                 }
                             </div>
-                            {userRole && userRole.permissions.can_manage_members &&
+                            {userRole?.permissions?.can_manage_members &&
                             <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
                                 <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Пригласить участника</h3>
                                 <form style={{ marginTop: '10px' }}>
@@ -291,7 +333,7 @@ function Project(props) {
                             }
                         </div>
                     </Tab>
-                    {userRole && userRole.permissions.can_manage_project &&
+                    {userRole?.permissions?.can_manage_project &&
                         <Tab eventKey="settings" title="Настройки">
                             <h2 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки проекта</h2>
                             <div className="row">

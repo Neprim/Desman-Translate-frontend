@@ -1,5 +1,5 @@
 
-export async function fetchSomeAPI(link, method = "GET", body) {
+export async function fetchSomeAPI(link, method = "GET", body = {}) {
     let options = { method: method, }
     if (method == 'POST' || method == 'PATCH') {
         options.body = JSON.stringify(body)
@@ -37,6 +37,10 @@ export async function fetchMembers(project_id, fetch_members = true) {
 
 export async function fetchSections(project_id, generate_statistics = false) {
     return await fetchSomeAPI(`/api/projects/${project_id}/sections?generate_statistics=${generate_statistics}`)
+}
+
+export async function fetchSection(project_id, section_id, generate_statistics = false) {
+    return await fetchSomeAPI(`/api/projects/${project_id}/sections/${section_id}?generate_statistics=${generate_statistics}`)
 }
 
 export async function fetchUser(user_id, fetch_projects = false) {
