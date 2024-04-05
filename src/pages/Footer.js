@@ -1,28 +1,25 @@
-
+import Navbar from 'react-bootstrap/Navbar'
+import Nav from 'react-bootstrap/Nav'
+import Container from 'react-bootstrap/Container';
 
 function Footer() {
     return (
-        <nav className="py-2 bg-body-tertiary border-top" style={{ marginTop: 20 }}>
-            <div className="container d-flex flex-wrap">
-                <ul className="nav me-auto">
-                    <li className="nav-item">
-                        <a
-                            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                            className="nav-link link-dark px-2"
-                        >
-                            Поддержка
-                        </a>
-                    </li>
-                </ul>
-                <ul className="nav align-items-center">
-                    <li>
-                        <a className="px-2" href="https://www.youtube.com/watch?v=Sagg08DrO5U">
-                            © ПетрГУ 2023
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <Navbar className="bg-body-tertiary py-2 border-top" style={{ marginTop: 20 }}>
+            <Container className="d-flex flex-wrap">
+                <Nav className="me-auto">
+                    <Nav.Link className="px-2"
+                    href="mailto:zimenkova@petrsu.ru">
+                        Поддержка
+                    </Nav.Link>
+                </Nav>
+                <Nav className="align-items-center">
+                    <Nav.Link className="px-2"
+                    href="https://cs.petrsu.ru">
+                        © ПетрГУ 2023
+                    </Nav.Link>
+                </Nav>
+            </Container>
+        </Navbar>
     );
 }
 

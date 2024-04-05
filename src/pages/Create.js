@@ -2,6 +2,8 @@ import { Link } from "react-router-dom"
 import Navbar from "./Navbar"
 import Footer from "./Footer"
 import Button from "react-bootstrap/Button"
+import Container from "react-bootstrap/Container"
+import Form from "react-bootstrap/Form"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -151,70 +153,85 @@ export default function Create() {
 		<>
 			<Navbar />
 
-			<div className="container text-left" style={{ marginTop: '50px', marginLeft: 'auto', marginRight: 'auto', width: '40%', minWidth: '300px' }}>
+			<Container className="text-left" style={{ marginTop: '50px', marginLeft: 'auto', marginRight: 'auto', width: '40%', minWidth: '300px' }}>
 				<h1 style={{ marginBottom: '20px' }}>Создать новый проект</h1>
-				<form>
-					<div className="mb-3">
-						
-						<label htmlFor="inputName" className="form-label">Название проекта</label>
-						<input type="text" className="form-control" id="inputName" onChange={nameChange} aria-describedby="nameError"/>
-						{nameError != "" && <div id="nameError" className="form-text">
+				<Form>
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputName">Название проекта</Form.Label>
+						<Form.Control type="text" id="inputName" onChange={nameChange} aria-describedby="nameError"/>
+						{nameError != "" && <Form.Text id="nameError">
                             {nameError}
-                        </div>}
-					</div>
-					<div className="mb-3">
-						
-						<label htmlFor="inputHandle" className="form-label">Уникальная ссылка</label>
-						<input type="text" className="form-control" id="inputHandle" aria-describedby="linkDesc handleError" onChange={handleChange} />
-						{/* <div id="linkDesc" className="form-text">Можно придумать позже</div> */}
-						{handleError != "" && <div id="handleError" className="form-text">
+                        </Form.Text>}
+					</Form.Group>
+
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputHandle">Уникальная ссылка</Form.Label>
+						<Form.Control type="text" id="inputHandle" aria-describedby="linkDesc handleError" onChange={handleChange} />
+						{/* <Form.Text id="linkDesc">Можно придумать позже</Form.Text> */}
+						{handleError != "" && <Form.Text id="handleError">
                             {handleError}
-                        </div>}
-					</div>
-					<div className="mb-3">
-						
-						<label htmlFor="inputDesc" className="form-label">Описание проекта</label>
-						<textarea type="text" className="form-control" id="inputDesc" aria-describedby="descriptionError" onChange={desciptionChange} />
-						{descriptionError != "" && <div id="descriptionError" className="form-text">
+                        </Form.Text>}
+					</Form.Group>
+
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputDesc">Описание проекта</Form.Label>
+						<Form.Control as="textarea" type="text" id="inputDesc" aria-describedby="descriptionError" onChange={desciptionChange} />
+						{descriptionError != "" && <Form.Text id="descriptionError">
                             {descriptionError}
-                        </div>}
-					</div>
-					<label htmlFor="inputSrcLang" className="form-label">Язык оригинала</label>
-					<select className="form-select" id="inputSrcLang" defaultValue="en" onChange={(e) => setLangSource(e.target.value)}>
-						<option value="ru">русский</option>
-						<option value="en">английский</option>
-						<option value="de">немецкий</option>
-						<option value="fr">французский</option>
-					</select>
-					<label htmlFor="inputTargLang" className="form-label" style={{ marginTop: '10px' }}>Язык перевода</label>
-					<select className="form-select" id="inputTargLang" defaultValue="ru" onChange={(e) => setLangTarget(e.target.value)}>
-						<option value="ru">русский</option>
-						<option value="en">английский</option>
-						<option value="de">немецкий</option>
-						<option value="fr">французский</option>
-					</select>
-					<label htmlFor="inputLogo" className="form-label" style={{ marginTop: '10px' }}>Загрузить обложку</label>
-					<input type="file" className="form-control" id="inputLogo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
-					<div id="logo-desc" className="form-text">Принимаются картинки в формате png и jpeg</div>
-					<label className="form-label" style={{ marginTop: '10px' }}>Доступ к проекту</label>
-					<div className="form-check">
-						<input type="radio" name="radios" className="form-check-input" id="settings-access-private" defaultValue="private" defaultChecked onClick={(e) => setVisibility("private")}/>
-						<label className="form-check-label" htmlFor="settings-access-private">Приватный проект</label>
-					</div>
-					<div className="form-check">
-						<input type="radio" name="radios" className="form-check-input" id="settings-access-public" defaultValue="public" onClick={(e) => setVisibility("public")}/>
-						<label className="form-check-label" htmlFor="settings-access-public">Публичный проект</label>
-					</div>
+                        </Form.Text>}
+					</Form.Group>
+
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputSrcLang">Язык оригинала</Form.Label>
+						<Form.Select id="inputSrcLang" defaultValue="en" onChange={(e) => setLangSource(e.target.value)}>
+							<option value="ru">русский</option>
+							<option value="en">английский</option>
+							<option value="de">немецкий</option>
+							<option value="fr">французский</option>
+						</Form.Select>
+					</Form.Group>
+
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputTargLang" style={{ marginTop: '10px' }}>Язык перевода</Form.Label>
+						<Form.Select id="inputTargLang" defaultValue="ru" onChange={(e) => setLangTarget(e.target.value)}>
+							<option value="ru">русский</option>
+							<option value="en">английский</option>
+							<option value="de">немецкий</option>
+							<option value="fr">французский</option>
+						</Form.Select>
+					</Form.Group>
+
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputLogo" style={{ marginTop: '10px' }}>Загрузить обложку</Form.Label>
+						<Form.Control type="file" id="inputLogo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
+						<Form.Text id="logo-desc">Принимаются картинки в формате png и jpeg</Form.Text>
+					</Form.Group>
+
+					<Form.Group className="mb-3">
+						<Form.Label style={{ marginTop: '10px' }}>Доступ к проекту</Form.Label>
+						<Form.Check
+						type="radio"
+						id="settings-access-private"
+						label="Приватный проект"
+						defaultValue="private"
+						defaultChecked
+						onClick={(e) => setVisibility("private")}/>
+						
+						<Form.Check
+						type="radio"
+						id="settings-access-public"
+						label="Публичный проект"
+						defaultValue="public"
+						onClick={(e) => setVisibility("public")}/>
+					</Form.Group>
 					
 					<Button variant="primary"
 						style={{ marginTop: "20px" }}
-						onClick={CreateProject}
-					>
+						onClick={CreateProject}>
 						Создать проект
 					</Button>
-					
-				</form>
-			</div>
+				</Form>
+			</Container>
 
 			<Footer />
 		</>
