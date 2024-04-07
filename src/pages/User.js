@@ -2,7 +2,12 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import placeholder from "../images/placeholder.png";
-import { Col, Button, Row, Tab, Tabs } from "react-bootstrap";
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/row"
+import Button from "react-bootstrap/Button"
+import Tab from "react-bootstrap/Tab"
+import Tabs from "react-bootstrap/Tabs"
+import Container from "react-bootstrap/Container"
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -49,7 +54,7 @@ export default function User() {
         try {
             let user = await fetchUser(link["user_id"])
             if (user.about == undefined) {
-                user.about = "Пользователь еще не добавил описание"
+                user.about = "Описание отсутствует."
             }
             setUser(user)
         } catch (err) {
@@ -91,26 +96,25 @@ export default function User() {
         <>
             <Header />
 
-            <div className="container" style={{ marginTop: '50px' }}>
-                <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>{user?.username}</h1>
+            <Container className="container mt-5">
+                <h1 className="my-4">{user?.username}</h1>
 
                 <Tabs
                     defaultActiveKey="user"
                     id="project-id-tabs"
-                    className="mb-3"
-                >
+                    className="mb-3">
                     <Tab eventKey="user" title="Пользователь">
 
                         <Row>
-                            <Col md={5} className="border rounded" style={{ marginLeft: '10px', padding: '10px' }}>
-                                <img src={placeholder} height={200} alt="project cover" style={{ float: 'left', padding: '10px', margin: '0px 10px 0px 0px' }} className="border rounded" />
-                                <h3>{user?.username}</h3>
+                            <Col md={5} className="border rounded ms-2 p-2">
+                                <img src={placeholder} height={200} alt="project cover" style={{ float: 'left'}} className="border rounded me-3 p-2" />
+                                <h2>{user?.username}</h2>
                                 {gotUser &&
-                                    <h3>{flagCurrentUser ? "О вас" : "О пользователе"}</h3>
+                                    <h4>{flagCurrentUser ? "О вас" : "О пользователе"}</h4>
                                 }
                                 <p>{user?.about}</p>
                             </Col>
-                            <Col className="py-3" style={{ marginLeft: '10px', marginRight: '20px', paddingLeft: '20px' }}>
+                            <Col className="p-3 mx-3">
                                 <h2 style={{ marginBottom: '20px' }}>Участие в проектах</h2>
                                 { flagCurrentUser &&
                                     <Button variant="primary" style={{ marginTop: '0px', marginBottom: '5px' }} onClick={routeChange}>Создать проект</Button>
@@ -182,7 +186,7 @@ export default function User() {
                 {/* настройки. */}
 
 
-            </div>
+            </Container>
 
             <Footer />
         </>

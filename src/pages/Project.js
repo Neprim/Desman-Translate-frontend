@@ -185,7 +185,7 @@ function Project(props) {
         <>
             <Header />
             <Container style={{ marginTop: 50 }}>
-                <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>{project?.name}</h1>
+                <h1 className="my-4">{project?.name}</h1>
                 <Tabs
                     defaultActiveKey="project"
                     id="project-id-tabs"
@@ -284,6 +284,7 @@ function Project(props) {
                                             <th scope="col">Пользователь</th>
                                             <th scope="col">Роль</th>
                                             <th scope="col">Рейтинг</th>
+                                            <th scope="col"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -296,6 +297,7 @@ function Project(props) {
                                                 {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members &&
                                                     <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Исключить</button></td>
                                                 }
+                                                <td></td>
                                             </tr>
                                         )}
                                     </tbody>
