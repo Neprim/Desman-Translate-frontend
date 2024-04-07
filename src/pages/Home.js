@@ -8,6 +8,7 @@ import Button from "react-bootstrap/Button"
 import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
+import Stack from "react-bootstrap/Stack"
 import { useNavigate } from "react-router-dom"
 
 import api_link from "../App"
@@ -66,95 +67,76 @@ function Home() {
             <Navbar />
             <Container style={{ marginTop: 50 }}>
                 <Row>
-                    <Col sm={6} className="text-left" style={{ paddingRight: "5%" }}>
+                    <Col sm={6} className="text-left" style={{ paddingRight: "5%"}}>
                         <h2>Недавние проекты:</h2>
                         {recentProjects.map((project, i) =>
                             <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
-                                <Row className="border rounded py-3 align-items-center"
-                                     style={{ marginTop: 5 }}
-                                >
-                                    <Col sm={2} xs={5}>
-                                        <img
-                                            width={60}
-                                            height={60}
-                                            src={placeholder}
-                                            alt="thumbnail"
-                                            style={{ marginRight: 10 }}
-                                        />
-                                    </Col>
-                                    <Col className="text-left">
-
+                                <Stack direction="horizontal" gap="10" className="border rounded py-3"
+                                style={{ marginTop: 5, padding: 10}}>
+                                    <img
+                                        width={60}
+                                        height={60}
+                                        src={placeholder}
+                                        alt="thumbnail"
+                                    />
+                                    <Container className="text-left">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
                                         <br /> {project.description}
-                                    </Col>
-                                </Row>
+                                    </Container>
+                                </Stack>
                             </Container>
                         )}
 
                         <h2 style={{ marginTop: 20 }}>Популярные проекты:</h2>
                         {popularProjects.map((project, i) =>
                             <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
-                                <Row className="border rounded py-3 align-items-center"
-                                    style={{ marginTop: 5 }}
-                                >
-                                    <Col sm={2} xs={5}>
-                                        <img
-                                            width={60}
-                                            height={60}
-                                            src={placeholder}
-                                            alt="thumbnail"
-                                            style={{ marginRight: 10 }}
-                                        />
-                                    </Col>
-                                    <Col className="text-left">
+                                <Stack direction="horizontal" gap="10" className="border rounded py-3"
+                                style={{ marginTop: 5, padding: 10 }}>
+                                    <img
+                                        width={60}
+                                        height={60}
+                                        src={placeholder}
+                                        alt="thumbnail"/>
+                                    <Container className="text-left">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
                                         <br /> {project.description}
-                                    </Col>
-                                </Row>
+                                    </Container>
+                                </Stack>
                             </Container>
                         )}
 
 
                     </Col>
-                    <div
-                        className="col border-top border-start rounded py-3"
+                    <Col
+                        className="border-top border-start rounded py-3"
                         style={{ marginTop: 5, paddingLeft: 20 }}
                     >
                         <h5 className="py-2 border-bottom" style={{ marginTop: "-10px" }}>
                             Что такое Desman Translate?
                         </h5>
                         <p>
-                            Добро пожаловать в веб-сервис для коллективных переводов! Desman
-                            Translate предназначен для совместных переводов книг, программ,
-                            субтитров и всего на свете, что имеет форму текста.
+                            Добро пожаловать в веб-сервис для коллективных переводов! Desman Translate предназначен для совместных переводов книг, программ, субтитров и всего на свете, что имеет форму текста.
                         </p>
                         <h5 className="py-2 border-bottom" style={{ marginTop: "-10px" }}>
                             Как это работает?
                         </h5>
                         <p>
-                            Когда вы загружаете текст для работы, он разбивается на небольшие
-                            отрывки: строки, абзацы, отдельные субтитры — вы можете выбрать способ
-                            самостоятельно. Каждый пользователь может предложить свой вариант
-                            перевода для отрывка, а лучший вариант определяется голосованием.
+                            Когда вы загружаете текст для работы, он разбивается на небольшие отрывки: строки, абзацы, отдельные субтитры — вы можете выбрать способ самостоятельно. Каждый пользователь может предложить свой вариант перевода для отрывка, а лучший вариант определяется голосованием.
                         </p>
                         <p>
-                            Присоединяйтесь к командам переводчиков, создавайте собственные проекты,
-                            приглашайте других пользователей присоединиться, переводите книги,
-                            программы и субтитры, оттачивайте свои навыки и создавайте лучший
-                            перевод любого текста.
+                            Присоединяйтесь к командам переводчиков, создавайте собственные проекты, приглашайте других пользователей присоединиться, переводите книги, программы и субтитры, оттачивайте свои навыки и создавайте лучший перевод любого текста.
                         </p>
                         <p>Have a lot of fun...</p>
                         <Button variant="primary"
-                            style={{ marginTop: "-10px" }}
-                            onClick={routeChange}
-                        >
+                            // style={{ marginTop: "-10px" }}
+                            onClick={routeChange}>
                             Создать проект
                         </Button>
-                    </div>
+                    </Col>
                 </Row>
             </Container>
             <Footer />

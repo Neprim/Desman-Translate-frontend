@@ -1,10 +1,14 @@
-import { Link, useParams } from "react-router-dom";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Button from "react-bootstrap/Button";
-import placeholder from "../images/placeholder.png";
+import { Link, useParams } from "react-router-dom"
+import Navbar from "./Navbar"
+import Footer from "./Footer"
+import Tab from "react-bootstrap/Tab"
+import Tabs from "react-bootstrap/Tabs"
+import Button from "react-bootstrap/Button"
+import Row from "react-bootstrap/Row"
+import Col from "react-bootstrap/Col"
+import Container from "react-bootstrap/Container"
+import Form from "react-bootstrap/Form"
+import placeholder from "../images/placeholder.png"
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -180,7 +184,7 @@ function Project(props) {
     return (
         <>
             <Navbar />
-            <div className="container" style={{ marginTop: 50 }}>
+            <Container style={{ marginTop: 50 }}>
                 <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>{project?.name}</h1>
                 <Tabs
                     defaultActiveKey="project"
@@ -188,14 +192,14 @@ function Project(props) {
                     className="mb-3"
                 >
                     <Tab eventKey="project" title="Проект">
-                        <div className="row">
-                            <div className="col-7">
+                        <Row>
+                            <Col xs={7}>
                                 <img src={placeholder} height={250} alt="project cover" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
                                 <h3>Описание проекта</h3>
                                 <p>{project?.description}</p>
-                            </div>
+                            </Col>
                             {project &&
-                                <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
+                                <Col className="border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
                                     <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>Информация</h3>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {project?.source_lang}</div>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {project?.target_lang}</div>
@@ -212,12 +216,12 @@ function Project(props) {
                                     { userRole &&
                                     <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
                                     }
-                                </div>
+                                </Col>
                             }
-                        </div>
+                        </Row>
                         <h2>Разделы</h2>
                         {userRole?.permissions?.can_manage_sections && 
-                        <Button type="submit" variant="primary" onClick={(e) => document.getElementById('divAddChapter').hidden = false} >Добавить раздел</Button>
+                        <Button type="submit" variant="primary" onClick={(e) => document.getElementById('divAddChapter').hidden = false}>Добавить раздел</Button>
                         }
                         <table className="table table-striped">
                             <thead>
@@ -226,6 +230,7 @@ function Project(props) {
                                     <th scope="col">Название</th>
                                     <th scope="col">Прогресс</th>
                                     <th scope="col">Скачать</th>
+                                    <th scope="col"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -245,26 +250,26 @@ function Project(props) {
                                                     </Link>
                                                 </td>
                                         }
-                                        <td>Оригинал / Переведено</td>
+                                        <td>Оригинал / Перевод</td>
                                         <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
-                        <div className="mb-3" id="divAddChapter" hidden>
-                            <input
+                        <Form className="mb-2" id="divAddChapter" hidden>
+                            <Form.Control
                                 type="text"
-                                className="form-control"
+                                className="mb-2"
                                 id="inputSectionName"
                                 placeholder="Название главы"
                             />
-                            <Button type="submit" variant="primary" onClick={AddChapter}>
+                            <Button className="me-2" type="submit" variant="primary" onClick={AddChapter}>
                                 Добавить
                             </Button>
                             <Button type="cancel" variant="outline-secondary" onClick={(e) => e.target.closest("div").hidden = true}>
                                 Отмена
                             </Button>
-                        </div>
+                        </Form>
                     </Tab>
                     <Tab eventKey="members" title="Участники">
                         <div className="row">
@@ -415,7 +420,7 @@ function Project(props) {
                         </Tab>
                     }
                 </Tabs>
-            </div>
+            </Container>
             <Footer />
         </>
     );
