@@ -251,7 +251,9 @@ function Project(props) {
                                                 </td>
                                         }
                                         <td>Оригинал / Перевод</td>
-                                        <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
+                                        {userRole?.permissions?.can_manage_sections && 
+                                            <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
+                                        }
                                     </tr>
                                 )}
                             </tbody>

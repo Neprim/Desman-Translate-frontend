@@ -26,8 +26,12 @@ export async function fetchProject(project_id, fetch_members = false, fetch_role
     return project
 }
 
-export async function fetchProjects(limit = 25) {
-    let projects = await fetchSomeAPI(`/api/projects?limit=${limit}`)
+export async function fetchProjects(options) {
+    let str = "/api/projects?"
+    for (const key in options) {
+        str += `${key}=${options[key]}&`
+    }
+    let projects = await fetchSomeAPI(str)
     return projects
 }
 
