@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 
 function Footer() {
     return (
-        <Navbar className="bg-body-tertiary py-2 border-top" style={{ marginTop: 20 }}>
+        <Navbar className="bg-body-tertiary mt-4 py-2 border-top">
             <Container className="d-flex flex-wrap">
                 <Nav className="me-auto">
                     <Nav.Link className="px-2"

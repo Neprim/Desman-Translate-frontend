@@ -1,4 +1,4 @@
-import Navbar from "./Navbar"
+import Header from "./Header"
 import Footer from "./Footer"
 
 import React, { useState } from "react"
@@ -87,7 +87,7 @@ export default function Signup() {
 
     return (
         <>
-            <Navbar />
+            <Header />
             <div
                 className="container text-left"
                 style={{

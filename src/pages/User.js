@@ -1,5 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
+import Header from "./Header";
 import Footer from "./Footer";
 import placeholder from "../images/placeholder.png";
 import { Col, Button, Row, Tab, Tabs } from "react-bootstrap";
@@ -89,7 +89,7 @@ export default function User() {
 
     return (
         <>
-            <Navbar />
+            <Header />
 
             <div className="container" style={{ marginTop: '50px' }}>
                 <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>{user?.username}</h1>

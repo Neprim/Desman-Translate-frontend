@@ -1,4 +1,4 @@
-import Navbar from "./Navbar";
+import Header from "./Header";
 import Footer from "./Footer";
 import { Link } from "react-router-dom";
 
@@ -34,7 +34,7 @@ function Search() {
 
     return (
         <>
-            <Navbar />
+            <Header />
             <Container style={{ marginTop: 20, paddingRight: "5%" }}>
                 <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>Название</label>
                 <input type="text" className="form-control" id="settings-name" maxLength={100} onChange={(e) => {FindProjects(e.target.value)}} />

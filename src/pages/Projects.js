@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import Navbar from "./Navbar"
+import Header from "./Header"
 import Footer from "./Footer"
 import Tab from 'react-bootstrap/Tab'
 import Tabs from 'react-bootstrap/Tabs'
@@ -60,7 +60,7 @@ function Projects() {
 
     return (
         <>
-            <Navbar />
+            <Header />
 
             <div className="container" style={{ marginTop: 50 }}>
 

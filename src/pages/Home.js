@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import Navbar from "./Navbar"
+import Header from "./Header"
 import Footer from "./Footer"
 import placeholder from "../images/placeholder.png"
 import { useEffect, useState, useContext } from "react"
@@ -64,22 +64,21 @@ function Home() {
 
     return (
         <>
-            <Navbar />
-            <Container style={{ marginTop: 50 }}>
+            <Header />
+            <Container className="mt-5">
                 <Row>
-                    <Col sm={6} className="text-left" style={{ paddingRight: "5%"}}>
-                        <h2>Недавние проекты:</h2>
+                    <Col sm={6} className="text-left pe-5">
+                        <h2 className="mb-4">Недавние проекты:</h2>
                         {recentProjects.map((project, i) =>
-                            <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
-                                <Stack direction="horizontal" gap="10" className="border rounded py-3"
-                                style={{ marginTop: 5, padding: 10}}>
+                            <Container className="text-left pb-2" key={project.id}>
+                                <Stack direction="horizontal" gap="10" className="border rounded p-3 mt-1">
                                     <img
                                         width={60}
                                         height={60}
                                         src={placeholder}
                                         alt="thumbnail"
                                     />
-                                    <Container className="text-left">
+                                    <Container className="text-left text-break">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
@@ -89,17 +88,16 @@ function Home() {
                             </Container>
                         )}
 
-                        <h2 style={{ marginTop: 20 }}>Популярные проекты:</h2>
+                        <h2 className="my-4">Популярные проекты:</h2>
                         {popularProjects.map((project, i) =>
-                            <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
-                                <Stack direction="horizontal" gap="10" className="border rounded py-3"
-                                style={{ marginTop: 5, padding: 10 }}>
+                            <Container className="text-left pb-2" key={project.id}>
+                                <Stack direction="horizontal" gap="10" className="border rounded p-3 mt-1">
                                     <img
                                         width={60}
                                         height={60}
                                         src={placeholder}
                                         alt="thumbnail"/>
-                                    <Container className="text-left">
+                                    <Container className="text-left text-break">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
                                         </Link>
@@ -111,17 +109,14 @@ function Home() {
 
 
                     </Col>
-                    <Col
-                        className="border-top border-start rounded py-3"
-                        style={{ marginTop: 5, paddingLeft: 20 }}
-                    >
-                        <h5 className="py-2 border-bottom" style={{ marginTop: "-10px" }}>
+                    <Col className="border-top border-start rounded py-1 mt-3 ps-3">
+                        <h5 className="py-2 border-bottom" >
                             Что такое Desman Translate?
                         </h5>
                         <p>
                             Добро пожаловать в веб-сервис для коллективных переводов! Desman Translate предназначен для совместных переводов книг, программ, субтитров и всего на свете, что имеет форму текста.
                         </p>
-                        <h5 className="py-2 border-bottom" style={{ marginTop: "-10px" }}>
+                        <h5 className="py-2 border-bottom">
                             Как это работает?
                         </h5>
                         <p>
@@ -132,7 +127,6 @@ function Home() {
                         </p>
                         <p>Have a lot of fun...</p>
                         <Button variant="primary"
-                            // style={{ marginTop: "-10px" }}
                             onClick={routeChange}>
                             Создать проект
                         </Button>

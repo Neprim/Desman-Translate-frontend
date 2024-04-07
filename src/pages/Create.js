@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import Navbar from "./Navbar"
+import Header from "./Header"
 import Footer from "./Footer"
 import Button from "react-bootstrap/Button"
 import Container from "react-bootstrap/Container"
@@ -151,9 +151,9 @@ export default function Create() {
 
 	return (
 		<>
-			<Navbar />
+			<Header />
 
-			<Container className="text-left" style={{ marginTop: '50px', marginLeft: 'auto', marginRight: 'auto', width: '40%', minWidth: '300px' }}>
+			<Container className="text-left mt-5 mx-auto" style={{width: '40%', minWidth: '300px' }}>
 				<h1 style={{ marginBottom: '20px' }}>Создать новый проект</h1>
 				<Form>
 					<Form.Group className="mb-3">
@@ -192,7 +192,7 @@ export default function Create() {
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputTargLang" style={{ marginTop: '10px' }}>Язык перевода</Form.Label>
+						<Form.Label className="mt-2" htmlFor="inputTargLang">Язык перевода</Form.Label>
 						<Form.Select id="inputTargLang" defaultValue="ru" onChange={(e) => setLangTarget(e.target.value)}>
 							<option value="ru">русский</option>
 							<option value="en">английский</option>
@@ -202,13 +202,13 @@ export default function Create() {
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputLogo" style={{ marginTop: '10px' }}>Загрузить обложку</Form.Label>
+						<Form.Label className="mt-2" htmlFor="inputLogo">Загрузить обложку</Form.Label>
 						<Form.Control type="file" id="inputLogo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
 						<Form.Text id="logo-desc">Принимаются картинки в формате png и jpeg</Form.Text>
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label style={{ marginTop: '10px' }}>Доступ к проекту</Form.Label>
+						<Form.Label className="mt-2">Доступ к проекту</Form.Label>
 						<Form.Check
 						type="radio"
 						id="settings-access-private"
@@ -226,7 +226,7 @@ export default function Create() {
 					</Form.Group>
 					
 					<Button variant="primary"
-						style={{ marginTop: "20px" }}
+						className="mt-3"
 						onClick={CreateProject}>
 						Создать проект
 					</Button>

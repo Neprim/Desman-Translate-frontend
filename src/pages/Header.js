@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
 import logo from "../images/logo.png"
 import Button from "react-bootstrap/Button"
+import Navbar from "react-bootstrap/Navbar"
+import Nav from "react-bootstrap/Nav"
+import Container from "react-bootstrap/Container"
+import Form from "react-bootstrap/Form"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 
-function Navbar() {
+function Header() {
 	const [input, setInput] = useState("");
 	const { user, gotUser } = useContext(AuthContext);
 
@@ -22,7 +26,7 @@ function Navbar() {
 	return (
 		<>
 			<header className="py-3 border-bottom">
-				<div className="container d-flex flex-wrap justify-content-center">
+				<Container className="d-flex flex-wrap justify-content-center">
 					<a className="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto link-body-emphasis text-decoration-none">
 						<img
 							width={250}
@@ -32,21 +36,21 @@ function Navbar() {
 						/>
 					</a>
 					<div className="d-flex align-items-center">
-						<form role="search">
-							<input
+						<Form role="search">
+							<Form.Control
 								type="search"
 								className="form-control"
 								placeholder="Поиск..."
 								aria-label="Search"
 							/>
-						</form>
+						</Form>
 					</div>
-				</div>
+				</Container>
 			</header>
-			<nav className="py-2 bg-body-tertiary border-bottom">
-				<div className="container d-flex flex-wrap">
-					<ul className="nav me-auto">
-						<li className="nav-item">
+			<Navbar className="py-2 bg-body-tertiary border-bottom">
+				<Container className="d-flex flex-wrap">
+					<Nav className="me-auto">
+						<Nav.Item>
 							<Link
 								to="/"
 								className="nav-link link-body-emphasis px-2 active"
@@ -54,26 +58,26 @@ function Navbar() {
 							>
 								Главная
 							</Link>
-						</li>
-						<li className="nav-item">
+						</Nav.Item>
+						<Nav.Item>
 							<Link to="/projects" className="nav-link link-body-emphasis px-2">
 								Проекты
 							</Link>
-						</li>
-						<li className="nav-item">
+						</Nav.Item>
+						<Nav.Item>
 							<Link to="/search" className="nav-link link-body-emphasis px-2">
 								Поиск проектов
 							</Link>
-						</li>
-					</ul>
+						</Nav.Item>
+					</Nav>
 					{user 
 				? 
-					<ul className="nav" style={{ display: "flex" }}>
-						<li className="nav-item">
+					<Nav style={{ display: "flex" }}>
+						<Nav.Item>
 							<Link to={"/users/" + user.id} reloadDocument className="nav-link link-primary px-2">
 								{user.username}
 							</Link>
-						</li>
+						</Nav.Item>
 						<Button
 							className="nav-item border-0"
 							variant="outline-secondary"
@@ -82,25 +86,25 @@ function Navbar() {
 							Выйти
 						</Button>
 
-					</ul> 
+					</Nav> 
 				: gotUser &&
-					<ul className="nav" style={{ display: "flex" }}>
-						<li className="nav-item">
+					<Nav style={{ display: "flex" }}>
+						<Nav.Item>
 							<Link to="/login" className="nav-link link-body-emphasis px-2">
 								Войти
 							</Link>
-						</li>
-						<li className="nav-item">
+						</Nav.Item>
+						<Nav.Item>
 							<Link to="/signup" className="nav-link link-body-emphasis px-2">
 								Зарегистрироваться
 							</Link>
-						</li>
-					</ul>
+						</Nav.Item>
+					</Nav>
 				}
-				</div>
-			</nav>
+				</Container>
+			</Navbar>
 		</>
 	);
 }
 
-export default Navbar;
+export default Header;

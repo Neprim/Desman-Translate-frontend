@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import Button from "react-bootstrap/Button";
+import Link from "react-router-dom"
+import Header from "./Header"
+import Footer from "./Footer"
+import Button from "react-bootstrap/Button"
+import Container from "react-bootstrap/Container"
+import Form from "react-bootstrap/Form"
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"
 
 export default function Login() {
     const navigate = useNavigate();
@@ -59,52 +61,48 @@ export default function Login() {
 
     return (
         <>
-            <Navbar />
-            <div
-                className="container text-left"
+            <Header />
+            <Container
+                className="text-left mt-5 mx-auto"
                 style={{
-                    marginTop: 50,
-                    marginLeft: "auto",
-                    marginRight: "auto",
                     width: "20%",
                     minWidth: 300
                 }}
             >
-                <h1 style={{ marginBottom: 20 }}>Вход</h1>
-                <form>
-                    <div className="mb-3">
-                        <label htmlFor="inputEmailLogin" className="form-label">
+                <h1 className="mb-3">Вход</h1>
+                <Form>
+                    <Form.Group className="mb-3">
+                        <Form.Label htmlFor="inputEmailLogin">
                             Имя пользователя
-                        </label>
-                        <input className="form-control" id="inputEmailLogin" onChange={mailChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="inputPasswordLogin" className="form-label">
+                        </Form.Label>
+                        <Form.Control id="inputEmailLogin" onChange={mailChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label htmlFor="inputPasswordLogin">
                             Пароль
-                        </label>
-                        <input
+                        </Form.Label>
+                        <Form.Control
                             onChange={passChange}
                             type="password"
-                            className="form-control"
                             id="inputPasswordLogin"
                             aria-describedby="forgotPassword"
                         />
-                        <div id="forgotPassword" className="form-text">
+                        <Form.Text id="forgotPassword">
                             Забыли пароль?
-                        </div>
-                    </div>
-                    <div className="mb-3 form-check">
+                        </Form.Text>
+                    </Form.Group>
+                    <Form.Check className="mb-3">
                         <input type="checkbox" className="form-check-input" id="rememberCheck" />
-                        <label className="form-check-label" htmlFor="rememberCheck">
+                        <Form.Check.Label className="form-check-label" htmlFor="rememberCheck">
                             Запомнить аккаунт
-                        </label>
-                    </div>
-                    {errorVisibility && <div id="error" style={{ margin: "5px 0px" }}>Неверный логин или пароль.</div>}
+                        </Form.Check.Label>
+                    </Form.Check>
+                    {errorVisibility && <div id="error" className="my-1">Неверный логин или пароль.</div>}
                     <Button type="submit" variant="primary" onClick={Submit}>
                         Войти
                     </Button>
-                </form>
-            </div>
+                </Form>
+            </Container>
             <Footer />
         </>
     );

@@ -1,4 +1,4 @@
-import Navbar from "./Navbar";
+import Header from "./Header";
 import Footer from "./Footer";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -78,13 +78,10 @@ export default function LoadSection() {
 
     return (
         <>
-            <Navbar />
+            <Header />
             <Container
-                className="text-left"
+                className="text-left mt-5 mx-auto"
                 style={{
-                    marginTop: 50,
-                    marginLeft: "auto",
-                    marginRight: "auto",
                     width: '40%',
                     minWidth: '300px'
                 }}
@@ -94,14 +91,14 @@ export default function LoadSection() {
                     <h1 style={{ marginBottom: 20 }}>Загрузка строк для раздела "{section.name}"</h1>
                     <Form>
                         <Form.Group>
-                            <Form.Label htmlFor="settings-strings-type" style={{ marginTop: '10px' }}>Тип строк</Form.Label>
+                            <Form.Label htmlFor="settings-strings-type" className="mt-2">Тип строк</Form.Label>
                             <Form.Select defaultValue="text" id="settings-strings-type">
                                 <option value="text">Текст</option>
                                 <option value="json">JSON</option>
                             </Form.Select>
                     </Form.Group>
                     <Form.Group>
-                        <Form.Label htmlFor="settings-loaded-strings" className="form-label" style={{ marginTop: '10px' }}>Текст для загрузки</Form.Label>
+                        <Form.Label htmlFor="settings-loaded-strings" className="form-label mt-2">Текст для загрузки</Form.Label>
                         <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-strings"/>
                         {stringsError && 
                             <div id="stringsError" className="form-text">
@@ -109,27 +106,30 @@ export default function LoadSection() {
                             </div>
                         }
                     </Form.Group>
-                    <Button style={{ marginTop: '10px' }} type="submit" variant="primary" onClick={TransformStrings}>
+                    <Button className="mt-2" type="submit" variant="primary" onClick={TransformStrings}>
                         Преобразовать
                     </Button>
 
                     </Form>
                     </>
                 }
-                {section && strings && // Нужно сделать красиво
+                {section && strings &&
                     <> 
-                    <div id='div-strings-to-load'>
+                    <h3 className="mb-3">
+                        Итоговое разбиение на строки
+                    </h3>
+                    <div id="div-strings-to-load">
                         {strings.map((str, i) => 
-                            <div key={i}>
-                            <strong>{str.text}</strong>
-                            {str.key && <i> key: {str.key}</i>}
-                            </div>
+                            <Container className="text-left border rounded my-2 pt-3" key={i}>
+                            <p className="mb-1 fw-semibold">{str.text}</p>
+                            <p className="text-body-secondary mt-0">{str.key && <i> key: {str.key}</i>}</p>
+                            </Container>
                         )}
                     </div>
-                    <Button style={{ marginTop: '10px', marginRight: '10px' }} type="submit" variant="primary" onClick={LoadStrings}>
+                    <Button className="mt-2 me-2" type="submit" variant="primary" onClick={LoadStrings}>
                         Загрузить
                     </Button>
-                    <Button style={{ marginTop: '10px' }} type="submit" variant="secondary" onClick={(e) => {setStrings(null)}}>
+                    <Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setStrings(null)}}>
                         Отмена
                     </Button>
                     </>
