@@ -120,9 +120,9 @@ export default function LoadSection() {
                     </h3>
                     <div id="div-strings-to-load">
                         {strings.map((str, i) => 
-                            <Container className="text-left border rounded my-2 pt-3" key={i}>
+                            <Container className="text-left text-break border rounded my-2 pt-3" key={i}>
                             <p className="mb-1 fw-semibold">{str.text}</p>
-                            <p className="text-body-secondary mt-0">{str.key && <i> key: {str.key}</i>}</p>
+                            <p className="text-body-secondary mt-0">{str.key && <i> ключ: {str.key}</i>}</p>
                             </Container>
                         )}
                     </div>

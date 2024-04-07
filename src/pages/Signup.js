@@ -1,5 +1,8 @@
 import Header from "./Header"
 import Footer from "./Footer"
+import Container from "react-bootstrap/Container"
+import Form from "react-bootstrap/Form"
+import Button from "react-bootstrap/Button"
 
 import React, { useState } from "react"
 
@@ -76,8 +79,6 @@ export default function Signup() {
         } else {
             window.location.href = "/login"
         }
-
-        //console.log(await jopa.json())
     }
 
 
@@ -88,65 +89,56 @@ export default function Signup() {
     return (
         <>
             <Header />
-            <div
-                className="container text-left"
+            <Container
+                className="text-left mt-5 mx-auto"
                 style={{
-                    marginTop: 50,
-                    marginLeft: "auto",
-                    marginRight: "auto",
                     width: "20%",
                     minWidth: 300
                 }}
             >
-                <h1 style={{ marginBottom: 20 }}>Регистрация</h1>
-                <form>
-                    <div className="mb-3">
-                        <label htmlFor="inputEmail" className="form-label">
+                <h1 className="mb-3">Регистрация</h1>
+                <Form>
+                    <Form.Group className="mb-3">
+                        <Form.Label htmlFor="inputEmail">
                             Электронная почта
-                        </label>
-                        <input type="email" value={inputMail} className="form-control" id="inputEmail" onChange={mailChange} aria-describedby="emailError" />
-                        {emailError && <div id="emailError" className="form-text">
-                            {emailError}
-                        </div>}
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="inputLogin" className="form-label">
+                        </Form.Label>
+                        <Form.Control type="email" value={inputMail} id="inputEmail" onChange={mailChange} aria-describedby="emailError" />
+                        {emailError && <Form.Text id="emailError" className="form-text">{emailError}</Form.Text>}
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label htmlFor="inputLogin">
                             Логин
-                        </label>
-                        <input
+                        </Form.Label>
+                        <Form.Control
                             type="text"
-                            className="form-control"
                             value={inputLogin}
                             onChange={loginChange}
                             id="inputLogin"
                             aria-describedby="usernameError"
                         />
-                        {usernameError && <div id="usernameError" className="form-text">
-                            {usernameError}
-                        </div>}
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="inputPassword" className="form-label">
+                        {usernameError && <Form.Text id="usernameError" className="form-text">{usernameError}</Form.Text>}
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label htmlFor="inputPassword">
                             Пароль
-                        </label>
-                        <input type="password" value={inputPass} onChange={passChange} className="form-control" id="inputPassword" aria-describedby="passwordError" />
-                        {passwordError && 
-                            <div id="passwordError" className="form-text">
-                                {passwordError}
-                            </div>
+                        </Form.Label>
+                        <Form.Control type="password" value={inputPass} onChange={passChange} id="inputPassword" aria-describedby="passwordError" />
+                        {passwordError && <Form.Text id="passwordError" className="form-text">{passwordError}</Form.Text>
                         }
-                    </div>
+                    </Form.Group>
                     {/* <div className="mb-3">
                     <label htmlFor="repeatPassword" className="form-label">
                         Повторите пароль
                     </label>
                     <input type="password" value={inputRepeatPass} onChange={repeatPassChange} className="form-control" id="repeatPassword" />
                     </div> */}
-                    <button type="submit" id="submit-button" className="btn btn-primary" onClick={Submit}>
+                    <Button type="submit" id="submit-button" className="btn-primary" onClick={Submit}>
                         Зарегистрироваться
-                    </button>
-                </form>
-            </div>
+                    </Button>
+                </Form>
+            </Container>
             <Footer />
         </>
     );

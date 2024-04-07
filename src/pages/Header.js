@@ -72,16 +72,16 @@ function Header() {
 					</Nav>
 					{user 
 				? 
-					<Nav style={{ display: "flex" }}>
+					<Nav className="d-flex">
 						<Nav.Item>
 							<Link to={"/users/" + user.id} reloadDocument className="nav-link link-primary px-2">
 								{user.username}
 							</Link>
 						</Nav.Item>
 						<Button
-							className="nav-item border-0"
+							className="nav-item border-0 p-1 px-2 ms-2 m-auto"
 							variant="outline-secondary"
-							style={{ padding: "2px", height: "75%", margin: "auto", marginLeft: "10px" }}
+							style={{ height: "75%"}}
 							onClick={Logout}>
 							Выйти
 						</Button>
