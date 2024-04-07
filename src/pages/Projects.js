@@ -45,6 +45,7 @@ function Projects() {
         try {
             await fetchSomeAPI(`/api/invites/${invite_id}`, "POST", { "accept": is_accepted })
             await GetInvites()
+            GetProjects()
         } catch (err) {
             console.log(err)
         }
@@ -52,7 +53,7 @@ function Projects() {
 
     useEffect(() => {
         GetProjects()
-    }, [user, invites]);
+    }, [user]);
 
     useEffect(() => {
         GetInvites()

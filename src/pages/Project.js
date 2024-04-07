@@ -16,6 +16,17 @@ import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fet
 import { ProgressBar } from "react-bootstrap";
 import { FaRegTrashAlt } from "react-icons/fa"
 
+const kostyl_lang_tr = {
+    en: "Английский",
+    ru: "Русский",
+}
+
+const kostyl_status_tr = {
+    opened: "Открыт",
+    closed: "Закрыт",
+    frozen: "Заморожен",
+}
+
 function Project(props) {
 
     const { user } = useContext(AuthContext);
@@ -26,6 +37,7 @@ function Project(props) {
     const [roles, setRoles] = useState([]);
     const [invites, setInvites] = useState([]);
     const [userRole, setUserRole] = useState(null);
+    const [inviteError, setInviteError] = useState(null)
 
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
 
@@ -81,13 +93,20 @@ function Project(props) {
         if (fieldInviteUser == "")
             return
         
+        setInviteError(null)
         try {
             const user = await fetchUser(fieldInviteUser)
             await fetchSomeAPI(`/api/projects/${project.id}/invites`, "POST", { user_id: user.id })
             await GetInvites()
         } catch (err) {
-            // TODO
-            // В зависимости от типа ошибки выводить то-то то-то на экране
+            switch (err.status) {
+                case 404:
+                    setInviteError("Такого пользователя не существует"); break;
+                case 400:
+                    setInviteError("Пользователь уже является участником проекта"); break;
+                case 409:
+                    setInviteError("Пользователь уже приглашён"); break;
+            }
             console.log(err)
         }
     }
@@ -95,8 +114,7 @@ function Project(props) {
     async function KickMember(user_id) {
         try {
             await fetchSomeAPI(`/api/projects/${link["project_id"]}/members/${user_id}`, "DELETE")
-            const members = await fetchMembers(link["project_id"])
-            setMembers(members)
+            await GetProject()
         } catch (err) {
             console.log(err)
             // По идее, тут ошибок со стороны сервера быть не должно.
@@ -201,10 +219,10 @@ function Project(props) {
                             {project &&
                                 <Col className="border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
                                     <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>Информация</h3>
-                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {project?.source_lang}</div>
-                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {project?.target_lang}</div>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {kostyl_lang_tr[project?.source_lang]}</div>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {kostyl_lang_tr[project?.target_lang]}</div>
                                     <div className="py-2 border-bottom"><b>Дата создания:</b> {project?.created_at?.toLocaleString()}</div>
-                                    <div className="py-2 border-bottom"><b>Статус:</b> {project?.status}</div>
+                                    <div className="py-2 border-bottom"><b>Статус:</b> {kostyl_status_tr[project?.status]}</div>
                                     <div className="py-2 border-bottom"><b>Прогресс: {project.statistics.completeness}%</b>
                                         <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
                                             {/* <ProgressBar className="progress" style={{ width: '100%' }} aria-valuenow={100} aria-valuemin={0} aria-valuemax={100}>
@@ -297,6 +315,9 @@ function Project(props) {
                                                 {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members &&
                                                     <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Исключить</button></td>
                                                 }
+                                                {user?.id == member.user.id && project.owner_id != user?.id && 
+                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Покинуть проект</button></td>
+                                                }
                                                 <td></td>
                                             </tr>
                                         )}
@@ -332,13 +353,18 @@ function Project(props) {
                                 }
                             </div>
                             {userRole?.permissions?.can_manage_members &&
-                            <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
-                                <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Пригласить участника</h3>
-                                <form style={{ marginTop: '10px' }}>
-                                    <input className="form-control" placeholder="Введите ник пользователя" aria-label="Invite" onChange={fieldInviteUserChange} />
-                                </form>
-                                <button type="button" className="btn btn-primary" style={{ marginTop: '10px', marginBottom: '5px' }} onClick={function (e) { SendInvite() }}>Пригласить</button>
-                            </div>
+                                <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
+                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Пригласить участника</h3>
+                                    <form style={{ marginTop: '10px' }}>
+                                        <input className="form-control" placeholder="Введите ник пользователя" aria-label="Invite" onChange={fieldInviteUserChange} />
+                                    </form>
+                                    <button type="button" className="btn btn-primary" style={{ marginTop: '10px', marginBottom: '5px' }} onClick={SendInvite}>Пригласить</button>
+                                    {inviteError && 
+                                        <div id="inviteError" className="form-text">
+                                            {inviteError}
+                                        </div>
+                                    }
+                                </div>
                             }
                         </div>
                     </Tab>

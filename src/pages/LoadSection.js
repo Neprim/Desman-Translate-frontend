@@ -31,7 +31,8 @@ export default function LoadSection() {
         GetSection()
     }, [])
 
-    async function TransformStrings() {
+    async function TransformStrings(e) {
+        e.preventDefault()
         try {
             setStringsError(null)
             const type = document.getElementById("settings-strings-type").value
@@ -106,7 +107,7 @@ export default function LoadSection() {
                             </div>
                         }
                     </Form.Group>
-                    <Button className="mt-2" type="submit" variant="primary" onClick={TransformStrings}>
+                    <Button className="mt-2" type="submit" variant="primary" onClick={(e) => TransformStrings(e)}>
                         Преобразовать
                     </Button>
 
