@@ -10,7 +10,7 @@ import Signup from "./pages/Signup.js";
 import Project from './pages/Project.js';
 import Create from './pages/Create.js';
 import Editor from './pages/Editor.js';
-import Notfound from './pages/Error.js';
+import { Notfound, Forbidden, Unathorized } from './pages/Errors.js';
 import LoadSection from './pages/LoadSection.js';
 import { AuthProvider } from "./AuthContext";
 
@@ -23,6 +23,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="404" element={<Notfound />} />
+          <Route path="403" element={<Forbidden />} />
+          <Route path="401" element={<Unathorized />} />
           <Route path="about" element={<About />} />
           <Route path="projects" element={<Projects />} />
           <Route path="search" element={<Search />} />
@@ -35,6 +37,7 @@ function App() {
           <Route path="notfound" element={<Notfound />} />
           <Route path="users/:user_id" element={<User />} />
           <Route path="projects/:project_id/sections/:section_id/load" element={<LoadSection />} />
+          <Route path="*" element={<Notfound />} />
         </Routes>
       </AuthProvider>
     </div>

@@ -148,6 +148,13 @@ export default function Create() {
 		}
 	}
 
+	useEffect(() => {
+		if (user === undefined)	
+			return
+		if (user === null)
+			window.location.href = '/401'
+	}, [user])
+
 	return (
 		<>
 			<Header />
@@ -183,20 +190,20 @@ export default function Create() {
 					<Form.Group className="mb-3">
 						<Form.Label htmlFor="inputSrcLang">Язык оригинала</Form.Label>
 						<Form.Select id="inputSrcLang" defaultValue="en" onChange={(e) => setLangSource(e.target.value)}>
-							<option value="ru">русский</option>
-							<option value="en">английский</option>
-							<option value="de">немецкий</option>
-							<option value="fr">французский</option>
+							<option value="ru">Русский</option>
+							<option value="en">Английский</option>
+							<option value="de">Немецкий</option>
+							<option value="fr">Французский</option>
 						</Form.Select>
 					</Form.Group>
 
 					<Form.Group className="mb-3">
 						<Form.Label className="mt-2" htmlFor="inputTargLang">Язык перевода</Form.Label>
 						<Form.Select id="inputTargLang" defaultValue="ru" onChange={(e) => setLangTarget(e.target.value)}>
-							<option value="ru">русский</option>
-							<option value="en">английский</option>
-							<option value="de">немецкий</option>
-							<option value="fr">французский</option>
+							<option value="ru">Русский</option>
+							<option value="en">Английский</option>
+							<option value="de">Немецкий</option>
+							<option value="fr">Французский</option>
 						</Form.Select>
 					</Form.Group>
 
@@ -208,20 +215,10 @@ export default function Create() {
 
 					<Form.Group className="mb-3">
 						<Form.Label className="mt-2">Доступ к проекту</Form.Label>
-						<Form.Check
-						type="radio"
-						id="settings-access-private"
-						label="Приватный проект"
-						defaultValue="private"
-						defaultChecked
-						onClick={(e) => setVisibility("private")}/>
-						
-						<Form.Check
-						type="radio"
-						id="settings-access-public"
-						label="Публичный проект"
-						defaultValue="public"
-						onClick={(e) => setVisibility("public")}/>
+						<Form.Select id="inputVisibility" defaultValue="private" onChange={(e) => setVisibility(e.target.value)}>
+							<option value="private">Приватный</option>
+							<option value="public">Публичный</option>
+						</Form.Select>
 					</Form.Group>
 					
 					<Button variant="primary"

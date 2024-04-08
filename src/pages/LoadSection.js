@@ -24,6 +24,12 @@ export default function LoadSection() {
             setSection(sec)
         } catch (err) {
             console.log(err)
+            if (err.status == 404) {
+                window.location.href = "/404"
+            }
+            if (err.status == 403) {
+                window.location.href = "/403"
+            }
         }
     }
 

@@ -20,7 +20,7 @@ function Header() {
 				'Content-Type': 'application/json; charset=UTF-8',
 			},
 		})
-		window.location.reload(false);
+		window.location.href = "/";
 	}
 
 	return (

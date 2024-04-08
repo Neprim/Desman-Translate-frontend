@@ -126,10 +126,12 @@ function Home() {
                             Присоединяйтесь к командам переводчиков, создавайте собственные проекты, приглашайте других пользователей присоединиться, переводите книги, программы и субтитры, оттачивайте свои навыки и создавайте лучший перевод любого текста.
                         </p>
                         <p>Have a lot of fun...</p>
-                        <Button variant="primary"
-                            onClick={routeChange}>
-                            Создать проект
-                        </Button>
+                        {user && 
+                            <Button variant="primary"
+                                onClick={routeChange}>
+                                Создать проект
+                            </Button>
+                        }
                     </Col>
                 </Row>
             </Container>

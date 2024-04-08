@@ -62,6 +62,9 @@ export default function User() {
                 window.location.href = "/404"
                 return
             }
+            if (err.status == 403) {
+                window.location.href = "/403"
+            }
             console.log(err)
         }
     }
