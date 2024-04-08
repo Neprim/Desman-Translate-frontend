@@ -198,6 +198,17 @@ function Project(props) {
             console.log(err)
         }
     }
+
+    async function ChangeRole(user_id, role_id) {
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/members/${user_id}/grant_role`, "POST", {
+                role_id: role_id,
+            })
+            GetProject()
+        } catch (err) {
+            console.log(err)
+        }
+    }
     
     return (
         <>
@@ -310,9 +321,16 @@ function Project(props) {
                                             <tr key={member.user.id}>
                                                 <th scope="row">{index + 1}</th>
                                                 <td>{member.user.username}</td>
-                                                <td>{roles[member.role_id].name}</td>
+                                                {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members || (userRole?.permissions.is_owner && user?.id != member.user.id)
+                                                ?   <Form.Select defaultValue={member.role_id} onChange={(e) => ChangeRole(member.user.id, e.target.value)}>
+                                                    {Object.keys(roles).filter((id) => id != '0' && (!roles[id].permissions.can_manage_members || userRole?.permissions.is_owner)).map((id, index) =>
+                                                            <option value={id} key={id}>{roles[id].name}</option>
+                                                    )}
+                                                    </Form.Select>
+                                                :   <td>{roles[member.role_id].name}</td>
+                                                }
                                                 <td>0</td>
-                                                {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members &&
+                                                {(!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members || (userRole?.permissions.is_owner && user?.id != member.user.id)) &&
                                                     <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Исключить</button></td>
                                                 }
                                                 {user?.id == member.user.id && project.owner_id != user?.id && 

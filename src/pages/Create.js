@@ -96,7 +96,6 @@ export default function Create() {
 		str = str.toLowerCase()
 		let tr = ""
 		for (const ch of str) {
-			console.log(ch)
 			if (/[a-z]/.test(ch))
 				tr += ch
 			else if (letters[ch])
