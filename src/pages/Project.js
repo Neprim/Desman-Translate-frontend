@@ -9,6 +9,7 @@ import Col from "react-bootstrap/Col"
 import Container from "react-bootstrap/Container"
 import Form from "react-bootstrap/Form"
 import placeholder from "../images/placeholder.png"
+import Spinner from 'react-bootstrap/Spinner';
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -38,10 +39,11 @@ function Project(props) {
     const [invites, setInvites] = useState([]);
     const [userRole, setUserRole] = useState(null);
     const [inviteError, setInviteError] = useState(null)
-
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
 
     const fieldInviteUserChange = event => setFieldInviteUser(event.target.value);
+
+    const [fetchingInvite, setFetchingInvite] = useState(false)
 
     const link = useParams()
 
@@ -97,6 +99,7 @@ function Project(props) {
             return
         
         setInviteError(null)
+        setFetchingInvite(true)
         try {
             const user = await fetchUser(fieldInviteUser)
             await fetchSomeAPI(`/api/projects/${project.id}/invites`, "POST", { user_id: user.id })
@@ -112,6 +115,7 @@ function Project(props) {
             }
             console.log(err)
         }
+        setFetchingInvite(false)
     }
 
     async function KickMember(user_id) {
@@ -297,10 +301,10 @@ function Project(props) {
                                 id="inputSectionName"
                                 placeholder="Название главы"
                             />
-                            <Button className="me-2" type="submit" variant="primary" onClick={AddChapter}>
+                            <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); AddChapter()}}>
                                 Добавить
                             </Button>
-                            <Button type="cancel" variant="outline-secondary" onClick={(e) => e.target.closest("div").hidden = true}>
+                            <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); e.target.closest("form").hidden = true}}>
                                 Отмена
                             </Button>
                         </Form>
@@ -378,8 +382,15 @@ function Project(props) {
                                     <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Пригласить участника</h3>
                                     <form style={{ marginTop: '10px' }}>
                                         <input className="form-control" placeholder="Введите ник пользователя" aria-label="Invite" onChange={fieldInviteUserChange} />
+                                        <button className="btn btn-primary" style={{ marginTop: '10px', marginBottom: '5px' }} disabled={fetchingInvite} onClick={(e) => {e.preventDefault(); SendInvite()}}>
+                                            {fetchingInvite
+                                             ?  <Spinner animation="border" role="output" size="sm">
+                                                    <span className="visually-hidden">Загрузка...</span>
+                                                </Spinner>
+                                             :  <span>Пригласить</span>
+                                            }
+                                        </button>
                                     </form>
-                                    <button type="button" className="btn btn-primary" style={{ marginTop: '10px', marginBottom: '5px' }} onClick={SendInvite}>Пригласить</button>
                                     {inviteError && 
                                         <div id="inviteError" className="form-text">
                                             {inviteError}

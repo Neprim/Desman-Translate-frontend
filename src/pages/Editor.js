@@ -57,10 +57,6 @@ export default function Editor() {
 
 	const link = useParams()
 
-	function refreshPage() {
-		window.location.reload(false);
-	}
-
 	let navigate = useNavigate();
 	const routeChange = () => {
 		let path = '/projects/' + link["project_id"];
@@ -205,7 +201,7 @@ export default function Editor() {
 			<Container fluid style={{ marginTop: "110px" }}>
 				<Row>
 					<Col className="border-bottom" style={{ padding: "0px" }}>
-						{strings.map((str, i) =>
+						{strings.slice(0, 500).map((str, i) =>
 							<Container key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px" }} className="py-2 d-flex justify-content-between">
 								<Col md="auto" className="d-flex align-items-center" style={{ marginRight: "10px", marginTop: "20px" }}>
 									<Form className="d-flex align-items-center">
