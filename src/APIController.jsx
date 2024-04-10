@@ -1,11 +1,9 @@
-
 export async function fetchSomeAPI(link, method = "GET", body = {}) {
     let options = { method: method, }
     if (method == 'POST' || method == 'PATCH') {
         options.body = JSON.stringify(body)
         options.headers = { 'Content-Type': 'application/json; charset=UTF-8', }
     }
-
     const response = await fetch(link, options)
     if (!response.ok) {
         throw { status: response.status, errors: JSON.parse(await response.text() || "{}")?.errors }
@@ -14,7 +12,6 @@ export async function fetchSomeAPI(link, method = "GET", body = {}) {
         let data = await response.json()
         return data
     } catch (err) {
-
     }
 }
 
