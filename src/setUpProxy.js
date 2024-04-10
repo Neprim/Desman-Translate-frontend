@@ -1,5 +1,4 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
-console.log("what")
 module.exports = function(app) {
   app.use(
     '/api',
@@ -9,3 +8,5 @@ module.exports = function(app) {
     })
   );
 };
+
+
