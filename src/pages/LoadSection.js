@@ -7,6 +7,7 @@ import { useEffect, useState, useContext } from "react"
 // import { AuthContext } from "../AuthContext";
 import { fetchSection, fetchSomeAPI } from "../APIController";
 import { Link, useParams } from "react-router-dom";
+import Spinner from 'react-bootstrap/Spinner';
 
 export default function LoadSection() {
 
@@ -15,6 +16,10 @@ export default function LoadSection() {
     const [section, setSection] = useState(null)
     const [stringsError, setStringsError] = useState(null)
     const [strings, setStrings] = useState(null)
+
+    const [loadError, setLoadError] = useState(null)
+
+    const [fetchingStringsLoad, setFetchingStringsLoad] = useState(false)
 
     const link = useParams()
 
@@ -39,6 +44,7 @@ export default function LoadSection() {
 
     async function TransformStrings(e) {
         e.preventDefault()
+        setFetchingStringsLoad(true)
         try {
             setStringsError(null)
             const type = document.getElementById("settings-strings-type").value
@@ -71,15 +77,21 @@ export default function LoadSection() {
             console.log(err)
             setStringsError(err.errors[0])
         }
+        setFetchingStringsLoad(false)
     }
 
     async function LoadStrings() {
+        setFetchingStringsLoad(true)
         try {
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}/strings`, "POST", strings)
             window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
         } catch (err) {
+            if (err.status == 413) {
+                setLoadError("Слишком большой объём строк, в одной главе может быть не больше 10000 строк.")
+            }
             console.log(err)
         }
+        setFetchingStringsLoad(false)
     }
 
 
@@ -113,8 +125,13 @@ export default function LoadSection() {
                             </div>
                         }
                     </Form.Group>
-                    <Button className="mt-2" type="submit" variant="primary" onClick={(e) => TransformStrings(e)}>
-                        Преобразовать
+                    <Button className="mt-2" type="submit" variant="primary" disabled={fetchingStringsLoad} onClick={(e) => TransformStrings(e)}>
+                        {fetchingStringsLoad
+                            ?  <Spinner animation="border" role="output" size="sm">
+                                <span className="visually-hidden">Загрузка...</span>
+                            </Spinner>
+                            :  <span>Преобразовать</span>
+                        }
                     </Button>
 
                     </Form>
@@ -133,12 +150,24 @@ export default function LoadSection() {
                             </Container>
                         )}
                     </div>
-                    <Button className="mt-2 me-2" type="submit" variant="primary" onClick={LoadStrings}>
-                        Загрузить
+                    <Button className="mt-2 me-2" type="submit" variant="primary" disabled={fetchingStringsLoad} onClick={LoadStrings}>
+                        {fetchingStringsLoad
+                            ?  <Spinner animation="border" role="output" size="sm">
+                                <span className="visually-hidden">Загрузка...</span>
+                            </Spinner>
+                            :  <span>Загрузить</span>
+                        }
                     </Button>
-                    <Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setStrings(null)}}>
-                        Отмена
-                    </Button>
+                    {!fetchingStringsLoad &&
+                        <Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setStrings(null)}}>
+                            Отмена
+                        </Button>
+                    }
+                    {loadError && 
+                        <div id="inviteError" className="form-text">
+                            {loadError}
+                        </div>
+                    }
                     </>
                 }
             </Container>
