@@ -3,7 +3,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import placeholder from "../images/placeholder.png";
 import Col from "react-bootstrap/Col"
-import Row from "react-bootstrap/row"
+import Row from "react-bootstrap/Row"
 import Button from "react-bootstrap/Button"
 import Tab from "react-bootstrap/Tab"
 import Tabs from "react-bootstrap/Tabs"
@@ -41,6 +41,7 @@ export default function User() {
             console.log(user)
             let projects = (await fetchUser(user.id, true)).projects
             setProjects(projects)
+            console.log(projects)
             for (let project of projects) {
                 project.user_role = (await fetchSomeAPI(`/api/projects/${project.id}/members/${user.id}`)).role_name
             }

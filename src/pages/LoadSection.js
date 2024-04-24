@@ -81,8 +81,10 @@ export default function LoadSection() {
     }
 
     async function LoadStrings() {
+
         setFetchingStringsLoad(true)
         try {
+            console.log("aboba")
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}/strings`, "POST", strings)
             window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
         } catch (err) {
