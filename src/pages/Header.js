@@ -28,21 +28,11 @@ function Header() {
 			<header className="py-3 border-bottom">
 				<Container className="d-flex flex-wrap justify-content-center">
 					<a className="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto link-body-emphasis text-decoration-none">
-						<img
-							width={250}
-							height={100}
-							src={logo}
-							alt="logo"
-						/>
+						<img width={250} height={100} src={logo} alt="logo"/>
 					</a>
 					<div className="d-flex align-items-center">
 						<Form role="search">
-							<Form.Control
-								type="search"
-								className="form-control"
-								placeholder="Поиск..."
-								aria-label="Search"
-							/>
+							<Form.Control type="search" className="form-control" placeholder="Поиск..." aria-label="Search"/>
 						</Form>
 					</div>
 				</Container>
@@ -51,23 +41,13 @@ function Header() {
 				<Container className="d-flex flex-wrap">
 					<Nav className="me-auto">
 						<Nav.Item>
-							<Link
-								to="/"
-								className="nav-link link-body-emphasis px-2 active"
-								aria-current="page"
-							>
-								Главная
-							</Link>
+							<Link to="/" className="nav-link link-body-emphasis px-2 active" aria-current="page">Главная</Link>
 						</Nav.Item>
 						<Nav.Item>
-							<Link to="/projects" className="nav-link link-body-emphasis px-2">
-								Проекты
-							</Link>
+							<Link to="/projects" className="nav-link link-body-emphasis px-2">Проекты</Link>
 						</Nav.Item>
 						<Nav.Item>
-							<Link to="/search" className="nav-link link-body-emphasis px-2">
-								Поиск проектов
-							</Link>
+							<Link to="/search" className="nav-link link-body-emphasis px-2">Поиск проектов</Link>
 						</Nav.Item>
 					</Nav>
 					{user 
