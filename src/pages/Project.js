@@ -13,6 +13,7 @@ import Spinner from 'react-bootstrap/Spinner';
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
+import { openConnection } from "../WSController";
 import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites } from "../APIController";
 import { ProgressBar } from "react-bootstrap";
 import { FaRegTrashAlt } from "react-icons/fa"
@@ -151,6 +152,10 @@ function Project(props) {
             console.log(err)
         }
     }
+
+    useEffect(() => {
+        openConnection(`/projects/${link["project_id"]}`)
+    }, [])
 
     useEffect(() => {
         GetProject();

@@ -7,7 +7,8 @@ import placeholder from "../images/placeholder.png"
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
-import { fetchSomeAPI, fetchUser, fetchUserInvites } from "../APIController"
+import { fetchSomeAPI, fetchUser, fetchUserInvites, fetchProject } from "../APIController"
+import { openConnection } from "../WSController"
 
 function Projects() {
 
@@ -50,6 +51,15 @@ function Projects() {
             console.log(err)
         }
     }
+
+    useEffect(() => {
+        openConnection("/projects", async (mes) => {
+            if (mes.type == "new_invite") {
+                console.log(mes.data)
+                // toast(`Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}`);
+            }
+        })
+    }, [])
 
     useEffect(() => {
         GetProjects()
