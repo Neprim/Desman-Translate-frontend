@@ -53,9 +53,9 @@ function Projects() {
         }
     }
 
+    // тут нужные штуки для всплывающего окна.
     const [show, setShow] = useState(false);
 
-    // тут нужные штуки для всплывающего окна.
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);  
 
@@ -68,15 +68,15 @@ function Projects() {
                     <>                
                       <Modal show={show} onHide={handleClose}>
                         <Modal.Header closeButton>
-                          <Modal.Title>Modal heading</Modal.Title>
+                          <Modal.Title>Приглашение</Modal.Title>
                         </Modal.Header>
-                        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+                        <Modal.Body>Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}</Modal.Body>
                         <Modal.Footer>
                           <Button variant="secondary" onClick={handleClose}>
-                            Close
+                            Закрыть
                           </Button>
                           <Button variant="primary" onClick={handleClose}>
-                            Save Changes
+                            Принять приглашение
                           </Button>
                         </Modal.Footer>
                       </Modal>
