@@ -4,6 +4,7 @@ import Footer from "./Footer"
 import Tab from 'react-bootstrap/Tab'
 import Tabs from 'react-bootstrap/Tabs'
 import placeholder from "../images/placeholder.png"
+import Modal from 'react-bootstrap/Modal'
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -52,11 +53,35 @@ function Projects() {
         }
     }
 
+    const [show, setShow] = useState(false);
+
+    // тут нужные штуки для всплывающего окна.
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);  
+
     useEffect(() => {
         openConnection("/projects", async (mes) => {
             if (mes.type == "new_invite") {
                 console.log(mes.data)
                 // toast(`Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}`);
+                return (
+                    <>                
+                      <Modal show={show} onHide={handleClose}>
+                        <Modal.Header closeButton>
+                          <Modal.Title>Modal heading</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={handleClose}>
+                            Close
+                          </Button>
+                          <Button variant="primary" onClick={handleClose}>
+                            Save Changes
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                    </>
+                  );
             }
         })
     }, [])
