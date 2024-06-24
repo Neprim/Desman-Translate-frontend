@@ -57,8 +57,9 @@ export default function Editor() {
 	const translationChange = event => setInputTranslation(event.target.value);
 
 	const [project, setProject] = useState({});
-	const [members, setMembers] = useState({});
-	const [roles, setRoles] = useState({});
+	const [members, setMembers] = useState([]);
+	const [roles, setRoles] = useState([]);
+	const [userRole, setUserRole] = useState(null);
 
 	useEffect(() => {
 		console.log(translations)
@@ -95,9 +96,29 @@ export default function Editor() {
         }
     }
 
+	async function GetUserRole() {
+        if (!user)
+            return
+        if (!members)
+            return
+
+		console.log(members)
+        const member = members.find(member => member.user.id == user.id)
+        if (!member) {
+            setUserRole(null)
+            return
+        }
+
+        setUserRole(roles[member.role_id])
+    }
+
 	useEffect(() => {
         GetProject();
     }, []);
+
+	useEffect(() => {
+        GetUserRole();
+    }, [project, user]);
 
 	async function GetStrings() {
 		try {
@@ -293,31 +314,33 @@ export default function Editor() {
 
 
 					</Col>
-					<Col className="border-start border-end border-bottom" md={4}>
-						<Button variant="outline-success" style={{ margin: "10px 0px 10px 0px" }} onClick={() => AddTranslation()}><FaPlus style={{ marginBottom: "3px", marginRight: "3px" }} />  Добавить перевод </Button>
-						<Form.Control className="d-flex align-items-start"
-							onChange={translationChange}
-							as="textarea"
-							placeholder="Ваш вариант перевода..."
-							style={{ marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
-						>
-						</Form.Control>
+					{userRole?.permissions?.can_translate &&
+						<Col className="border-start border-end border-bottom" md={4}>
+							<Button variant="outline-success" style={{ margin: "10px 0px 10px 0px" }} onClick={() => AddTranslation()}><FaPlus style={{ marginBottom: "3px", marginRight: "3px" }} />  Добавить перевод </Button>
+							<Form.Control className="d-flex align-items-start"
+								onChange={translationChange}
+								as="textarea"
+								placeholder="Ваш вариант перевода..."
+								style={{ marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+							>
+							</Form.Control>
 
-						<h3>Варианты перевода</h3>
-						{curString?.translations?.map((tr, i) =>
-						<>
-							<FloatingLabel controlId="translationVariant" label={members.find((el) => el.user.id == tr.author_id)?.user?.username || "noname"} key={tr.id}>
-								<Form.Control
-									as="textarea"
-									readOnly
-									style={{ marginTop: "10px", minHeight: "100px", wordWrap: "break-word" }}
-									value={tr.text}
-								>
-								</Form.Control>
-							</FloatingLabel>
-						</>
-						)}
-					</Col>
+							<h3>Варианты перевода</h3>
+							{curString?.translations?.map((tr, i) =>
+							<>
+								<FloatingLabel controlId="translationVariant" label={members.find((el) => el.user.id == tr.author_id)?.user?.username || "noname"} key={tr.id}>
+									<Form.Control
+										as="textarea"
+										readOnly
+										style={{ marginTop: "10px", minHeight: "100px", wordWrap: "break-word" }}
+										value={tr.text}
+									>
+									</Form.Control>
+								</FloatingLabel>
+							</>
+							)}
+						</Col>
+					}
 				</Row>
 			</Container>
 		</>
