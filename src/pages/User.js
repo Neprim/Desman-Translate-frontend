@@ -39,7 +39,7 @@ export default function User() {
         try {
             console.log("user:")
             console.log(user)
-            let projects = (await fetchUser(user.id, true)).projects
+            let projects = (await fetchUser(user.id, true)).projects || []
             setProjects(projects)
             console.log(projects)
             for (let project of projects) {

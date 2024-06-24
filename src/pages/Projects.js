@@ -23,7 +23,7 @@ function Projects() {
             return
 
         try {
-            let projects = (await fetchUser(user.id, true)).projects
+            let projects = (await fetchUser(user.id, true)).projects || []
             setProjects(projects)
             for (let project of projects) {
                 project.user_role = (await fetchSomeAPI(`/api/projects/${project.id}/members/${user.id}`)).role_name
@@ -64,24 +64,22 @@ function Projects() {
             if (mes.type == "new_invite") {
                 console.log(mes.data)
                 // toast(`Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}`);
-                return (
-                    <>                
-                      <Modal show={show} onHide={handleClose}>
-                        <Modal.Header closeButton>
-                          <Modal.Title>Приглашение</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}</Modal.Body>
-                        <Modal.Footer>
-                          <Button variant="secondary" onClick={handleClose}>
-                            Закрыть
-                          </Button>
-                          <Button variant="primary" onClick={handleClose}>
-                            Принять приглашение
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    </>
-                  );
+                // return (
+                //       <Modal show={show} onHide={handleClose}>
+                //         <Modal.Header closeButton>
+                //           <Modal.Title>Приглашение</Modal.Title>
+                //         </Modal.Header>
+                //         <Modal.Body>Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}</Modal.Body>
+                //         <Modal.Footer>
+                //           <Button variant="secondary" onClick={handleClose}>
+                //             Закрыть
+                //           </Button>
+                //           <Button variant="primary" onClick={handleClose}>
+                //             Принять приглашение
+                //           </Button>
+                //         </Modal.Footer>
+                //       </Modal>
+                //   );
             }
         })
     }, [])

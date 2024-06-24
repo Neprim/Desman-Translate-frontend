@@ -14,7 +14,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { openConnection } from "../WSController";
-import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites } from "../APIController";
+import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites, fetchStrings } from "../APIController";
 import { ProgressBar } from "react-bootstrap";
 import { FaRegTrashAlt } from "react-icons/fa"
 
@@ -221,6 +221,80 @@ function Project(props) {
             console.log(err)
         }
     }
+
+    async function DownloadOriginal(index) {
+        const section = sections[index]
+        let strings = await fetchStrings(project.id, section.id)
+        if (strings.length == 0) {
+            alert("А строк то нема")
+            return
+        }
+
+        let filename = section.name
+
+        let text = ''
+        if (section.type == 'text') {
+            for (const str of strings) {
+                text += str.text + '\n'
+            }
+            filename += '.txt'
+        } else if (section.type == 'json') {
+            let strs = {}
+            for (const str of strings) {
+                strs[str.key] = str.text
+            }
+            text = JSON.stringify(strs, null, 4)
+            filename += '.json'
+        }
+        console.log(text)
+
+        DownloadFile(text, filename)
+    }
+
+    async function DownloadTranslation(index) {
+        const section = sections[index]
+        let strings = await fetchStrings(project.id, section.id, true)
+        if (strings.length == 0) {
+            alert("А строк то нема")
+            return
+        }
+
+        let filename = section.name
+
+        let text = ''
+        if (section.type == 'text') {
+            for (const str of strings) {
+                text += (str.translations?.[0]?.text || str.text) + '\n'
+            }
+            filename += '.txt'
+        } else if (section.type == 'json') {
+            let strs = {}
+            for (const str of strings) {
+                strs[str.key] = (str.translations?.[0]?.text || str.text)
+            }
+            text = JSON.stringify(strs, null, 4)
+            filename += '.json'
+        }
+
+        DownloadFile(text, filename)
+    }
+
+    async function DownloadFile(text, filename) {
+        var element = document.createElement('a')
+        element.setAttribute('href',
+            'data:text/plain;charset=utf-8, '
+            + encodeURIComponent(text))
+        element.setAttribute('download', filename)
+        document.body.appendChild(element)
+        element.click()
+
+        document.body.removeChild(element)
+    }
+
+    async function DeleteProject() {
+        await fetchSomeAPI(`/api/projects/${project.id}`, "DELETE")
+        window.location.href = '/'
+    }
     
     return (
         <>
@@ -284,14 +358,23 @@ function Project(props) {
                                             </Link>
                                         </td>
                                         {section.statistics.strings_amount > 0
-                                            ?   <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
-                                            :   <td>
-                                                    <Link to={`/projects/${project.id}/sections/${section.id}/load`} className="link-primary">
-                                                        Загрузить строки
-                                                    </Link>
-                                                </td>
+                                            ?   <>
+                                                    <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
+                                                    <td>
+                                                        <Link onClick={(e) => DownloadOriginal(index)}>Оригинал</Link> 
+                                                        / 
+                                                        <Link onClick={(e) => DownloadTranslation(index)}>Перевод</Link>
+                                                    </td>
+                                                </>
+                                            :   <>   
+                                                    <td>
+                                                        <Link to={`/projects/${project.id}/sections/${section.id}/load`} className="link-primary">
+                                                            Загрузить строки
+                                                        </Link>
+                                                    </td>
+                                                    <td></td>
+                                                </>
                                         }
-                                        <td>Оригинал / Перевод</td>
                                         {userRole?.permissions?.can_manage_sections && 
                                             <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
                                         }
@@ -481,7 +564,10 @@ function Project(props) {
                                             что временно не будете над ним работать, или как закрытый, если работа завершена и не будет продолжаться.
                                         </div> */}
                                     </form>
-                                    <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>Применить</button>
+                                    <Button variant="primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>Применить</Button>
+                                    { userRole?.permissions?.is_owner && 
+                                    <div><Button variant="danger" type="submit" style={{ marginTop: '20px' }} onClick={DeleteProject}>Удалить проект</Button></div>
+                                    }
                                 </div>
                             </div>
                         </Tab>

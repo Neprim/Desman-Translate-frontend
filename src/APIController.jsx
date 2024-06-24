@@ -47,6 +47,10 @@ export async function fetchSection(project_id, section_id, generate_statistics =
     return await fetchSomeAPI(`/api/projects/${project_id}/sections/${section_id}?generate_statistics=${generate_statistics}`)
 }
 
+export async function fetchStrings(project_id, section_id, fetch_translations = false) {
+    return await fetchSomeAPI(`/api/projects/${project_id}/sections/${section_id}/strings?fetch_translations=${fetch_translations}`)
+}
+
 export async function fetchUser(user_id, fetch_projects = false) {
     return await fetchSomeAPI(`/api/users/${user_id}?fetch_projects=${fetch_projects}`)
 }

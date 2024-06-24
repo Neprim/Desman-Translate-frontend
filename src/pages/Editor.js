@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import { FaCog, FaFilter, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaEllipsisV, FaUndo, FaRedo, FaBook } from "react-icons/fa"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
+import Pagination from 'react-bootstrap/Pagination';
 
 
 import React, { setState, useEffect, useState, formData, useContext } from "react"
@@ -34,14 +35,22 @@ function LinkWithTooltip({ id, children, href, tooltip, where }) {
 
 export default function Editor() {
 
+	const page_size = 50
+	const max_page_counter = 11
+
 	const { user } = useContext(AuthContext);
 
 	const [strings, setStrings] = useState([]);
+	const [pageStrings, setPageStrings] = useState([]);
 
 	const [curString, setCurString] = useState(null)
 	const [curStringIndex, setCurStringIndex] = useState(-1)
 
 	const [translations, setCurTranslations] = useState([]);
+
+	const [curPage, setCurPage] = useState(1)
+	const [maxPage, setMaxPage] = useState(1)
+	const [middlePage, setMiddlePage] = useState(1)
 
 	const [inputTranslation, setInputTranslation] = useState("");
 	
@@ -93,12 +102,12 @@ export default function Editor() {
 	async function GetStrings() {
 		try {
 			let strings = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings?fetch_translations=1`)
-
-			for (let i = 0; i < strings.length; i++) {
-				strings[i].translations.sort((a, b) => (new Date(b.updated_at) - new Date(a.updated_at)))
-			}
+			
+			setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
+			let page_strings = strings.slice(0, page_size)
 
 			setStrings(strings)
+			setPageStrings(page_strings)
 		} catch (err) {
 			console.log(err)
 		}
@@ -123,7 +132,13 @@ export default function Editor() {
 		}
 	}
 
-
+	async function ChangePage(page) {
+		setCurPage(page)
+		setMiddlePage(page)
+		
+		let page_strings = strings.slice((page - 1) * page_size, page * page_size)
+		setPageStrings(page_strings)
+	}
 
 	return (
 		<>
@@ -175,7 +190,51 @@ export default function Editor() {
 							</Form.Group>
 						</Form>
 					</Col>
-					<Col></Col>
+					<Col className="py-1 d-inline-flex align-items-center">
+						<Pagination>
+							{ maxPage > max_page_counter
+							? 	<>
+									<Pagination.Item onClick={(e) => {ChangePage(1)}} active={curPage == 1}>{1}</Pagination.Item>
+									{(() => {
+										let arr = []
+										let left_page = Math.max(2, middlePage - (max_page_counter - 5) / 2)
+										let right_page = Math.min(maxPage - 1, middlePage + (max_page_counter - 5) / 2)
+
+																				
+										if (right_page - left_page < max_page_counter - 4) {
+											if (left_page - 1 < maxPage - right_page) {
+												right_page = left_page + (max_page_counter - 4)
+											} else {
+												left_page = right_page - (max_page_counter - 4)
+											}
+										}
+										console.log(left_page)
+										console.log(middlePage)
+										console.log(right_page)
+
+										if (left_page > 2) 
+											arr.push(<Pagination.Prev onClick={(e) => {setMiddlePage(Math.max(1, middlePage - (max_page_counter + 1) / 2))}}/>)
+
+										for (let i = left_page; i <= right_page; i++) {
+											arr.push(<Pagination.Item onClick={(e) => {ChangePage(i)}} active={curPage == i}>{i}</Pagination.Item>)
+										}
+										
+										if (right_page < maxPage - 1) 
+											arr.push(<Pagination.Next onClick={(e) => {setMiddlePage(Math.min(maxPage, middlePage + (max_page_counter + 1) / 2))}} />)
+										return arr
+									})()}
+									<Pagination.Item onClick={(e) => {ChangePage(maxPage)}} active={curPage == maxPage}>{maxPage}</Pagination.Item>
+								</>
+							: 	<>
+									{
+										Array.from(Array(maxPage).keys()).map((el, ind) =>
+											<Pagination.Item onClick={(e) => {ChangePage(ind + 1)}} active={curPage == ind + 1}>{ind + 1}</Pagination.Item>
+										)
+									}
+								</>
+							}
+						</Pagination>
+					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
 						<LinkWithTooltip tooltip="Одобрить перевод" href="#" id="tooltip-settings" where="bottom">
 							<Button disabled variant="outline-secondary"><FaCheck style={{ marginBottom: "3px" }} /></Button>
@@ -198,11 +257,11 @@ export default function Editor() {
 				</Container>
 			</header>
 
-			<Container fluid style={{ marginTop: "110px" }}>
+			<Container fluid style={{ marginTop: "130px" }}>
 				<Row>
 					<Col className="border-bottom" style={{ padding: "0px" }}>
-						{strings.slice(0, 500).map((str, i) =>
-							<Container key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px" }} className="py-2 d-flex justify-content-between">
+						{pageStrings.slice(0, 500).map((str, i) =>
+							<Container onClick={ async (e) => SelectString(i) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px" }} className="py-2 d-flex justify-content-between">
 								<Col md="auto" className="d-flex align-items-center" style={{ marginRight: "10px", marginTop: "20px" }}>
 									<Form className="d-flex align-items-center">
 										<Form.Group className="mb-3" controlId="formBasicCheckbox">
@@ -210,7 +269,7 @@ export default function Editor() {
 										</Form.Group>
 									</Form>
 								</Col>
-								<Col style={{ marginRight: "10px" }} onClick={ async (e) => SelectString(i) }>
+								<Col style={{ marginRight: "10px" }}>
 									<Form.Control className="d-flex align-items-start"
 										readOnly
 										as="textarea"

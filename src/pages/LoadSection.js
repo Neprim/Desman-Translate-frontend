@@ -14,6 +14,7 @@ export default function LoadSection() {
     // const { user } = useContext(AuthContext);
 
     const [section, setSection] = useState(null)
+    const [sectionType, setSectionType] = useState('text')
     const [stringsError, setStringsError] = useState(null)
     const [strings, setStrings] = useState(null)
 
@@ -70,8 +71,9 @@ export default function LoadSection() {
                 }
             }
             if (!strings.length)
-            throw {errors: ["А строки то где?"]}
+                throw {errors: ["А строки то где?"]}
 
+            setSectionType(type)
             setStrings(strings)
         } catch (err) {
             console.log(err)
@@ -84,8 +86,8 @@ export default function LoadSection() {
 
         setFetchingStringsLoad(true)
         try {
-            console.log("aboba")
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}/strings`, "POST", strings)
+            await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}`, "PATCH", {type: sectionType})
             window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
         } catch (err) {
             if (err.status == 413) {

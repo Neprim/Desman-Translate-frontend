@@ -27,7 +27,7 @@ function Home() {
             return
 
         try {
-            let projects = (await fetchUser(user.id, true)).projects
+            let projects = (await fetchUser(user.id, true)).projects || []
             projects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             setRecentProjects(projects)
         } catch (err) {
@@ -122,9 +122,9 @@ function Home() {
                         <p>
                             Когда вы загружаете текст для работы, он разбивается на небольшие отрывки: строки, абзацы, отдельные субтитры — вы можете выбрать способ самостоятельно. Каждый пользователь может предложить свой вариант перевода для отрывка, а лучший вариант определяется голосованием.
                         </p>
-                        <p>
+                        {/* <p>
                             Присоединяйтесь к командам переводчиков, создавайте собственные проекты, приглашайте других пользователей присоединиться, переводите книги, программы и субтитры, оттачивайте свои навыки и создавайте лучший перевод любого текста.
-                        </p>
+                        </p> */}
                         <p>Have a lot of fun...</p>
                         {user && 
                             <Button variant="primary"
