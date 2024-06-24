@@ -37,7 +37,7 @@ function Projects() {
 
     async function GetInvites() {
         try {
-            let invites = await fetchUserInvites()
+            let invites = await fetchUserInvites() || []
             setInvites(invites)
         } catch (err) {
             console.log(err)
