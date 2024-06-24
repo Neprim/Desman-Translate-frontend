@@ -8,14 +8,14 @@ function Footer() {
             <Container className="d-flex flex-wrap">
                 <Nav className="me-auto">
                     <Nav.Link className="px-2"
-                    href="mailto:zimenkova@petrsu.ru">
+                    href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
                         Поддержка
                     </Nav.Link>
                 </Nav>
                 <Nav className="align-items-center">
                     <Nav.Link className="px-2"
-                    href="https://cs.petrsu.ru">
-                        © ПетрГУ 2023
+                    href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                        © Мяу
                     </Nav.Link>
                 </Nav>
             </Container>
