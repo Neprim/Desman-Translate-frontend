@@ -456,8 +456,15 @@ function Project(props) {
                                             // Соня, сделай список приглашений красиво
                                             <tr key={invite.user.id}>
                                                 <th scope="row">{index + 1}</th>
-                                                <td>{invite.user.username}</td>
-                                                <td>{invite.inviter.username}</td>
+                                                <td>
+                                                <Link to={"/users/" + invite.user.id} reloadDocument className="nav-link link-primary px-2">
+                                                    {invite.user.username}
+                                                </Link>
+                                                </td>
+                                                <td>
+                                                <Link to={"/users/" + invite.inviter.id} reloadDocument className="nav-link link-primary px-2">
+                                                    {invite.inviter.username}
+                                                </Link></td>
                                                 {userRole?.permissions?.can_manage_members &&
                                                     <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>Отменить</button></td>
                                                 }
