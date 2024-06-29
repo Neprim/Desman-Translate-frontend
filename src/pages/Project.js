@@ -183,6 +183,7 @@ function Project(props) {
                 description:    document.getElementById("settings-description").value,
                 source_lang:    document.getElementById("settings-source-lang").value,
                 target_lang:    document.getElementById("settings-target-lang").value,
+                visibility:     document.getElementById("settings-access").value,
             })
             GetProject()
         } catch (err) {
@@ -261,7 +262,7 @@ function Project(props) {
 
         let filename = section.name
 
-        let text = ''
+        let text = ""
         if (section.type == 'text') {
             for (const str of strings) {
                 text += (str.translations?.[0]?.text || str.text) + '\n'
@@ -282,7 +283,7 @@ function Project(props) {
     async function DownloadFile(text, filename) {
         var element = document.createElement('a')
         element.setAttribute('href',
-            'data:text/plain;charset=utf-8, '
+            'data:text/plain;charset=utf-8,'
             + encodeURIComponent(text))
         element.setAttribute('download', filename)
         document.body.appendChild(element)
@@ -318,7 +319,7 @@ function Project(props) {
                                     <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>Информация</h3>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {kostyl_lang_tr[project?.source_lang]}</div>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {kostyl_lang_tr[project?.target_lang]}</div>
-                                    <div className="py-2 border-bottom"><b>Дата создания:</b> {project?.created_at?.toLocaleString()}</div>
+                                    <div className="py-2 border-bottom"><b>Дата создания:</b> {new Date(project?.created_at).toLocaleDateString()}</div>
                                     <div className="py-2 border-bottom"><b>Статус:</b> {kostyl_status_tr[project?.status]}</div>
                                     <div className="py-2 border-bottom"><b>Прогресс: {project.statistics.completeness}%</b>
                                         <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
@@ -415,7 +416,10 @@ function Project(props) {
                                         {members.map((member, index) =>
                                             <tr key={member.user.id}>
                                                 <th scope="row">{index + 1}</th>
-                                                <td>{member.user.username}</td>
+                                                <td><Link to={"/users/" + member.user.id} reloadDocument className="nav-link link-primary px-2">
+                                                        {member.user.username}
+                                                    </Link>
+                                                </td>
                                                 {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members || (userRole?.permissions.is_owner && user?.id != member.user.id)
                                                 ?   <Form.Select defaultValue={member.role_id} onChange={(e) => ChangeRole(member.user.id, e.target.value)}>
                                                     {Object.keys(roles).filter((id) => id != '0' && (!roles[id].permissions.can_manage_members || userRole?.permissions.is_owner)).map((id, index) =>
@@ -526,16 +530,11 @@ function Project(props) {
                                             <option value="de">немецкий</option>
                                             <option value="fr">французский</option>
                                         </select>
-                                        { // Надо сделать нормальные рабочие кнопочки выбора
-                                        /* <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>Видимость проекта</label>
-                                        <div className="form-check">
-                                            <input type="radio" name="radios" className="form-check-input" id="settings-access-private" value="private" defaultChecked />
-                                            <label className="form-check-label" htmlFor="settings-access-private">Приватный проект</label>
-                                        </div>
-                                        <div className="form-check">
-                                            <input type="radio" name="radios" className="form-check-input" id="settings-access-public" value="public" />
-                                            <label className="form-check-label" htmlFor="settings-access-public">Публичный проект</label>
-                                        </div> */}
+                                        <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>Видимость проекта</label>
+                                        <select className="form-select" defaultValue={project.visibility} id="settings-access">
+                                            <option value="private">Приватный проект</option>
+                                            <option value="public">Публичный проект</option>
+                                        </select>
                                         {/* <label htmlFor="settings-category" className="form-label" style={{ marginTop: '10px' }}>Категория</label>
                                         <select className="form-select" defaultValue="none" id="settings-category" aria-describedby="category-desc">
                                             <option value="none">Не выбрано</option>
