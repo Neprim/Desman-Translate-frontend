@@ -12,6 +12,8 @@ import Pagination from 'react-bootstrap/Pagination';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Stack from 'react-bootstrap/Stack';
+import CloseButton from 'react-bootstrap/CloseButton';
 
 
 import React, { setState, useEffect, useState, formData, useContext } from "react"
@@ -57,6 +59,8 @@ export default function Editor() {
 
 	const [inputTranslation, setInputTranslation] = useState("");
 	const [translationEdit, setTranslationEdit] = useState(null)
+
+	const [filters, setFilters] = useState([])
 	
 	const translationChange = event => setInputTranslation(event.target.value);
 
@@ -129,17 +133,16 @@ export default function Editor() {
 
 	async function GetStrings() {
 		try {
-			let strings = await fetchStrings(link["project_id"], link["section_id"], true, true)
+			let strs = await fetchStrings(link["project_id"], link["section_id"], true, true)
 			
 			for (let i = 0; i < strings.length; i++) {
-				strings[i].index = i
+				strs[i].index = i
 			}
-			console.log(strings)
+			console.log(strs)
 
-			setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
+			setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
 
-			setStrings(strings)
-			setDrawStrings(strings)
+			setStrings(strs)
 		} catch (err) {
 			console.log(err)
 		}
@@ -154,9 +157,68 @@ export default function Editor() {
 		setInputTranslation("")
 	}, [curStringIndex])
 
+	useEffect(() => {
+		UpdateDrawStrings()
+	}, [filters, strings])
+
+	useEffect(() => {
+		setMaxPage(Math.max(1, Math.ceil(drawStrings.length / page_size)))
+		ChangePage(1)
+	}, [drawStrings])
+
+	async function UpdateDrawStrings() {
+		setDrawStrings(FilterStrings())
+	}
+
 	async function UpdateStrings() {
 		setStrings(strings)
-		setDrawStrings(strings)
+	}
+
+	function FilterStrings() {
+		let draws = strings.filter((str) => {
+			for (let filter of filters) {
+				if (filter.key == "orig") {
+					if (!str.text.includes(filter.value))
+						return false
+				} else 
+				if (filter.key == "trans") {
+					let flag = false
+					for (let tr of str.translations) {
+						if (tr.text.includes(filter.value)) {
+							flag = true
+							break
+						}
+					}
+					if (!flag)
+						return false
+				} else
+				if (filter.key == "status") {
+					if (filter.value == "non_tr") {
+						if (str.translations.length > 0)
+							return false
+					} else
+					if (filter.value == "tr") {
+						if (str.translations.length == 0)
+							return false
+					} else 
+					if (filter.value == "non_app") {
+						if (str.translations?.[0]?.is_approved)
+							return false
+					} else
+					if (filter.value == "app") {
+						if (!str.translations?.[0]?.is_approved)
+							return false
+					}
+				}
+			}
+
+			return true
+		})
+		console.log("draws")
+		console.log(strings)
+		console.log(draws)
+
+		return draws
 	}
 
 	async function UpdateTranslation() {
@@ -227,9 +289,46 @@ export default function Editor() {
 		} 
 	}
 
+	async function AddFilter(key, value) {
+		if (value == "" || filters.find((filter) => filter.key == key && filter.value == value))
+			return
+
+		const ResolveName = (key, value) => {
+			if (key == "orig")
+				return "Оригинал содержит: " + value
+			else if (key == "trans")
+				return "Перевод содержит: " + value
+			else if (key == "status") {
+				switch (value) {
+					case "non_tr":
+						return "Непереведённое"
+					case "tr":
+						return "Переведённое"
+					case "non_app":
+						return "Не одобренное"
+					case "app":
+						return "Одобренное"
+				}
+			}
+		}
+
+		setFilters(filters.concat({
+			key: key,
+			value: value,
+			name: ResolveName(key, value)
+		}))
+
+		console.log(filters)
+	}
+
+	async function RemoveFilter(key, value) {
+		let index = filters.findIndex((filter) => filter.key == key && filter.value == value)
+		setFilters(filters.toSpliced(index, 1))
+	}
+
 	return (
 		<>
-			<header className="fixed-top" expand="lg">
+			{/* <header className="fixed-top" expand="lg"> */}
 				<Container fluid className="bg-white py-1 border-bottom d-flex flex-wrap justify-content-between">
 					<div className="d-inline-flex align-items-center">
 						<LinkWithTooltip tooltip="Вернуться к проекту" href="#" id="tooltip-back" where="bottom">
@@ -252,7 +351,20 @@ export default function Editor() {
 				>
 					<Col className="py-1 d-inline-flex align-items-center">
 						<LinkWithTooltip tooltip="Фильтр" href="#" id="tooltip-settings" where="bottom">
-							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaFilter style={{ marginBottom: "3px" }} /></Button>
+							<Dropdown>
+								<Dropdown.Toggle as={FilterButton}></Dropdown.Toggle>
+								<Dropdown.Menu as={FilterForm}>
+									{/* Да пошло оно всё, сделаю костылём*/}
+									<Dropdown.Item as="button">
+										<Button onClick={(e) => {
+											AddFilter(
+												document.getElementById("select-filter-key").value,
+												document.getElementById("select-filter-value").value	
+											)
+										}}>Добавить</Button>
+									</Dropdown.Item>
+								</Dropdown.Menu>
+							</Dropdown>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Режим редактирования" href="#" id="tooltip-settings" where="bottom">
 							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaPencilAlt style={{ marginBottom: "3px" }} /></Button>
@@ -260,13 +372,6 @@ export default function Editor() {
 						<LinkWithTooltip tooltip="Словарь" href="#" id="tooltip-settings" where="bottom">
 							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaBook style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
-{/* 
-
-						<Form style={{ marginLeft: "10px" }}>
-							<Form.Group controlId="pieceSearch">
-								<Form.Control type="search" placeholder="Поиск..." />
-							</Form.Group>
-						</Form> */}
 					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
 						<Pagination>
@@ -310,28 +415,22 @@ export default function Editor() {
 							}
 						</Pagination>
 					</Col>
-					{/* <Col className="py-1 d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Одобрить перевод" href="#" id="tooltip-settings" where="bottom">
-							<Button disabled variant="outline-secondary"><FaCheck style={{ marginBottom: "3px" }} /></Button>
-						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Скрыть отрывок" href="#" id="tooltip-settings" where="bottom">
-							<Button disabled variant="outline-secondary" style={{ marginLeft: "10px" }}><FaEyeSlash style={{ marginBottom: "3px" }} /></Button>
-						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Удалить отрывок" href="#" id="tooltip-settings" where="bottom">
-							<Button disabled variant="outline-secondary" style={{ marginLeft: "10px" }}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button>
-						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Прочее" href="#" id="tooltip-settings" where="bottom">
-							<Button disabled variant="outline-secondary" style={{ marginLeft: "10px" }}><FaEllipsisV style={{ marginBottom: "3px" }} /></Button>
-						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Комментарии" href="#" id="tooltip-settings" where="bottom">
-							<Button disabled variant="outline-secondary" style={{ marginLeft: "10px" }}><BsChatLeftText style={{ marginBottom: "3px" }} /></Button>
-						</LinkWithTooltip>
-					</Col> */}
-
 				</Container>
-			</header>
-
-			<Container fluid style={{ marginTop: "130px" }}>
+			{/* </header> */}
+			<Container>
+				{/* <FilterForm/> */}
+			</Container>
+			<Stack direction="horizontal">
+				{filters.map((filter, i) =>
+					<>
+					<div style={{padding: "10px", border: "1px solid"}}>
+						{filter.name}
+						<CloseButton onClick={(e) => {RemoveFilter(filter.key, filter.value)}}></CloseButton>
+					</div>
+					</>
+				)}
+			</Stack>
+			<Container fluid>
 				<Row>
 					<Col className="border-bottom" style={{ padding: "0px" }}>
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
@@ -453,3 +552,43 @@ export default function Editor() {
 		</>
 	);
 }
+
+
+
+const FilterButton = React.forwardRef(({ children, onClick }, ref) => (
+	<Button ref={ref} variant="outline-primary" style={{ marginLeft: "10px" }} onClick={(e) => {
+		e.preventDefault();
+		onClick(e);
+	}}><FaFilter style={{ marginBottom: "3px" }} /></Button>
+));
+
+const FilterForm = React.forwardRef(
+	({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
+	const [key, setKey] = useState("orig")
+	const [value, setValue] = useState("")
+
+	return <>
+	<div id="filter" ref={ref} className={className} style={{backgroundColor: "white", position: "absolute", padding: "15px 15px 15px", width: "250px"}}
+	onClose={(e) => {
+		console.log("hmm")
+	}}>
+		<Form.Select defaultValue="orig" id="select-filter-key" onChange={(e) => {setKey(e.target.value)}} >
+			<option value="orig">Оригинал содержит</option>
+			<option value="trans">Перевод содержит</option>
+			<option value="status">Статус</option>
+		</Form.Select>
+		{(key == "orig" || key == "trans") &&
+			<Form.Control id="select-filter-value" onChange={(e) => {setValue(e.target.value)}}></Form.Control>
+		}
+		{key == "status" &&
+			<Form.Select defaultValue="non_tr" id="select-filter-value" onChange={(e) => {setValue(e.target.value)}}>
+				<option value="non_tr">Непереведенное</option>
+				<option value="tr">Переведенное</option>
+				<option value="non_app">Не одобрено</option>
+				<option value="app">Одобрено</option>
+			</Form.Select>
+		}
+		{children}
+	</div>
+	</>
+})
