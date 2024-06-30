@@ -355,13 +355,13 @@ export default function Editor() {
 								<Dropdown.Toggle as={FilterButton}></Dropdown.Toggle>
 								<Dropdown.Menu as={FilterForm}>
 									{/* Да пошло оно всё, сделаю костылём*/}
-									<Dropdown.Item as="button">
-										<Button onClick={(e) => {
+									<Dropdown.Item as={Button} onClick={(e) => {
 											AddFilter(
 												document.getElementById("select-filter-key").value,
 												document.getElementById("select-filter-value").value	
 											)
-										}}>Добавить</Button>
+										}}>
+										Добавить
 									</Dropdown.Item>
 								</Dropdown.Menu>
 							</Dropdown>
