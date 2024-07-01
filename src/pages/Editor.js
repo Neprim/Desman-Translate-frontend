@@ -36,7 +36,7 @@ function LinkWithTooltip({ id, children, href, tooltip, where }) {
 
 
 
-
+let strings = []
 
 export default function Editor() {
 
@@ -45,7 +45,6 @@ export default function Editor() {
 
 	const { user } = useContext(AuthContext);
 
-	const [strings, setStrings] = useState([]);
 	const [drawStrings, setDrawStrings] = useState([]);
 
 	const [curString, setCurString] = useState(null)
@@ -84,6 +83,8 @@ export default function Editor() {
 
 
 	async function SelectString(str_index) {
+		console.log("wtf")
+		console.log(strings)
 		setCurString(strings[str_index])
 		setCurStringIndex(str_index)
 	}
@@ -113,7 +114,6 @@ export default function Editor() {
         if (!members)
             return
 
-		console.log(members)
         const member = members.find(member => member.user.id == user?.id)
         if (!member) {
             setUserRole(null)
@@ -142,7 +142,10 @@ export default function Editor() {
 
 			setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
 
-			setStrings(strs)
+			strings = strs
+			console.log(strings)
+			
+			UpdateDrawStrings()
 		} catch (err) {
 			console.log(err)
 		}
@@ -159,19 +162,15 @@ export default function Editor() {
 
 	useEffect(() => {
 		UpdateDrawStrings()
-	}, [filters, strings])
+	}, [filters])
 
 	useEffect(() => {
 		setMaxPage(Math.max(1, Math.ceil(drawStrings.length / page_size)))
 		ChangePage(1)
-	}, [drawStrings])
+	}, [filters])
 
 	async function UpdateDrawStrings() {
 		setDrawStrings(FilterStrings())
-	}
-
-	async function UpdateStrings() {
-		setStrings(strings)
 	}
 
 	function FilterStrings() {
@@ -222,13 +221,10 @@ export default function Editor() {
 	}
 
 	async function UpdateTranslation() {
-		// console.log(translation)
-		// console.log(curString)
-		// curString.translations[curString.translations.findIndex((el) => el.id == translation.id)] = translation
 		const str = await fetchString(link["project_id"], link["section_id"], curString.id, true, true)
 		strings[curStringIndex] = {...str, index: curString.index}
 		setCurString(strings[curStringIndex])
-		UpdateStrings()
+		UpdateDrawStrings()
 	}
 
 	async function ChangePage(page) {
