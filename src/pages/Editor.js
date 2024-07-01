@@ -50,8 +50,6 @@ export default function Editor() {
 	const [curString, setCurString] = useState(null)
 	const [curStringIndex, setCurStringIndex] = useState(-1)
 
-	const [translations, setCurTranslations] = useState([]);
-
 	const [curPage, setCurPage] = useState(1)
 	const [maxPage, setMaxPage] = useState(1)
 	const [middlePage, setMiddlePage] = useState(1)
@@ -69,10 +67,6 @@ export default function Editor() {
 	const [roles, setRoles] = useState([]);
 	const [userRole, setUserRole] = useState(null);
 
-	useEffect(() => {
-		console.log(translations)
-	}, [translations])
-
 	const link = useParams()
 
 	let navigate = useNavigate();
@@ -83,11 +77,8 @@ export default function Editor() {
 
 
 	async function SelectString(str_index) {
-		console.log("wtf")
-		console.log(strings)
 		setCurString(strings[str_index])
 		setCurStringIndex(str_index)
-		setInputTranslation(strings[str_index].text)
 	}
 
 	async function GetProject() {
@@ -158,7 +149,7 @@ export default function Editor() {
 
 	useEffect(() => {
 		setTranslationEdit(null)
-		setInputTranslation("")
+		setInputTranslation(curString.text)
 	}, [curStringIndex])
 
 	useEffect(() => {
