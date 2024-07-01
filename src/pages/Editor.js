@@ -316,6 +316,7 @@ export default function Editor() {
 
 	return (
 		<>
+		<div style={{ height: "100vh" }}>
 			{/* <header className="fixed-top" expand="lg"> */}
 				<Container fluid className="bg-white py-1 border-bottom d-flex flex-wrap justify-content-between">
 					<div className="d-inline-flex align-items-center">
@@ -418,9 +419,9 @@ export default function Editor() {
 					</>
 				)}
 			</Stack>
-			<Container fluid>
-				<Row>
-					<Col className="border-bottom" style={{ padding: "0px" }}>
+			<Container fluid style={{ height: "80%" }}>
+				<Row  style={{ height: "100%" }}>
+					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
 							<Container onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
 								{/* <Col md="auto" className="d-flex align-items-center" style={{ marginRight: "10px", marginTop: "20px" }}>
@@ -495,11 +496,12 @@ export default function Editor() {
 						{curString?.translations?.map((tr, i) =>
 						<>
 							<Container key={tr.id} style={{ border: (tr.id == translationEdit?.id ? "1px solid orange" : "1px solid")}}>
-								<Form.Control
+								<div
 									readOnly
-									style={{ marginTop: "10px", wordWrap: "break-word" }}
-									value={tr.text}
-								></Form.Control>
+									style={{ marginTop: "10px", wordWrap: "break-word", border: "1px solid" }}
+								>
+									{tr.text}
+								</div>
 								<div>Автор: {members.find((el) => el.user.id == tr.author_id)?.user?.username || "noname"}</div>
 								{ tr.editor_id && 
 									<div>Редактор: {members.find((el) => el.user.id == tr.editor_id)?.user?.username || "noname"}</div>
@@ -548,6 +550,7 @@ export default function Editor() {
 					</Col>
 				</Row>
 			</Container>
+		</div>
 		</>
 	);
 }
