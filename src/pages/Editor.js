@@ -135,7 +135,7 @@ export default function Editor() {
 		try {
 			let strs = await fetchStrings(link["project_id"], link["section_id"], true, true)
 			
-			for (let i = 0; i < strings.length; i++) {
+			for (let i = 0; i < strs.length; i++) {
 				strs[i].index = i
 			}
 			console.log(strs)
