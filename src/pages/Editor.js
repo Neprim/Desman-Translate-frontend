@@ -87,6 +87,7 @@ export default function Editor() {
 		console.log(strings)
 		setCurString(strings[str_index])
 		setCurStringIndex(str_index)
+		setInputTranslation(strings[str_index].text)
 	}
 
 	async function GetProject() {
