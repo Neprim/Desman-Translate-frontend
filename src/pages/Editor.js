@@ -149,7 +149,7 @@ export default function Editor() {
 
 	useEffect(() => {
 		setTranslationEdit(null)
-		setInputTranslation(curString.text)
+		setInputTranslation(curString?.text || "")
 	}, [curStringIndex])
 
 	useEffect(() => {
