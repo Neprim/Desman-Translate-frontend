@@ -15,7 +15,7 @@ import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { openConnection } from "../WSController";
 import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites, fetchStrings } from "../APIController";
-import { ProgressBar } from "react-bootstrap";
+import { ProgressBar, Stack } from "react-bootstrap";
 import { FaRegTrashAlt } from "react-icons/fa"
 
 const kostyl_lang_tr = {
@@ -301,7 +301,7 @@ function Project(props) {
         <>
             <Header />
             <Container style={{ marginTop: 50 }}>
-                <h1 className="my-4">{project?.name}</h1>
+                <h1 className="my-4 text-break">{project?.name}</h1>
                 <Tabs
                     defaultActiveKey="project"
                     id="project-id-tabs"
@@ -311,8 +311,10 @@ function Project(props) {
                         <Row>
                             <Col xs={7}>
                                 <img src={placeholder} height={250} alt="project cover" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
-                                <h3>Описание проекта</h3>
-                                <p>{project?.description}</p>
+                                <Stack className="text-left text-break">
+                                    <h3>Описание проекта</h3>
+                                    <p style={{fontSize: "smaller"}}>{project?.description}</p>
+                                </Stack>
                             </Col>
                             {project &&
                                 <Col className="border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>

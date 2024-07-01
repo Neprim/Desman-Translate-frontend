@@ -434,7 +434,7 @@ export default function Editor() {
 				<Row>
 					<Col className="border-bottom" style={{ padding: "0px" }}>
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-							<Container onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px" }} className="py-2 d-flex justify-content-between">
+							<Container onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
 								{/* <Col md="auto" className="d-flex align-items-center" style={{ marginRight: "10px", marginTop: "20px" }}>
 									<Form className="d-flex align-items-center">
 										<Form.Group className="mb-3" controlId="formBasicCheckbox">
@@ -443,23 +443,34 @@ export default function Editor() {
 									</Form>
 								</Col> */}
 								<Col style={{ marginRight: "10px" }}>
-										{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
-										<Form.Control
+									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
+									<Stack style={{border: "1px solid", height: "100%"}}>
+										<div
 											readOnly
-											as="textarea"
-											style={{ paddingTop: "5px", paddingLeft: "10px", height: "100%", wordWrap: "break-word" }}
-											value={str.text}
-										>	
-										</Form.Control>
+											className="text-left text-break"
+											style={{ paddingTop: "5px", paddingLeft: "10px" }}
+										>
+											{str.text}
+										</div>	
+									</Stack>
 								</Col>
 								<Col>
-									<Form.Control className="d-flex align-items-start"
+									<Stack style={{border: "1px solid", height: "100%"}}>
+										<div
+											readOnly
+											className="text-left text-break"
+											style={{ paddingTop: "5px", paddingLeft: "10px" }}
+										>
+											{str.translations?.[0]?.text || ""}
+										</div>	
+									</Stack>
+									{/* <Form.Control className="d-flex align-items-start"
 										readOnly
 										as="textarea"
 										style={{ paddingTop: "5px", paddingLeft: "10px", height: "100%", wordWrap: "break-word" }}
-										value={str.translations?.[0]?.text || ""}
+										value=
 									>	
-									</Form.Control>
+									</Form.Control> */}
 								</Col>
 							<hr style={{ padding: "0px", margin: "0px" }} />
 							</Container>

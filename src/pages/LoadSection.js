@@ -111,7 +111,7 @@ export default function LoadSection() {
             >
                 {section && !strings &&
                     <>
-                    <h1 style={{ marginBottom: 20 }}>Загрузка строк для раздела "{section.name}"</h1>
+                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">Загрузка строк для раздела "{section.name}"</h1>
                     <Form>
                         <Form.Group>
                             <Form.Label htmlFor="settings-strings-type" className="mt-2">Тип строк</Form.Label>
