@@ -433,7 +433,7 @@ export default function Editor() {
 								</Col> */}
 								<Col style={{ marginRight: "10px" }}>
 									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
-									<Stack style={{border: "1px solid", height: "100%", position: "relative"}}>
+									<Stack style={{border: "1px solid", height: "100%", position: "relative", whiteSpace: "pre-wrap"}}>
 										<div
 											readOnly
 											className="text-left text-break"
@@ -447,7 +447,7 @@ export default function Editor() {
 									</Stack>
 								</Col>
 								<Col>
-									<Stack style={{border: "1px solid", height: "100%"}}>
+									<Stack style={{border: "1px solid", height: "100%", whiteSpace: "pre-wrap"}}>
 										<div
 											readOnly
 											className="text-left text-break"
