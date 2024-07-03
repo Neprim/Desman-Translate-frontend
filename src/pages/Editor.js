@@ -433,13 +433,16 @@ export default function Editor() {
 								</Col> */}
 								<Col style={{ marginRight: "10px" }}>
 									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
-									<Stack style={{border: "1px solid", height: "100%"}}>
+									<Stack style={{border: "1px solid", height: "100%", position: "relative"}}>
 										<div
 											readOnly
 											className="text-left text-break"
 											style={{ paddingTop: "5px", paddingLeft: "10px" }}
 										>
 											{str.text}
+										</div>
+										<div style={{color: "rgb(148, 148, 148)", position: "absolute", bottom: "0", fontStyle: "italic"}}>
+											{str.key}
 										</div>	
 									</Stack>
 								</Col>

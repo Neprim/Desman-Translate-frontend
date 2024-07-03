@@ -16,7 +16,8 @@ import { AuthContext } from "../AuthContext";
 import { openConnection } from "../WSController";
 import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites, fetchStrings } from "../APIController";
 import { ProgressBar, Stack } from "react-bootstrap";
-import { FaRegTrashAlt } from "react-icons/fa"
+import { FaRegTrashAlt, FaBars } from "react-icons/fa"
+import Dropdown from 'react-bootstrap/Dropdown';
 
 const kostyl_lang_tr = {
     en: "Английский",
@@ -296,6 +297,10 @@ function Project(props) {
         await fetchSomeAPI(`/api/projects/${project.id}`, "DELETE")
         window.location.href = '/'
     }
+
+    function UploadTranslations(section_id) {
+        window.location.href = `/projects/${project.id}/sections/${section_id}/upload_translations`
+    }
     
     return (
         <>
@@ -325,9 +330,6 @@ function Project(props) {
                                     <div className="py-2 border-bottom"><b>Статус:</b> {kostyl_status_tr[project?.status]}</div>
                                     <div className="py-2 border-bottom"><b>Прогресс: {project.statistics.completeness}%</b>
                                         <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
-                                            {/* <ProgressBar className="progress" style={{ width: '100%' }} aria-valuenow={100} aria-valuemin={0} aria-valuemax={100}>
-                                                <div className="progress-bar progress-bar-striped progress-bar-animated bg-success">40%</div>
-                                            </ProgressBar> */}
                                             <ProgressBar className="progress" striped animated label={`${project.statistics.completeness}%`} style={{ width: project.statistics.completeness + '%' }} aria-valuenow={project.statistics.completeness} aria-valuemin={0} aria-valuemax={100}/>
                                         </div>
                                     </div>
@@ -371,16 +373,35 @@ function Project(props) {
                                                 </>
                                             :   <>   
                                                     <td>
-                                                        <Link to={`/projects/${project.id}/sections/${section.id}/load`} className="link-primary">
+                                                        <Link to={`/projects/${project.id}/sections/${section.id}/load_strings`} className="link-primary">
                                                             Загрузить строки
                                                         </Link>
                                                     </td>
                                                     <td></td>
                                                 </>
                                         }
-                                        {userRole?.permissions?.can_manage_sections && 
-                                            <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
-                                        }
+                                        <td>
+                                            <Dropdown>
+                                                <Dropdown.Toggle data-toggle="dropdown">
+                                                    <FaBars/>
+                                                </Dropdown.Toggle>
+                                                <Dropdown.Menu>
+                                                {userRole?.permissions?.can_translate && section.statistics.strings_amount > 0 &&
+                                                    <Dropdown.Item onClick={(e) => UploadTranslations(section.id)}>
+                                                       Загрузить перевод
+                                                    </Dropdown.Item>
+                                                }
+                                                {userRole?.permissions?.can_manage_sections && 
+                                                    <Dropdown.Item onClick={(e) => DeleteSection(section.id)}>
+                                                       Удалить
+                                                    </Dropdown.Item>
+                                                }
+                                                </Dropdown.Menu>
+                                            {/* {userRole?.permissions?.can_manage_sections && 
+                                                <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
+                                            } */}
+                                            </Dropdown>
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
