@@ -501,7 +501,7 @@ export default function Editor() {
 							<Container key={tr.id} style={{ border: (tr.id == translationEdit?.id ? "1px solid orange" : "1px solid")}}>
 								<div
 									readOnly
-									style={{ marginTop: "10px", wordWrap: "break-word", border: "1px solid" }}
+									style={{ marginTop: "10px", wordWrap: "break-word", border: "1px solid", whiteSpace: "pre-wrap" }}
 								>
 									{tr.text}
 								</div>
