@@ -158,7 +158,7 @@ export default function LoadSection() {
                     </h3>
                     <div id="div-strings-to-load" style={{ height: "80vh", overflowY: "auto" }}>
                         {strings.map((str, i) => 
-                            <Container className="text-left text-break border rounded my-2 pt-3" key={i}>
+                            <Container className="text-left text-break border rounded my-2 pt-3" key={i} style={{whiteSpace: "pre-wrap"}}>
                             <p className="mb-1 fw-semibold">{str.text}</p>
                             <p className="text-body-secondary mt-0">{str.key && <i> ключ: {str.key}</i>}</p>
                             </Container>

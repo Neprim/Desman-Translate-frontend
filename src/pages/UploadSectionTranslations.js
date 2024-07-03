@@ -182,7 +182,7 @@ export default function UploadSectionTranslations() {
                     </h3>
                     <div id="div-translations-to-load" style={{ height: "80vh", overflowY: "auto" }}>
                         {translations.map((tr, i) => 
-                            <Container className="text-left text-break border rounded my-2 pt-3" key={tr.string.id}>
+                            <Container className="text-left text-break border rounded my-2 pt-3" key={tr.string.id} style={{whiteSpace: "pre-wrap"}}>
                             <p className="mb-1 fw-semibold">Оригинал: {tr.string.text}</p>
                             <p className="mb-1 fw-semibold">перевод: {tr.text}</p>
                             <p className="text-body-secondary mt-0"><i> Ключ: {tr.string.key}</i></p>
