@@ -115,7 +115,11 @@ export default function UploadSectionTranslations() {
             }
             window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
         } catch (err) {
-            setLoadError(err.errors[0])
+            if (err.status == 400 && err.errors[0].key == 'text' && err.errors[0].kind == "required") {
+                setLoadError("Нельзя загружать пустые переводы.")
+            } else {
+                setLoadError(JSON.stringify(err))
+            }
             console.log(err)
         }
         setfetchingTranslationsLoad(false)
@@ -176,7 +180,7 @@ export default function UploadSectionTranslations() {
                     <h3 className="mb-3">
                         Итоговые переводы для загрузки
                     </h3>
-                    <div id="div-strings-to-load">
+                    <div id="div-translations-to-load" style={{ height: "80vh", overflowY: "auto" }}>
                         {translations.map((tr, i) => 
                             <Container className="text-left text-break border rounded my-2 pt-3" key={tr.string.id}>
                             <p className="mb-1 fw-semibold">Оригинал: {tr.string.text}</p>

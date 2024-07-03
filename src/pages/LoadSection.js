@@ -86,12 +86,20 @@ export default function LoadSection() {
 
         setFetchingStringsLoad(true)
         try {
+            for (const str of strings) {
+                if (!str.text) {
+                    console.log(str)
+                }
+            }
+            // console.log(strings)
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}/strings`, "POST", strings)
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}`, "PATCH", {type: sectionType})
             window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
         } catch (err) {
             if (err.status == 413) {
                 setLoadError("Слишком большой объём строк, в одной главе может быть не больше 10000 строк.")
+            } else if (err.status == 400 && err.errors[0].key == 'text' && err.errors[0].kind == "required") {
+                setLoadError("Нельзя загружать пустые строки.")
             } else {
                 setLoadError(JSON.stringify(err))
             }
@@ -109,7 +117,6 @@ export default function LoadSection() {
                 style={{
                     width: '40%',
                     minWidth: '300px',
-                    height: "100%",
                 }}
             >
                 {section && !strings &&
@@ -149,7 +156,7 @@ export default function LoadSection() {
                     <h3 className="mb-3">
                         Итоговое разбиение на строки
                     </h3>
-                    <div id="div-strings-to-load" style={{ height: "100%", overflowY: "auto" }}>
+                    <div id="div-strings-to-load" style={{ height: "80vh", overflowY: "auto" }}>
                         {strings.map((str, i) => 
                             <Container className="text-left text-break border rounded my-2 pt-3" key={i}>
                             <p className="mb-1 fw-semibold">{str.text}</p>
