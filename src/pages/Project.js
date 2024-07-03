@@ -76,6 +76,7 @@ function Project(props) {
                 sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
             }
             setSections(sections)
+            console.log(sections)
         } catch (err) {
 
         }
@@ -301,6 +302,31 @@ function Project(props) {
     function UploadTranslations(section_id) {
         window.location.href = `/projects/${project.id}/sections/${section_id}/upload_translations`
     }
+
+    function TimestampToTimeSince(timestamp) {
+        if (timestamp == 0)
+            return ""
+        console.log(timestamp)
+        const delta = (Date.now() - timestamp) / 1000
+        console.log(delta)
+        if (delta < 60)
+            return `${delta} сек. назад`
+        if (delta < 60 * 60)
+            return `${Math.round(delta / 60)} мин. назад`
+        if (delta < 60 * 60 * 24)
+            return `${Math.round(delta / 60 / 60)} час. назад`
+        if (delta < 60 * 60 * 24 * 30)
+            return `${Math.round(delta / 60 / 60 / 24)} дн. назад`
+        if (delta < 60 * 60 * 24 * 30 * 12)
+            return `${Math.round(delta / 60 / 60 / 24 / 30)} мес. назад`
+        return `Больше года назад`
+        // if($t < 60) return $this->idle_time . " сек.";
+		// if($t < 60 * 60) return round($this->idle_time / 60) . " мин.";
+		// if($t < 60 * 60 * 24) return round($this->idle_time / 3600) . " час.";
+		// if($t < 60 * 60 * 24 * 30) return round($this->idle_time / 86400) . " дней.";
+		// if($t < 60 * 60 * 24 * 30 * 12) return round($this->idle_time / 2592000) . " мес.";
+		// return "> 1 года.";
+    }
     
     return (
         <>
@@ -349,7 +375,7 @@ function Project(props) {
                                     <th scope="col">№</th>
                                     <th scope="col">Название</th>
                                     <th scope="col">Прогресс</th>
-                                    <th scope="col">Скачать</th>
+                                    <th scope="col">Активность</th>
                                     <th scope="col"></th>
                                 </tr>
                             </thead>
@@ -365,11 +391,6 @@ function Project(props) {
                                         {section.statistics.strings_amount > 0
                                             ?   <>
                                                     <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
-                                                    <td>
-                                                        <Link onClick={(e) => DownloadOriginal(index)}>Оригинал</Link> 
-                                                        / 
-                                                        <Link onClick={(e) => DownloadTranslation(index)}>Перевод</Link>
-                                                    </td>
                                                 </>
                                             :   <>   
                                                     <td>
@@ -377,20 +398,28 @@ function Project(props) {
                                                             Загрузить строки
                                                         </Link>
                                                     </td>
-                                                    <td></td>
                                                 </>
                                         }
+                                        <td>
+                                            <span title={new Date(section.statistics.last_update).toLocaleString()}>{TimestampToTimeSince(section.statistics.last_update)}</span>
+                                        </td>
                                         <td>
                                             <Dropdown>
                                                 <Dropdown.Toggle data-toggle="dropdown">
                                                     <FaBars/>
                                                 </Dropdown.Toggle>
                                                 <Dropdown.Menu>
+                                                    <Dropdown.Item onClick={(e) => DownloadTranslation(index)}>
+                                                        Скачать перевод
+                                                    </Dropdown.Item>
                                                 {userRole?.permissions?.can_translate && section.statistics.strings_amount > 0 &&
                                                     <Dropdown.Item onClick={(e) => UploadTranslations(section.id)}>
                                                        Загрузить перевод
                                                     </Dropdown.Item>
                                                 }
+                                                    <Dropdown.Item onClick={(e) => DownloadOriginal(index)}>
+                                                        Скачать оригинал
+                                                    </Dropdown.Item>
                                                 {userRole?.permissions?.can_manage_sections && 
                                                     <Dropdown.Item onClick={(e) => DeleteSection(section.id)}>
                                                        Удалить
