@@ -92,6 +92,8 @@ export default function LoadSection() {
         } catch (err) {
             if (err.status == 413) {
                 setLoadError("Слишком большой объём строк, в одной главе может быть не больше 10000 строк.")
+            } else {
+                setLoadError(JSON.stringify(err))
             }
             console.log(err)
         }
@@ -106,7 +108,8 @@ export default function LoadSection() {
                 className="text-left mt-5 mx-auto"
                 style={{
                     width: '40%',
-                    minWidth: '300px'
+                    minWidth: '300px',
+                    height: "100%",
                 }}
             >
                 {section && !strings &&
@@ -146,7 +149,7 @@ export default function LoadSection() {
                     <h3 className="mb-3">
                         Итоговое разбиение на строки
                     </h3>
-                    <div id="div-strings-to-load">
+                    <div id="div-strings-to-load" style={{ height: "100%", overflowY: "auto" }}>
                         {strings.map((str, i) => 
                             <Container className="text-left text-break border rounded my-2 pt-3" key={i}>
                             <p className="mb-1 fw-semibold">{str.text}</p>
