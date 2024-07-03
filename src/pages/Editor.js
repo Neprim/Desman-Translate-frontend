@@ -75,12 +75,6 @@ export default function Editor() {
 		navigate(path);
 	}
 
-
-	async function SelectString(str_index) {
-		setCurString(strings[str_index])
-		setCurStringIndex(str_index)
-	}
-
 	async function GetProject() {
         try {
             let project = await fetchProject(link["project_id"], true, true)
@@ -126,9 +120,14 @@ export default function Editor() {
 	async function GetStrings() {
 		try {
 			let strs = await fetchStrings(link["project_id"], link["section_id"], true, true)
-			
+			let sel = -1
+
 			for (let i = 0; i < strs.length; i++) {
 				strs[i].index = i
+				if (strs[i].index == window.location.hash.substring(1)) {
+					sel = i
+					ChangePage(1 + Math.floor(i / page_size))
+				}
 			}
 			console.log(strs)
 
@@ -138,9 +137,40 @@ export default function Editor() {
 			console.log(strings)
 			
 			UpdateDrawStrings()
+
+			if (sel != -1) {
+				SelectString(sel)
+				setTimeout(() => {
+					let str = document.getElementById('str' + strings[sel].id);
+					str.scrollIntoView({ behavior: "smooth" });
+				}, 100)
+			}
 		} catch (err) {
 			console.log(err)
 		}
+	}
+
+	function PreudoReload(sel) {
+		setFilters([])
+
+		ChangePage(1 + Math.floor(sel / page_size))
+
+		UpdateDrawStrings()
+
+		console.log("PseudoReload")
+		console.log(curPage)
+
+		setTimeout(() => {
+			SelectString(sel)
+			console.log(sel)
+			let str = document.getElementById('str' + strings[sel].id);
+			str.scrollIntoView({ behavior: "smooth" });
+		}, 100)
+	}
+
+	function SelectString(str_index) {
+		setCurString(strings[str_index])
+		setCurStringIndex(str_index)
 	}
 
 	useEffect(() => {
@@ -153,29 +183,34 @@ export default function Editor() {
 	}, [curStringIndex])
 
 	useEffect(() => {
-		UpdateDrawStrings()
+		// UpdateDrawStrings()
+		let strs = FilterStrings() 
+		setDrawStrings(strs)
+		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
 	}, [filters])
 
-	useEffect(() => {
-		setMaxPage(Math.max(1, Math.ceil(drawStrings.length / page_size)))
-		ChangePage(1)
-	}, [filters])
+	// useEffect(() => {
+	// 	UpdateDrawStrings()
+	// }, [curPage])
 
-	async function UpdateDrawStrings() {
+	function UpdateDrawStrings() {
 		setDrawStrings(FilterStrings())
 	}
 
 	function FilterStrings() {
 		let draws = strings.filter((str) => {
 			for (let filter of filters) {
+				if (filter.is_regex) {
+					filter.value = filter.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+				}
 				if (filter.key == "orig") {
-					if (!str.text.includes(filter.value))
+					if (!new RegExp(filter.value, 'i').test(str.text))
 						return false
 				} else 
 				if (filter.key == "trans") {
 					let flag = false
 					for (let tr of str.translations) {
-						if (tr.text.includes(filter.value)) {
+						if (new RegExp(filter.value, 'i').test(tr.text)) {
 							flag = true
 							break
 						}
@@ -183,6 +218,10 @@ export default function Editor() {
 					if (!flag)
 						return false
 				} else
+				if (filter.key == "key") {
+					if (!new RegExp(filter.value, 'i').test(str.key))
+						return false
+				} else 
 				if (filter.key == "status") {
 					if (filter.value == "non_tr") {
 						if (str.translations.length > 0)
@@ -219,7 +258,7 @@ export default function Editor() {
 		UpdateDrawStrings()
 	}
 
-	async function ChangePage(page) {
+	function ChangePage(page) {
 		setCurPage(page)
 		setMiddlePage(page)
 		setCurStringIndex(-1)
@@ -277,7 +316,7 @@ export default function Editor() {
 		} 
 	}
 
-	async function AddFilter(key, value) {
+	function AddFilter(key, value) {
 		if (value == "" || filters.find((filter) => filter.key == key && filter.value == value))
 			return
 
@@ -286,6 +325,8 @@ export default function Editor() {
 				return "Оригинал содержит: " + value
 			else if (key == "trans")
 				return "Перевод содержит: " + value
+			else if (key == "key")
+				return "Ключ содержит: " + value
 			else if (key == "status") {
 				switch (value) {
 					case "non_tr":
@@ -306,12 +347,17 @@ export default function Editor() {
 			name: ResolveName(key, value)
 		}))
 
+		ChangePage(1)
+
 		console.log(filters)
 	}
 
-	async function RemoveFilter(key, value) {
+	function RemoveFilter(key, value) {
 		let index = filters.findIndex((filter) => filter.key == key && filter.value == value)
-		setFilters(filters.toSpliced(index, 1))
+		if (index != -1) {
+			setFilters(filters.toSpliced(index, 1))
+			ChangePage(1)
+		}
 	}
 
 	return (
@@ -320,7 +366,7 @@ export default function Editor() {
 			{/* <header className="fixed-top" expand="lg"> */}
 				<Container fluid className="bg-white py-1 border-bottom d-flex flex-wrap justify-content-between">
 					<div className="d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Вернуться к проекту" href="#" id="tooltip-back" where="bottom">
+						<LinkWithTooltip tooltip="Вернуться к проекту" id="tooltip-back" where="bottom">
 							<Button variant="outline-dark" onClick={routeChange}><BsReplyFill style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</div>
@@ -328,7 +374,7 @@ export default function Editor() {
 						<h3 className="pt-1">Раздел: {section.name}</h3>
 					</div>
 					<div className="d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Настройки редактора" href="#" id="tooltip-settings" where="bottom">
+						<LinkWithTooltip tooltip="Настройки редактора" id="tooltip-settings" where="bottom">
 							<Button variant="outline-dark"><FaCog style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</div>
@@ -339,7 +385,7 @@ export default function Editor() {
 					style={{ margin: "0px" }}
 				>
 					<Col className="py-1 d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Фильтр" href="#" id="tooltip-settings" where="bottom">
+						<LinkWithTooltip tooltip="Фильтр" id="tooltip-settings" where="bottom">
 							<Dropdown>
 								<Dropdown.Toggle as={FilterButton}></Dropdown.Toggle>
 								<Dropdown.Menu as={FilterForm}>
@@ -355,10 +401,10 @@ export default function Editor() {
 								</Dropdown.Menu>
 							</Dropdown>
 						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Режим редактирования" href="#" id="tooltip-settings" where="bottom">
+						<LinkWithTooltip tooltip="Режим редактирования"id="tooltip-settings" where="bottom">
 							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaPencilAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Словарь" href="#" id="tooltip-settings" where="bottom">
+						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
 							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaBook style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</Col>
@@ -423,7 +469,7 @@ export default function Editor() {
 				<Row  style={{ height: "100%" }}>
 					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-							<Container onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
+							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
 								{/* <Col md="auto" className="d-flex align-items-center" style={{ marginRight: "10px", marginTop: "20px" }}>
 									<Form className="d-flex align-items-center">
 										<Form.Group className="mb-3" controlId="formBasicCheckbox">
@@ -441,8 +487,14 @@ export default function Editor() {
 										>
 											{str.text}
 										</div>
-										<div style={{color: "rgb(148, 148, 148)", position: "absolute", bottom: "0", fontStyle: "italic"}}>
-											{str.key}
+										<div style={{position: "relative", bottom: "0", padding: "4px"}}>
+											<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
+												{str.key}
+											</div>
+											<div>
+												<a href={`/projects/${link["project_id"]}/sections/${link["section_id"]}/editor#${str.index}`} onClick={(e) => {PreudoReload(str.index)}}>#{str.index + 1}</a>
+												{/* <a href={`${window.location.href}#${str.index}`}>#{str.index + 1}</a> */}
+											</div>	
 										</div>	
 									</Stack>
 								</Col>
@@ -580,9 +632,10 @@ const FilterForm = React.forwardRef(
 		<Form.Select defaultValue="orig" id="select-filter-key" onChange={(e) => {setKey(e.target.value)}} >
 			<option value="orig">Оригинал содержит</option>
 			<option value="trans">Перевод содержит</option>
+			<option value="key">Ключ содержит</option>
 			<option value="status">Статус</option>
 		</Form.Select>
-		{(key == "orig" || key == "trans") &&
+		{(key == "orig" || key == "trans" || key == "key") &&
 			<Form.Control id="select-filter-value" onChange={(e) => {setValue(e.target.value)}}></Form.Control>
 		}
 		{key == "status" &&
