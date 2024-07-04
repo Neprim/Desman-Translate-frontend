@@ -409,6 +409,7 @@ export default function Editor() {
 						</LinkWithTooltip>
 					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
+						{ maxPage > 1 &&
 						<Pagination>
 							{ maxPage > max_page_counter
 							? 	<>
@@ -449,6 +450,7 @@ export default function Editor() {
 								</>
 							}
 						</Pagination>
+						}
 					</Col>
 				</Container>
 			{/* </header> */}
@@ -523,7 +525,7 @@ export default function Editor() {
 
 					</Col>
 					<Col className="border-start border-end border-bottom" md={4}>
-						<h6>Контекст: {curString?.context}</h6>
+						<h6> {curString?.context ? `Контекст: ${curString?.context}` : ` ` }</h6>
 						{userRole?.permissions?.can_translate &&
 						<>
 							<Form.Control className="d-flex align-items-start"

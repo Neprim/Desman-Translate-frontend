@@ -31,9 +31,9 @@ function Header() {
 						<img width={250} height={100} src={logo} alt="logo"/>
 					</a>
 					<div className="d-flex align-items-center">
-						<Form role="search">
+						{/* <Form role="search">
 							<Form.Control type="search" className="form-control" placeholder="Поиск..." aria-label="Search"/>
-						</Form>
+						</Form> */}
 					</div>
 				</Container>
 			</header>
