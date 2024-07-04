@@ -384,9 +384,15 @@ function Project(props) {
                                     <tr key={section.id}>
                                         <th scope="row">{index + 1}</th>
                                         <td>
+                                        {section.statistics.strings_amount > 0 &&
                                             <Link to={`/projects/${project.id}/sections/${section.id}/editor`} className="link-primary">
                                                 {section.name}
                                             </Link>
+                                        }
+                                        {section.statistics.strings_amount == 0 &&
+                                            section.name
+                                        }
+                                            
                                         </td>
                                         {section.statistics.strings_amount > 0
                                             ?   <>

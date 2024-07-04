@@ -589,9 +589,9 @@ export default function Editor() {
 									)}
 									</DropdownButton>
 
-									<Button disabled={!userRole?.permissions?.can_translate} variant={tr.votes_plus.find((el) => el.id == user?.id) ? "success" : "outline-success"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_plus.find((el) => el.id == user?.id), false)}><FaArrowUp style={{ marginBottom: "3px" }}/></Button>
+									<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_plus.find((el) => el.id == user?.id) ? "success" : "outline-success"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_plus.find((el) => el.id == user?.id), false)}><FaArrowUp style={{ marginBottom: "3px" }}/></Button>
 
-									<Button disabled={!userRole?.permissions?.can_translate} variant={tr.votes_minus.find((el) => el.id == user?.id) ? "danger" : "outline-danger"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_minus.find((el) => el.id == user?.id), true)}><FaArrowDown style={{ marginBottom: "3px" }}/></Button>
+									<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_minus.find((el) => el.id == user?.id) ? "danger" : "outline-danger"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_minus.find((el) => el.id == user?.id), true)}><FaArrowDown style={{ marginBottom: "3px" }}/></Button>
 
 									<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_minus.length }>
 									{tr.votes_minus.map((vote) => 
