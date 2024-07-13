@@ -49,18 +49,26 @@ export default function Editor() {
 	const [drawStrings, setDrawStrings] = useState([]);
 
 	const [curString, setCurString] = useState(null)
-	const [curStringIndex, setCurStringIndex] = useState(-1)
 
 	const [curPage, setCurPage] = useState(1)
 	const [maxPage, setMaxPage] = useState(1)
 	const [middlePage, setMiddlePage] = useState(1)
 
 	const [inputTranslation, setInputTranslation] = useState("");
+	const [inputText, setInputText] = useState("");
+	const [inputKey, setInputKey] = useState("");
+	const [inputContext, setInputContext] = useState("");
+	const [inputMaxLength, setInputMaxLength] = useState("");
+
 	const [translationEdit, setTranslationEdit] = useState(null)
 
 	const [filters, setFilters] = useState([])
 	
-	const translationChange = event => setInputTranslation(event.target.value);
+	const translationChange = e => setInputTranslation(e.target.value);
+	const textChange 		= e => setInputText(e.target.value);
+	const keyChange 		= e => setInputKey(e.target.value);
+	const contextChange 	= e => setInputContext(e.target.value);
+	const maxLengthChange 	= e => setInputMaxLength(e.target.value);
 
 	const [project, setProject] = useState({});
 	const [section, setSection] = useState({});
@@ -70,6 +78,7 @@ export default function Editor() {
 
 	const [loading, setLoading] = useState(false)
 	const [editMode, setEditMode] = useState(false)
+	const [moveMode, setMoveMode] = useState(false)
 
 	const link = useParams()
 
@@ -177,7 +186,6 @@ export default function Editor() {
 
 	function SelectString(str_index) {
 		setCurString(strings[str_index])
-		setCurStringIndex(str_index)
 	}
 
 	useEffect(() => {
@@ -187,18 +195,15 @@ export default function Editor() {
 	useEffect(() => {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
-	}, [curStringIndex])
+		setEditMode(false)
+	}, [curString])
 
 	useEffect(() => {
-		// UpdateDrawStrings()
 		let strs = FilterStrings() 
 		setDrawStrings(strs)
 		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
+		setCurString(null)
 	}, [filters])
-
-	// useEffect(() => {
-	// 	UpdateDrawStrings()
-	// }, [curPage])
 
 	function UpdateDrawStrings() {
 		setDrawStrings(FilterStrings())
@@ -251,24 +256,20 @@ export default function Editor() {
 
 			return true
 		})
-		console.log("draws")
-		console.log(strings)
-		console.log(draws)
 
 		return draws
 	}
 
 	async function UpdateTranslation() {
 		const str = await fetchString(link["project_id"], link["section_id"], curString.id, true, true)
-		strings[curStringIndex] = {...str, index: curString.index}
-		setCurString(strings[curStringIndex])
+		strings[curString.index] = {...str, index: curString.index}
+		setCurString(strings[curString.index])
 		UpdateDrawStrings()
 	}
 
 	function ChangePage(page) {
 		setCurPage(page)
 		setMiddlePage(page)
-		setCurStringIndex(-1)
 		setCurString(null)
 	}
 
@@ -280,6 +281,67 @@ export default function Editor() {
 		} catch (err) {
 			console.log(err)
 		}
+		setLoading(false)
+	}
+
+	async function DeleteString(str_index) {
+		setLoading(true)
+		try {
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${strings[str_index].id}`, "DELETE")
+			strings.splice(str_index, 1)
+			for (let i = 0; i < strings.length; i++) {
+				strings[i].index = i
+			}
+			setCurString(null)
+			UpdateDrawStrings()
+		} catch (err) {
+			console.log(err)
+		} 
+		setLoading(false)
+	}
+	
+	
+	async function SaveString() {
+		setLoading(true)
+		try {
+			const str_index = curString.index
+			let str = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${strings[str_index].id}`, "PATCH", {
+				text: inputText,
+				key: inputKey,
+				context: inputContext,
+				max_tr_length: inputMaxLength,
+			})
+			strings[curString.index] = {...strings[curString.index], 
+				text: str.text, 
+				key: str.key,
+				context: str.context, 
+				max_tr_length: str.max_tr_length
+			}
+			setCurString(strings[curString.index])
+			UpdateDrawStrings()
+		} catch (err) {
+			console.log(err)
+		} 
+		setLoading(false)
+	}
+
+	async function AddString(str_index) {
+		setLoading(true)
+		try {
+			let str = (await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings?pos=${str_index}`, "POST", {text: " "}))[0]
+			strings.splice(str_index, 0, {...str, translations: []})
+			for (let i = 0; i < strings.length; i++) {
+				strings[i].index = i
+			}
+			setCurString(strings[str_index])
+			UpdateDrawStrings()
+			setTimeout(() => {
+				setInputText("")
+				setEditMode(true)
+			}, 100)
+		} catch (err) {
+			console.log(err)
+		} 
 		setLoading(false)
 	}
 	
@@ -419,7 +481,7 @@ export default function Editor() {
 							</Dropdown>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
-							<Button variant={editMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }}  onClick={(e) => {setEditMode(!editMode)}} disabled={true || !userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
+							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }}  onClick={(e) => {setMoveMode(!moveMode)}} disabled={true || !userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
 							<Button variant="outline-primary" style={{ marginLeft: "10px" }} disabled={true}><FaBook style={{ marginBottom: "3px" }} /></Button>
@@ -488,15 +550,27 @@ export default function Editor() {
 				<Row  style={{ height: "100%" }}>
 					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
+							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
 								{userRole?.permissions?.can_manage_strings &&
 									<Dropdown style={{ alignItems: "center", display: "flex" }}>
 										<Dropdown.Toggle variant="outline" data-toggle="dropdown">
 										</Dropdown.Toggle>
 										<Dropdown.Menu>
-											<Dropdown.Item disabled={true}>Редактировать строку</Dropdown.Item>
-											<Dropdown.Item disabled={true}>Удалить строку</Dropdown.Item>
-											<Dropdown.Item disabled={true}>Добавить строку</Dropdown.Item>
+											<Dropdown.Item onClick={(e) => {
+												setEditMode(true)
+												setInputText(str.text)
+												setInputKey(str.key)
+												setInputContext(str.context)
+												setInputMaxLength(str.max_tr_length)
+											}}>Редактировать строку</Dropdown.Item>
+											<Dropdown.Item onClick={(e) => {
+												DeleteString(str.index)
+											}}>Удалить строку</Dropdown.Item>
+											{filters.length == 0 && 
+											<Dropdown.Item onClick={(e) => {
+												AddString(str.index + 1)
+											}}>Добавить строку</Dropdown.Item>
+											}
 										</Dropdown.Menu>
 									</Dropdown>
 								}
@@ -547,108 +621,162 @@ export default function Editor() {
 
 					</Col>
 					<Col className="border-start border-end border-bottom" md={4}>
-						{userRole?.permissions?.can_translate &&
-						<>
+						{!editMode 
+						? <>
+							{userRole?.permissions?.can_translate &&
+							<>
+								<Form.Control className="d-flex align-items-start"
+									onChange={translationChange}
+									as="textarea"
+									value={inputTranslation}
+									placeholder="Ваш вариант перевода..."
+									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+								>
+								</Form.Control>
+								<div style={{ color: (inputTranslation.length > curString?.max_tr_length ? "red" : "black") }}>{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(макс. ${curString?.max_tr_length})` : ""}</div>
+								<h6> {curString?.context ? `Контекст: ${curString?.context}` : `` }</h6>
+
+							
+								{translationEdit 
+									? 	<>
+											{!loading 
+												? <>
+													<Button variant="outline-success" onClick={() => EditTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> Сохранить </Button>
+													<Button variant="outline-danger" onClick={() => {
+														setTranslationEdit(null)
+														setInputTranslation("")
+													}}><FaPlus /> Отмена </Button>
+												</>
+												:  <>
+												<Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
+												<Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+												</>
+											}
+										</>
+									: 	<>
+											{!loading 
+												? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> Добавить перевод </Button>
+												: <Button variant="outline-success" disabled><Spinner size="sm"/> Добавить перевод </Button>
+											}
+										</>
+								}
+							</>
+							}
+							<h3>Варианты перевода</h3>
+							{curString?.translations?.map((tr, i) =>
+							<>
+								<Container key={tr.id} style={{ border: (tr.id == translationEdit?.id ? "1px solid orange" : "1px solid")}}>
+									<div
+										readOnly
+										style={{ marginTop: "10px", wordWrap: "break-word", border: "1px solid", whiteSpace: "pre-wrap" }}
+									>
+										{tr.text}
+									</div>
+									<div>Автор: {members.find((el) => el.user.id == tr.author_id)?.user?.username || "noname"}</div>
+									{ tr.editor_id && 
+										<div>Редактор: {members.find((el) => el.user.id == tr.editor_id)?.user?.username || "noname"}</div>
+									}
+									<div>{new Date(tr.updated_at).toLocaleString()}</div>
+
+									{userRole?.permissions?.can_approve &&
+										(!loading
+											? <Button variant={tr.is_approved ? "success" : "outline-success"} onClick={(e) => ChangeApprove(tr.id, !tr.is_approved)}><FaCheck/></Button>
+											: <Button variant={tr.is_approved ? "success" : "outline-success"} disabled><Spinner size="sm"/></Button>
+										)
+									}
+
+									{(userRole?.permissions?.can_manage_translations || tr.author_id == user?.id) &&
+									(!loading 
+										? <>
+											<Button variant="outline-primary" onClick={(e) => {
+												setInputTranslation(tr.text)
+												setTranslationEdit(tr)
+											}} ><FaPencilAlt/></Button>
+
+											<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} ><FaTrashAlt/></Button>
+										</>
+										: <>
+											<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+											<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+										</>
+									)
+									}
+									
+									<div>
+										<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_plus.length }>
+										{tr.votes_plus.map((vote) => 
+											<Dropdown.Item href={"/users/" + vote.id}>
+											{vote.username}
+											</Dropdown.Item>
+										)}
+										</DropdownButton>
+
+										<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_plus.find((el) => el.id == user?.id) ? "success" : "outline-success"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_plus.find((el) => el.id == user?.id), false)}><FaArrowUp style={{ marginBottom: "3px" }}/></Button>
+
+										<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_minus.find((el) => el.id == user?.id) ? "danger" : "outline-danger"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_minus.find((el) => el.id == user?.id), true)}><FaArrowDown style={{ marginBottom: "3px" }}/></Button>
+
+										<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_minus.length }>
+										{tr.votes_minus.map((vote) => 
+											<Dropdown.Item href={"/users/" + vote.id}>
+												{vote.username}
+											</Dropdown.Item>
+										)}
+										</DropdownButton>
+									</div>
+								</Container>
+							</>
+							)}
+						</>
+						: <>
+							<h6>Текст:</h6>
 							<Form.Control className="d-flex align-items-start"
-								onChange={translationChange}
+								onChange={textChange}
 								as="textarea"
-								value={inputTranslation}
-								placeholder="Ваш вариант перевода..."
+								value={inputText}
+								placeholder="Текст строки"
 								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 							>
 							</Form.Control>
-							<h6> {curString?.context ? `Контекст: ${curString?.context}` : `` }</h6>
+							{section?.type == "json" &&  <>
+								<h6>Ключ:</h6>
+								<Form.Control className="d-flex align-items-start"
+									onChange={keyChange}
+									as="textarea"
+									value={inputKey}
+									placeholder="Ключ строки"
+									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+								>
+								</Form.Control>
+							</>}
+							<h6>Контекст:</h6>
+							<Form.Control className="d-flex align-items-start"
+								onChange={contextChange}
+								as="textarea"
+								value={inputContext}
+								placeholder="Контекст строки"
+								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+							>
+							</Form.Control>
+
+							<h6>Макс. число символов:</h6>
+							<Form.Control type="number" onChange={maxLengthChange} min="1" max="2000" value={inputMaxLength} />
+							{/* <input type="number" id="tentacles" name="tentacles" min="10" max="100" /> */}
 
 						
-							{translationEdit 
-								? 	<>
-										{!loading 
-											? <>
-												<Button variant="outline-success" onClick={() => EditTranslation()}><FaPlus /> Сохранить </Button>
-												<Button variant="outline-danger" onClick={() => {
-													setTranslationEdit(null)
-													setInputTranslation("")
-												}}><FaPlus /> Отмена </Button>
-											</>
-											:  <>
-											<Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
-											<Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
-											</>
-										}
-									</>
-								: 	<>
-										{!loading 
-											? <Button variant="outline-success" onClick={() => AddTranslation()}><FaPlus /> Добавить перевод </Button>
-											: <Button variant="outline-success" disabled><Spinner size="sm"/> Добавить перевод </Button>
-										}
-									</>
+							{!loading 
+								? <>
+									<Button variant="outline-success" onClick={() => SaveString()}><FaPlus /> Сохранить </Button>
+									<Button variant="outline-danger" onClick={() => {
+										setEditMode(false)
+									}}><FaPlus /> Отмена </Button>
+								</>
+								:  <>
+								<Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
+								<Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+								</>
 							}
 						</>
 						}
-						<h3>Варианты перевода</h3>
-						{curString?.translations?.map((tr, i) =>
-						<>
-							<Container key={tr.id} style={{ border: (tr.id == translationEdit?.id ? "1px solid orange" : "1px solid")}}>
-								<div
-									readOnly
-									style={{ marginTop: "10px", wordWrap: "break-word", border: "1px solid", whiteSpace: "pre-wrap" }}
-								>
-									{tr.text}
-								</div>
-								<div>Автор: {members.find((el) => el.user.id == tr.author_id)?.user?.username || "noname"}</div>
-								{ tr.editor_id && 
-									<div>Редактор: {members.find((el) => el.user.id == tr.editor_id)?.user?.username || "noname"}</div>
-								}
-								<div>{new Date(tr.updated_at).toLocaleString()}</div>
-
-								{userRole?.permissions?.can_approve &&
-									(!loading
-										? <Button variant={tr.is_approved ? "success" : "outline-success"} onClick={(e) => ChangeApprove(tr.id, !tr.is_approved)}><FaCheck/></Button>
-										: <Button variant={tr.is_approved ? "success" : "outline-success"} disabled><Spinner size="sm"/></Button>
-									)
-								}
-
-								{(userRole?.permissions?.can_manage_translations || tr.author_id == user?.id) &&
-								(!loading 
-									? <>
-										<Button variant="outline-primary" onClick={(e) => {
-											setInputTranslation(tr.text)
-											setTranslationEdit(tr)
-										}} ><FaPencilAlt/></Button>
-
-										<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} ><FaTrashAlt/></Button>
-									</>
-									: <>
-										<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
-										<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
-									</>
-								)
-								}
-								
-								<div>
-									<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_plus.length }>
-									{tr.votes_plus.map((vote) => 
-										<Dropdown.Item href={"/users/" + vote.id}>
-										{vote.username}
-										</Dropdown.Item>
-									)}
-									</DropdownButton>
-
-									<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_plus.find((el) => el.id == user?.id) ? "success" : "outline-success"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_plus.find((el) => el.id == user?.id), false)}><FaArrowUp style={{ marginBottom: "3px" }}/></Button>
-
-									<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_minus.find((el) => el.id == user?.id) ? "danger" : "outline-danger"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_minus.find((el) => el.id == user?.id), true)}><FaArrowDown style={{ marginBottom: "3px" }}/></Button>
-
-									<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_minus.length }>
-									{tr.votes_minus.map((vote) => 
-										<Dropdown.Item href={"/users/" + vote.id}>
-											{vote.username}
-										</Dropdown.Item>
-									)}
-									</DropdownButton>
-								</div>
-							</Container>
-						</>
-						)}
 					</Col>
 				</Row>
 			</Container>
