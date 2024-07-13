@@ -5,7 +5,7 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
-import { FaCog, FaFilter, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt } from "react-icons/fa"
+import { FaCog, FaFilter, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt } from "react-icons/fa"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
 import Pagination from 'react-bootstrap/Pagination';
@@ -14,6 +14,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Stack from 'react-bootstrap/Stack';
 import CloseButton from 'react-bootstrap/CloseButton';
+import Spinner from 'react-bootstrap/Spinner';
 
 
 import React, { setState, useEffect, useState, formData, useContext } from "react"
@@ -67,6 +68,9 @@ export default function Editor() {
 	const [roles, setRoles] = useState([]);
 	const [userRole, setUserRole] = useState(null);
 
+	const [loading, setLoading] = useState(false)
+	const [editMode, setEditMode] = useState(false)
+
 	const link = useParams()
 
 	let navigate = useNavigate();
@@ -107,6 +111,7 @@ export default function Editor() {
         }
 
         setUserRole(roles[member.role_id])
+		console.log(roles[member.role_id])
     }
 
 	useEffect(() => {
@@ -118,6 +123,7 @@ export default function Editor() {
     }, [project, user]);
 
 	async function GetStrings() {
+		setLoading(true)
 		try {
 			let strs = await fetchStrings(link["project_id"], link["section_id"], true, true)
 			let sel = -1
@@ -148,6 +154,7 @@ export default function Editor() {
 		} catch (err) {
 			console.log(err)
 		}
+		setLoading(false)
 	}
 
 	function PreudoReload(sel) {
@@ -266,54 +273,64 @@ export default function Editor() {
 	}
 
 	async function AddTranslation() {
+		setLoading(true)
 		try {
 			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations`, "POST", { "text": inputTranslation })
-			UpdateTranslation()
+			await UpdateTranslation()
 		} catch (err) {
 			console.log(err)
 		}
+		setLoading(false)
 	}
 	
 	async function DeleteTranslation(string_id, translation_id) {
+		setLoading(true)
 		try {
 			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${string_id}/translations/${translation_id}`, "DELETE")
-			UpdateTranslation()
+			await UpdateTranslation()
 		} catch (err) {
 			console.log(err)
 		} 
+		setLoading(false)
 	}
 	
 	async function EditTranslation() {
+		setLoading(true)
 		try {
 			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations/${translationEdit.id}`, "PATCH", { "text": inputTranslation })
-			UpdateTranslation()
+			await UpdateTranslation()
 		} catch (err) {
 			console.log(err)
 		} 
+		setLoading(false)
 	}
 
 	async function ChangeVote(translation_id, is_voted, is_minus) {
+		setLoading(true)
 		try {
 			const tr = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations/${translation_id}/
 			${is_voted ? "unvote" : "vote"}	
 			`, "POST", { "is_minus": is_minus },)
 
-			UpdateTranslation(tr)
+			await UpdateTranslation(tr)
 		} catch (err) {
 			console.log(err)
 		} 
+		setLoading(false)
 	}
 
 	async function ChangeApprove(translation_id, approve = true) {
+		setLoading(true)
 		try {
 			const tr = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations/${translation_id}/
 			${approve ? "approve" : "unapprove"}	
 			`, "POST")
 
-			UpdateTranslation(tr)
+			await UpdateTranslation(tr)
 		} catch (err) {
 			console.log(err)
 		} 
+		setLoading(false)
 	}
 
 	function AddFilter(key, value) {
@@ -375,7 +392,7 @@ export default function Editor() {
 					</div>
 					<div className="d-inline-flex align-items-center">
 						<LinkWithTooltip tooltip="Настройки редактора" id="tooltip-settings" where="bottom">
-							<Button variant="outline-dark"><FaCog style={{ marginBottom: "3px" }} /></Button>
+							<Button variant="outline-dark" disabled={true}><FaCog style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</div>
 				</Container>
@@ -401,11 +418,11 @@ export default function Editor() {
 								</Dropdown.Menu>
 							</Dropdown>
 						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Режим редактирования"id="tooltip-settings" where="bottom">
-							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaPencilAlt style={{ marginBottom: "3px" }} /></Button>
+						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
+							<Button variant={editMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }}  onClick={(e) => {setEditMode(!editMode)}} disabled={true || !userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
-							<Button variant="outline-primary" style={{ marginLeft: "10px" }}><FaBook style={{ marginBottom: "3px" }} /></Button>
+							<Button variant="outline-primary" style={{ marginLeft: "10px" }} disabled={true}><FaBook style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
@@ -471,14 +488,19 @@ export default function Editor() {
 				<Row  style={{ height: "100%" }}>
 					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
-								{/* <Col md="auto" className="d-flex align-items-center" style={{ marginRight: "10px", marginTop: "20px" }}>
-									<Form className="d-flex align-items-center">
-										<Form.Group className="mb-3" controlId="formBasicCheckbox">
-											<Form.Check type="checkbox" />
-										</Form.Group>
-									</Form>
-								</Col> */}
+							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curStringIndex ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
+								{userRole?.permissions?.can_manage_strings &&
+									<Dropdown style={{ alignItems: "center", display: "flex" }}>
+										<Dropdown.Toggle variant="outline" data-toggle="dropdown">
+										</Dropdown.Toggle>
+										<Dropdown.Menu>
+											<Dropdown.Item disabled={true}>Редактировать строку</Dropdown.Item>
+											<Dropdown.Item disabled={true}>Удалить строку</Dropdown.Item>
+											<Dropdown.Item disabled={true}>Добавить строку</Dropdown.Item>
+										</Dropdown.Menu>
+									</Dropdown>
+								}
+
 								<Col style={{ marginRight: "10px" }}>
 									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
 									<Stack style={{border: "1px solid", height: "100%", position: "relative", whiteSpace: "pre-wrap"}}>
@@ -525,7 +547,6 @@ export default function Editor() {
 
 					</Col>
 					<Col className="border-start border-end border-bottom" md={4}>
-						<h6> {curString?.context ? `Контекст: ${curString?.context}` : ` ` }</h6>
 						{userRole?.permissions?.can_translate &&
 						<>
 							<Form.Control className="d-flex align-items-start"
@@ -533,19 +554,34 @@ export default function Editor() {
 								as="textarea"
 								value={inputTranslation}
 								placeholder="Ваш вариант перевода..."
-								style={{ marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 							>
 							</Form.Control>
+							<h6> {curString?.context ? `Контекст: ${curString?.context}` : `` }</h6>
+
 						
 							{translationEdit 
 								? 	<>
-										<Button variant="outline-success" style={{ margin: "10px 0px 10px 0px" }} onClick={() => EditTranslation()}><FaPlus style={{ marginBottom: "3px", marginRight: "3px" }} /> Сохранить </Button>
-										<Button variant="outline-danger" style={{ margin: "10px 0px 10px 0px" }} onClick={() => {
-											setTranslationEdit(null)
-											setInputTranslation("")
-										}}><FaPlus style={{ marginBottom: "3px", marginRight: "3px" }} /> Отмена </Button>
+										{!loading 
+											? <>
+												<Button variant="outline-success" onClick={() => EditTranslation()}><FaPlus /> Сохранить </Button>
+												<Button variant="outline-danger" onClick={() => {
+													setTranslationEdit(null)
+													setInputTranslation("")
+												}}><FaPlus /> Отмена </Button>
+											</>
+											:  <>
+											<Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
+											<Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+											</>
+										}
 									</>
-								: 	<Button variant="outline-success" style={{ margin: "10px 0px 10px 0px" }} onClick={() => AddTranslation()}><FaPlus style={{ marginBottom: "3px", marginRight: "3px" }} />  Добавить перевод </Button>
+								: 	<>
+										{!loading 
+											? <Button variant="outline-success" onClick={() => AddTranslation()}><FaPlus /> Добавить перевод </Button>
+											: <Button variant="outline-success" disabled><Spinner size="sm"/> Добавить перевод </Button>
+										}
+									</>
 							}
 						</>
 						}
@@ -566,18 +602,27 @@ export default function Editor() {
 								<div>{new Date(tr.updated_at).toLocaleString()}</div>
 
 								{userRole?.permissions?.can_approve &&
-									<Button variant={tr.is_approved ? "success" : "outline-success"} onClick={(e) => ChangeApprove(tr.id, !tr.is_approved)} style={{ marginLeft: "10px" }}><FaCheck style={{ marginBottom: "3px" }} /></Button>
+									(!loading
+										? <Button variant={tr.is_approved ? "success" : "outline-success"} onClick={(e) => ChangeApprove(tr.id, !tr.is_approved)}><FaCheck/></Button>
+										: <Button variant={tr.is_approved ? "success" : "outline-success"} disabled><Spinner size="sm"/></Button>
+									)
 								}
 
 								{(userRole?.permissions?.can_manage_translations || tr.author_id == user?.id) &&
-									<>
+								(!loading 
+									? <>
 										<Button variant="outline-primary" onClick={(e) => {
 											setInputTranslation(tr.text)
 											setTranslationEdit(tr)
-										}} style={{ marginLeft: "10px" }}><FaPencilAlt style={{ marginBottom: "3px" }} /></Button>
-										
-										<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} style={{ marginLeft: "10px" }}><FaTrashAlt style={{ marginBottom: "3px" }} /></Button>
+										}} ><FaPencilAlt/></Button>
+
+										<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} ><FaTrashAlt/></Button>
 									</>
+									: <>
+										<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+										<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+									</>
+								)
 								}
 								
 								<div>
