@@ -17,10 +17,13 @@ export default function LoadSection() {
     const [sectionType, setSectionType] = useState('text')
     const [stringsError, setStringsError] = useState(null)
     const [strings, setStrings] = useState(null)
+    const [drawStrings, setDrawStrings] = useState(null)
 
     const [loadError, setLoadError] = useState(null)
 
     const [fetchingStringsLoad, setFetchingStringsLoad] = useState(false)
+
+    const [draggedElem, setDraggedElem] = useState(-1)
 
     const link = useParams()
 
@@ -42,6 +45,10 @@ export default function LoadSection() {
     useEffect(() => {
         GetSection()
     }, [])
+
+    useEffect(() => {
+        setDrawStrings(strings)
+    }, [strings])
 
     async function TransformStrings(e) {
         e.preventDefault()
@@ -108,6 +115,18 @@ export default function LoadSection() {
         setFetchingStringsLoad(false)
     }
 
+    function MoveElemTo(pos) {
+        pos = Number(pos)
+        if (draggedElem != -1) {
+            const elem = strings[draggedElem]
+            if (pos >= draggedElem) {
+                setDrawStrings(strings.toSpliced(pos + 1, 0, elem).toSpliced(draggedElem, 1))
+            } else if (pos < draggedElem) {
+                setDrawStrings(strings.toSpliced(draggedElem, 1).toSpliced(pos, 0, elem))
+            }
+        }
+    }
+
 
     return (
         <>
@@ -151,14 +170,29 @@ export default function LoadSection() {
                     </Form>
                     </>
                 }
-                {section && strings &&
+                {section && drawStrings &&
                     <> 
                     <h3 className="mb-3">
                         Итоговое разбиение на строки
                     </h3>
                     <div id="div-strings-to-load" style={{ height: "80vh", overflowY: "auto" }}>
-                        {strings.map((str, i) => 
-                            <Container className="text-left text-break border rounded my-2 pt-3" key={i} style={{whiteSpace: "pre-wrap"}}>
+                        {drawStrings.map((str, i) => 
+                            <Container className="text-left text-break border rounded my-2 pt-3" id={`str${i}`} key={i} style={{whiteSpace: "pre-wrap"}} data-position={i} draggable={true} onDragStart={(e) => {
+                                setDraggedElem(e.currentTarget.dataset.position)
+                            }} 
+                            onDragOver={(e) => {
+                                e.preventDefault()
+                            }}
+                            onDragEnter={(e) => {
+                                MoveElemTo(e.currentTarget.dataset.position)
+                                console.log(e.currentTarget.dataset.position)
+                                e.preventDefault()
+                            }} 
+                            onDrop={(e) => {
+                                console.log("hmmm")
+                                setStrings(drawStrings)
+                                e.preventDefault();
+                            }}>
                             <p className="mb-1 fw-semibold">{str.text}</p>
                             <p className="text-body-secondary mt-0">{str.key && <i> ключ: {str.key}</i>}</p>
                             </Container>

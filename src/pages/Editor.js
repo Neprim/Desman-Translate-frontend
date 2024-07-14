@@ -178,7 +178,6 @@ export default function Editor() {
 
 		setTimeout(() => {
 			SelectString(sel)
-			console.log(sel)
 			let str = document.getElementById('str' + strings[sel].id);
 			str.scrollIntoView({ behavior: "smooth" });
 		}, 100)
@@ -196,6 +195,9 @@ export default function Editor() {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
 		setEditMode(false)
+		let page = Math.floor((curString?.index || 0) / page_size) + 1
+		setCurPage(page)
+		setMiddlePage(page)
 	}, [curString])
 
 	useEffect(() => {
@@ -293,6 +295,7 @@ export default function Editor() {
 				strings[i].index = i
 			}
 			setCurString(null)
+			setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
 			UpdateDrawStrings()
 		} catch (err) {
 			console.log(err)
@@ -334,6 +337,7 @@ export default function Editor() {
 				strings[i].index = i
 			}
 			setCurString(strings[str_index])
+			setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
 			UpdateDrawStrings()
 			setTimeout(() => {
 				setInputText("")
@@ -621,6 +625,8 @@ export default function Editor() {
 
 					</Col>
 					<Col className="border-start border-end border-bottom" md={4}>
+					{curString 
+					? <>
 						{!editMode 
 						? <>
 							{userRole?.permissions?.can_translate &&
@@ -777,6 +783,10 @@ export default function Editor() {
 							}
 						</>
 						}
+					</>
+					: <>
+					</>
+					}
 					</Col>
 				</Row>
 			</Container>
