@@ -530,9 +530,10 @@ export default function Editor() {
 							</Dropdown>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
-							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }}  onClick={(e) => {
+							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} onClick={(e) => {
 								setMoveMode(!moveMode)
 								rearrange_strings = strings
+								UpdateDrawStrings()
 							}} disabled={!userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
@@ -869,7 +870,10 @@ export default function Editor() {
 					}
 				</Button>
 				{!loading &&
-					<Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setMoveMode(false)}}>
+					<Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {
+						setMoveMode(false)
+						UpdateDrawStrings()
+					}}>
 						Отмена
 					</Button>
 				}
