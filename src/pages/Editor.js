@@ -38,6 +38,7 @@ function LinkWithTooltip({ id, children, href, tooltip, where }) {
 
 
 let strings = []
+let rearrange_strings = []
 
 export default function Editor() {
 
@@ -78,7 +79,9 @@ export default function Editor() {
 
 	const [loading, setLoading] = useState(false)
 	const [editMode, setEditMode] = useState(false)
+
 	const [moveMode, setMoveMode] = useState(false)
+	const [draggedElem, setDraggedElem] = useState(-1)
 
 	const link = useParams()
 
@@ -443,6 +446,48 @@ export default function Editor() {
 		}
 	}
 
+	function MoveElemTo(pos) {
+        pos = Number(pos)
+        if (draggedElem != -1) {
+            const elem = rearrange_strings[draggedElem]
+            if (pos >= draggedElem) {
+                setDrawStrings(rearrange_strings.toSpliced(pos + 1, 0, elem).toSpliced(draggedElem, 1))
+            } else if (pos < draggedElem) {
+                setDrawStrings(rearrange_strings.toSpliced(draggedElem, 1).toSpliced(pos, 0, elem))
+            }
+        }
+    }
+
+	async function SaveRearrange() {
+		setLoading(true)
+		try {
+			let ids = []
+			for (const str of rearrange_strings) {
+				ids.push(str.id)
+			}
+			ids = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings`, "PATCH", {
+				strings: ids
+			})
+			let rev_str = {}
+			for (const str of strings) {
+				rev_str[str.id] = str
+			}
+			let strs = []
+			for (let i = 0; i < ids.length; i++) {
+				const id = ids[i]
+				strs.push(rev_str[id])
+				strs[i].index = i
+			}
+
+			strings = strs
+		} catch (err) {
+			console.log(err)
+		}
+		setMoveMode(false)
+		UpdateDrawStrings()
+		setLoading(false)
+	}
+
 	return (
 		<>
 		<div style={{ height: "100vh" }}>
@@ -485,14 +530,17 @@ export default function Editor() {
 							</Dropdown>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
-							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }}  onClick={(e) => {setMoveMode(!moveMode)}} disabled={true || !userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
+							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }}  onClick={(e) => {
+								setMoveMode(!moveMode)
+								rearrange_strings = strings
+							}} disabled={!userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
 							<Button variant="outline-primary" style={{ marginLeft: "10px" }} disabled={true}><FaBook style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
-						{ maxPage > 1 &&
+						{ maxPage > 1 && !moveMode &&
 						<Pagination>
 							{ maxPage > max_page_counter
 							? 	<>
@@ -551,7 +599,8 @@ export default function Editor() {
 				)}
 			</Stack>
 			<Container fluid style={{ height: "80%" }}>
-				<Row  style={{ height: "100%" }}>
+			{!moveMode 
+				? 	<Row  style={{ height: "100%" }}>
 					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
 							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
@@ -579,7 +628,7 @@ export default function Editor() {
 									</Dropdown>
 								}
 
-								<Col style={{ marginRight: "10px" }}>
+								<Col style={{ marginRight: "10px", minWidth: "50%" }}>
 									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
 									<Stack style={{border: "1px solid", height: "100%", position: "relative", whiteSpace: "pre-wrap"}}>
 										<div
@@ -589,7 +638,7 @@ export default function Editor() {
 										>
 											{str.text}
 										</div>
-										<div style={{position: "relative", bottom: "0", padding: "4px"}}>
+										<div className="text-left text-break" style={{position: "relative", bottom: "0", padding: "4px"}}>
 											<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
 												{str.key}
 											</div>
@@ -788,7 +837,44 @@ export default function Editor() {
 					</>
 					}
 					</Col>
-				</Row>
+					</Row>
+				: <>
+				<div id="div-strings-to-load" style={{ height: "95%", overflowY: "auto" }}>
+					{drawStrings.map((str, i) => 
+						<Container className="text-left text-break border rounded my-2 pt-3" id={`str${i}`} key={i} style={{whiteSpace: "pre-wrap"}} data-position={i} draggable={true} onDragStart={(e) => {
+							setDraggedElem(e.currentTarget.dataset.position)
+						}} 
+						onDragOver={(e) => {
+							e.preventDefault()
+						}}
+						onDragEnter={(e) => {
+							MoveElemTo(e.currentTarget.dataset.position)
+							e.preventDefault()
+						}} 
+						onDrop={(e) => {
+							rearrange_strings = drawStrings
+							e.preventDefault();
+						}}>
+						<p className="mb-1 fw-semibold">{str.text}</p>
+						<p className="text-body-secondary mt-0">{str.key && <i> ключ: {str.key}</i>}</p>
+						</Container>
+					)}
+				</div>
+				<Button className="mt-2 me-2" type="submit" variant="primary" disabled={loading} onClick={SaveRearrange}>
+					{loading
+						?  <Spinner animation="border" role="output" size="sm">
+							<span className="visually-hidden">Загрузка...</span>
+						</Spinner>
+						:  <span>Сохранить</span>
+					}
+				</Button>
+				{!loading &&
+					<Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setMoveMode(false)}}>
+						Отмена
+					</Button>
+				}
+				</>
+			}
 			</Container>
 		</div>
 		</>
