@@ -198,9 +198,11 @@ export default function Editor() {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
 		setEditMode(false)
+		if (curString) {
 		let page = Math.floor((curString?.index || 0) / page_size) + 1
-		setCurPage(page)
-		setMiddlePage(page)
+			setCurPage(page)
+			setMiddlePage(page)
+		}
 	}, [curString])
 
 	useEffect(() => {
