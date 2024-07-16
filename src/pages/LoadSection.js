@@ -127,6 +127,16 @@ export default function LoadSection() {
         }
     }
 
+    function CheckStringsType() {
+        const loaded_strings = document.getElementById("settings-loaded-strings").value
+        try {
+            JSON.parse(loaded_strings)
+        } catch (err) {
+            return
+        }
+        document.getElementById("settings-strings-type").value = "json"
+    }
+
 
     return (
         <>
@@ -151,7 +161,7 @@ export default function LoadSection() {
                     </Form.Group>
                     <Form.Group>
                         <Form.Label htmlFor="settings-loaded-strings" className="form-label mt-2">Текст для загрузки</Form.Label>
-                        <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-strings"/>
+                        <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-strings" onChange={(e) => {CheckStringsType()}}/>
                         {stringsError && 
                             <div id="stringsError" className="form-text">
                                 {stringsError}

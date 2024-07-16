@@ -42,6 +42,9 @@ function Project(props) {
     const [userRole, setUserRole] = useState(null);
     const [inviteError, setInviteError] = useState(null)
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
+    const [addChapterToggle, setAddChapterToggle] = useState(false);
+
+    const [loading, setLoading] = useState(false)
 
     const fieldInviteUserChange = event => setFieldInviteUser(event.target.value);
 
@@ -51,12 +54,20 @@ function Project(props) {
 
     async function GetProject() {
         try {
-            let project = await fetchProject(link["project_id"], true, true, true)
-            project.statistics.completeness = project.statistics.strings_amount ? project.statistics.translated_strings_amount / project.statistics.strings_amount * 100 : 0
-            project.statistics.completeness = Math.floor(project.statistics.completeness * 100) / 100
+            let project = await fetchProject(link["project_id"], true, true, false)
             setProject(project)
             setMembers(project.members)
             setRoles(project.roles)
+            
+            project = await fetchProject(link["project_id"], true, true, true)
+            setProject(project)
+            setMembers(project.members)
+            setRoles(project.roles)
+
+            if (project.statistics) {
+                project.statistics.completeness = project.statistics.strings_amount ? project.statistics.translated_strings_amount / project.statistics.strings_amount * 100 : 0
+                project.statistics.completeness = Math.floor(project.statistics.completeness * 100) / 100
+            }
         } catch (err) {
             console.log(err)
             if (err.status == 404) {
@@ -70,13 +81,17 @@ function Project(props) {
 
     async function GetSections() {
         try {
-            let sections = await fetchSections(link["project_id"], true)
+            let sections = await fetchSections(link["project_id"], false)
+            setSections(sections)
+            
+            sections = await fetchSections(link["project_id"], true)
             for (let sec of sections) {
-                sec.statistics.completeness = sec.statistics.strings_amount ? sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100 : 0
-                sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
+                if (sec.statistics.translated_strings_amount) {
+                    sec.statistics.completeness = sec.statistics.strings_amount ? sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100 : 0
+                    sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
+                }
             }
             setSections(sections)
-            console.log(sections)
         } catch (err) {
 
         }
@@ -156,24 +171,26 @@ function Project(props) {
     }
 
     useEffect(() => {
-        openConnection(`/projects/${link["project_id"]}`)
+        // openConnection(`/projects/${link["project_id"]}`)
     }, [])
 
     useEffect(() => {
-        GetProject();
-    }, []);
+        GetProject()
+    }, [])
 
     useEffect(() => {
-        GetUserRole();
-    }, [project, user]);
+        GetUserRole()
+    }, [project, user])
 
     useEffect(() => {
-        GetSections();
-    }, []);
+        if (!project || sections.length)
+            return
+        GetSections()
+    }, [project])
 
     useEffect(() => {
-        GetInvites();
-    }, [userRole, project]);
+        GetInvites()
+    }, [userRole, project])
 
     // TODO
     // Поменять всё на ref вместо getElementById
@@ -194,35 +211,41 @@ function Project(props) {
     }
 
     async function AddChapter() {
+        setLoading(true)
         try {
             await fetchSomeAPI(`/api/projects/${project.id}/sections`, "POST", {
                 name: document.getElementById("inputSectionName").value
             })
-            GetSections()
-            document.getElementById('divAddChapter').hidden = true
+            await GetSections()
+            setAddChapterToggle(false)
         } catch (err) {
             console.log(err)
         }
+        setLoading(false)
     }
 
     async function DeleteSection(section_id) {
+        setLoading(true)
         try {
             await fetchSomeAPI(`/api/projects/${project.id}/sections/${section_id}`, "DELETE")
-            GetSections()
+            await GetSections()
         } catch (err) {
             console.log(err)
         }
+        setLoading(false)
     }
 
     async function ChangeRole(user_id, role_id) {
+        setLoading(true)
         try {
             await fetchSomeAPI(`/api/projects/${project.id}/members/${user_id}/grant_role`, "POST", {
                 role_id: role_id,
             })
-            GetProject()
+            await GetProject()
         } catch (err) {
             console.log(err)
         }
+        setLoading(false)
     }
 
     async function DownloadOriginal(index) {
@@ -306,11 +329,9 @@ function Project(props) {
     function TimestampToTimeSince(timestamp) {
         if (timestamp == 0)
             return ""
-        console.log(timestamp)
         const delta = (Date.now() - timestamp) / 1000
-        console.log(delta)
         if (delta < 60)
-            return `${delta} сек. назад`
+            return `${Math.round(delta)} сек. назад`
         if (delta < 60 * 60)
             return `${Math.round(delta / 60)} мин. назад`
         if (delta < 60 * 60 * 24)
@@ -354,11 +375,14 @@ function Project(props) {
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {kostyl_lang_tr[project?.target_lang]}</div>
                                     <div className="py-2 border-bottom"><b>Дата создания:</b> {new Date(project?.created_at).toLocaleDateString()}</div>
                                     <div className="py-2 border-bottom"><b>Статус:</b> {kostyl_status_tr[project?.status]}</div>
-                                    <div className="py-2 border-bottom"><b>Прогресс: {project.statistics.completeness}%</b>
-                                        <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
-                                            <ProgressBar className="progress" striped animated label={`${project.statistics.completeness}%`} style={{ width: project.statistics.completeness + '%' }} aria-valuenow={project.statistics.completeness} aria-valuemin={0} aria-valuemax={100}/>
+                                    {project?.statistics?.completeness
+                                    ?   <div className="py-2 border-bottom"><b>Прогресс: {project?.statistics?.completeness}%</b>
+                                            <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
+                                                <ProgressBar className="progress" striped animated label={`${project?.statistics?.completeness}%`} style={{ width: project?.statistics?.completeness + '%' }} aria-valuenow={project?.statistics?.completeness} aria-valuemin={0} aria-valuemax={100}/>
+                                            </div>
                                         </div>
-                                    </div>
+                                    :   <div className="py-2 border-bottom"><b>Прогресс: <Spinner size="sm"/>%</b></div>
+                                    }
                                     { userRole &&
                                     <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
                                     }
@@ -366,9 +390,6 @@ function Project(props) {
                             }
                         </Row>
                         <h2>Разделы</h2>
-                        {userRole?.permissions?.can_manage_sections && 
-                        <Button type="submit" variant="primary" onClick={(e) => document.getElementById('divAddChapter').hidden = false}>Добавить раздел</Button>
-                        }
                         <table className="table table-striped">
                             <thead>
                                 <tr>
@@ -384,20 +405,21 @@ function Project(props) {
                                     <tr key={section.id}>
                                         <th scope="row">{index + 1}</th>
                                         <td>
-                                        {section.statistics.strings_amount > 0 &&
+                                        {!section.statistics || section?.statistics?.strings_amount > 0 &&
                                             <Link to={`/projects/${project.id}/sections/${section.id}/editor`} className="link-primary">
                                                 {section.name}
                                             </Link>
                                         }
-                                        {section.statistics.strings_amount == 0 &&
+                                        {section?.statistics?.strings_amount == 0 &&
                                             section.name
                                         }
                                             
                                         </td>
-                                        {section.statistics.strings_amount > 0
-                                            ?   <>
-                                                    <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
-                                                </>
+                                        {section?.statistics?.strings_amount > 0
+                                            ?   <>{section.statistics.translated_strings_amount 
+                                                    ? <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
+                                                    : <td><Spinner size="sm"/></td>
+                                                }</>
                                             :   <>   
                                                     <td>
                                                         <Link to={`/projects/${project.id}/sections/${section.id}/load_strings`} className="link-primary">
@@ -406,9 +428,10 @@ function Project(props) {
                                                     </td>
                                                 </>
                                         }
-                                        <td>
-                                            <span title={new Date(section.statistics.last_update).toLocaleString()}>{TimestampToTimeSince(section.statistics.last_update)}</span>
-                                        </td>
+                                        <td>{section?.statistics?.last_update
+                                            ? <span title={new Date(section?.statistics?.last_update).toLocaleString()}>{TimestampToTimeSince(section?.statistics?.last_update)}</span>
+                                            : <span><Spinner size="sm"/></span>
+                                        }</td>
                                         <td>
                                             <Dropdown>
                                                 <Dropdown.Toggle data-toggle="dropdown">
@@ -418,7 +441,7 @@ function Project(props) {
                                                     <Dropdown.Item onClick={(e) => DownloadTranslation(index)}>
                                                         Скачать перевод
                                                     </Dropdown.Item>
-                                                {userRole?.permissions?.can_translate && section.statistics.strings_amount > 0 &&
+                                                {userRole?.permissions?.can_translate && section?.statistics?.strings_amount > 0 &&
                                                     <Dropdown.Item onClick={(e) => UploadTranslations(section.id)}>
                                                        Загрузить перевод
                                                     </Dropdown.Item>
@@ -441,19 +464,29 @@ function Project(props) {
                                 )}
                             </tbody>
                         </table>
-                        <Form className="mb-2" id="divAddChapter" hidden>
+                        {userRole?.permissions?.can_manage_sections && 
+                            <Button type="submit" variant="primary" hidden={addChapterToggle} onClick={(e) => setAddChapterToggle(true)}>Добавить раздел</Button>
+                        }
+                        <Form className="mb-2" id="divAddChapter" hidden={!addChapterToggle}>
                             <Form.Control
                                 type="text"
                                 className="mb-2"
                                 id="inputSectionName"
                                 placeholder="Название главы"
                             />
-                            <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); AddChapter()}}>
-                                Добавить
-                            </Button>
-                            <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); e.target.closest("form").hidden = true}}>
-                                Отмена
-                            </Button>
+                            {!loading  
+                            ? <>
+                                <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); AddChapter()}}>
+                                    Добавить
+                                </Button>
+                                <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); setAddChapterToggle(false)}}>
+                                    Отмена
+                                </Button>
+                            </>
+                            : <>
+                                <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> Добавить</Button>
+                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> Отмена</Button>
+                            </>}
                         </Form>
                     </Tab>
                     <Tab eventKey="members" title="Участники">
