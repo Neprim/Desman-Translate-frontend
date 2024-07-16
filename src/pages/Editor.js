@@ -186,15 +186,22 @@ export default function Editor() {
 
 			if (sel != -1) {
 				SelectString(sel)
-				setTimeout(() => {
-					let str = document.getElementById('str' + strings[sel].id);
-					str.scrollIntoView({ behavior: "smooth" });
-				}, 100)
+				ScrollTo('str' + strings[sel].id)
 			}
 		} catch (err) {
 			console.log(err)
 		}
 		setLoading(false)
+	}
+
+	function ScrollTo(id) {
+		setTimeout(() => {
+			let str = document.getElementById(id);
+			if (!str)
+				ScrollTo(id)
+			else
+				str.scrollIntoView({ behavior: "smooth" });
+		}, 100)
 	}
 
 	function PreudoReload(sel) {
@@ -207,11 +214,10 @@ export default function Editor() {
 		console.log("PseudoReload")
 		console.log(curPage)
 
-		setTimeout(() => {
+		if (sel != -1) {
 			SelectString(sel)
-			let str = document.getElementById('str' + strings[sel].id);
-			str.scrollIntoView({ behavior: "smooth" });
-		}, 100)
+			ScrollTo('str' + strings[sel].id)
+		}
 	}
 
 	function SelectString(str_index) {
@@ -284,7 +290,7 @@ export default function Editor() {
 	}
 
 	useEffect(() => {
-		if (!curString)
+		if (!curString || !curString.dicts)
 			return 
 		
 		let warn = ""
