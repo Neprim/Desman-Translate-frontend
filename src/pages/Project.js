@@ -510,7 +510,7 @@ function Project(props) {
                                                     </td>
                                                 </>
                                         }
-                                        <td>{section?.statistics?.last_update
+                                        <td>{section?.statistics?.last_update != undefined
                                             ? <span title={new Date(section?.statistics?.last_update).toLocaleString()}>{TimestampToTimeSince(section?.statistics?.last_update)}</span>
                                             : <span><Spinner size="sm"/></span>
                                         }</td>
