@@ -16,7 +16,7 @@ import { AuthContext } from "../AuthContext";
 import { openConnection } from "../WSController";
 import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites, fetchStrings } from "../APIController";
 import { ProgressBar, Stack } from "react-bootstrap";
-import { FaRegTrashAlt, FaBars } from "react-icons/fa"
+import { FaRegTrashAlt, FaBars, FaTrashAlt, FaPlus, FaPenAlt } from "react-icons/fa"
 import Dropdown from 'react-bootstrap/Dropdown';
 
 const kostyl_lang_tr = {
@@ -35,6 +35,7 @@ function Project(props) {
     const { user } = useContext(AuthContext);
 
     const [project, setProject] = useState(null);
+    const [dictionary, setDictionary] = useState([]);
     const [members, setMembers] = useState([]);
     const [sections, setSections] = useState([]);
     const [roles, setRoles] = useState([]);
@@ -43,8 +44,31 @@ function Project(props) {
     const [inviteError, setInviteError] = useState(null)
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
     const [addChapterToggle, setAddChapterToggle] = useState(false);
-
+    
     const [loading, setLoading] = useState(false)
+    
+    const [inputWord, setInputWord] = useState("")
+    const [inputWordKey, setInputWordKey] = useState("")
+    const [inputTranslate, setInputTranslate] = useState("")
+    const [inputTranslateKey, setInputTranslateKey] = useState("")
+    const [inputDescription, setInputDescription] = useState("")
+    
+    const [dictError, setDictError] = useState(null)
+    const [editDict, setEditDict] = useState(null)
+
+	const wordChange 		    = e => {
+        setInputWord(e.target.value)
+        document.getElementById("form-word-key").value = e.target.value
+        setInputWordKey(e.target.value)
+    }
+	const wordKeyChange 		= e => setInputWordKey(e.target.value);
+    const descriptionChange 	= e => setInputDescription(e.target.value);
+	const translateChange 	    = e => {
+        setInputTranslate(e.target.value)
+        document.getElementById("form-translate-key").value = e.target.value
+        setInputTranslateKey(e.target.value)
+    }
+	const translateKeyChange 	= e => setInputTranslateKey(e.target.value);
 
     const fieldInviteUserChange = event => setFieldInviteUser(event.target.value);
 
@@ -112,6 +136,16 @@ function Project(props) {
         setUserRole(roles[member.role_id])
     }
 
+    async function GetDictionary() {
+        try {
+            let dict = await fetchSomeAPI(`/api/projects/${link["project_id"]}/dictionary`)
+            console.log(dict)
+            setDictionary(dict)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     async function SendInvite() {
         if (fieldInviteUser == "")
             return
@@ -176,6 +210,7 @@ function Project(props) {
 
     useEffect(() => {
         GetProject()
+        GetDictionary()
     }, [])
 
     useEffect(() => {
@@ -348,6 +383,53 @@ function Project(props) {
 		// if($t < 60 * 60 * 24 * 30 * 12) return round($this->idle_time / 2592000) . " мес.";
 		// return "> 1 года.";
     }
+
+    async function DeleteDictEntry(dict_id) {
+        setLoading(true)
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/dictionary/${dict_id}`, "DELETE")
+            await GetDictionary()
+        } catch (err) {
+            console.log(err)
+        }
+        setLoading(false)
+    }
+
+    async function AddWord() {
+        setLoading(true)
+        setDictError(null)
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/dictionary`, "POST", {
+                word: inputWord,
+                word_key: inputWordKey,
+                translate: inputTranslate,
+                translate_key: inputTranslateKey,
+                desc: inputDescription
+            })
+            await GetDictionary()
+        } catch (err) {
+            setDictError(JSON.stringify(err))
+        }
+        setLoading(false)
+    }
+
+    async function SaveWord() {
+        setLoading(true)
+        setDictError(null)
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/dictionary/${editDict}`, "PATCH", {
+                word: inputWord,
+                word_key: inputWordKey,
+                translate: inputTranslate,
+                translate_key: inputTranslateKey,
+                desc: inputDescription
+            })
+            await GetDictionary()
+        } catch (err) {
+            setDictError(JSON.stringify(err))
+        }
+        setLoading(false)
+    }
     
     return (
         <>
@@ -488,6 +570,136 @@ function Project(props) {
                                 <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> Отмена</Button>
                             </>}
                         </Form>
+                    </Tab>
+                    <Tab eventKey="dictionary" title="Словарь">
+                        <div className="row">
+                            <div className="col-8">
+                                <h2>Словарь</h2>
+                                <table className="table table-striped align-items-center">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Слово</th>
+                                            <th scope="col">Перевод</th>
+                                            <th scope="col">Описание</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {dictionary.map((dict, index) =>
+                                            <tr key={dict.word} className={(dict.id == editDict ? "table-secondary" : "")}>
+                                                <td>{dict.word}</td>
+                                                <td>{dict.translate}</td>
+                                                <td>{dict.desc}</td>
+                                                {(userRole?.permissions?.can_manage_strings) &&
+                                                    <td style={{ display: 'inline-flexbox' }}>
+                                                        <div style={{ textAlign: "right" }}>
+                                                            <Button variant="primary" onClick={ function (e) { 
+                                                                setEditDict(dict.id) 
+                                                                setInputWord(dict.word)
+                                                                setInputWordKey(dict.word_key)
+                                                                setInputTranslate(dict.translate)
+                                                                setInputTranslateKey(dict.translate_key)
+                                                                setInputDescription(dict.desc)
+                                                            } }>
+                                                                <FaPenAlt/>
+                                                            </Button>
+                                                            <Button variant="danger" onClick={ function (e) { DeleteDictEntry(dict.id) } }>
+                                                                <FaTrashAlt/>
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                }
+                                                <td></td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {userRole?.permissions?.can_manage_strings &&
+                                <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
+                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Добавить слово</h3>
+                                    <Form>
+                                        <h6>Текст:</h6>
+                                        <Form.Control className="d-flex align-items-start"
+                                            onChange={wordChange}
+                                            as="textarea"
+                                            value={inputWord}
+                                            placeholder="Слово"
+                                            id="form-word"
+                                            style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+                                        >
+                                        </Form.Control>
+                                        <h6>Ключ слова:</h6>
+                                        <Form.Control className="d-flex align-items-start"
+                                            onChange={wordKeyChange}
+                                            as="textarea"
+                                            value={inputWordKey}
+                                            placeholder="Ключ слова"
+                                            id="form-word-key"
+                                            style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+                                        >
+                                        </Form.Control>
+                                        <h6>Перевод:</h6>
+                                        <Form.Control className="d-flex align-items-start"
+                                            onChange={translateChange}
+                                            as="textarea"
+                                            value={inputTranslate}
+                                            placeholder="Перевод слова"
+                                            id="form-translate"
+                                            style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+                                        >
+                                        </Form.Control>
+                                        <h6>Ключ перевода:</h6>
+                                        <Form.Control className="d-flex align-items-start"
+                                            onChange={translateKeyChange}
+                                            as="textarea"
+                                            value={inputTranslateKey}
+                                            placeholder="Ключ перевода"
+                                            id="form-translate-key"
+                                            style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+                                        >
+                                        </Form.Control>
+                                        <h6>Описание:</h6>
+                                        <Form.Control className="d-flex align-items-start"
+                                            onChange={descriptionChange}
+                                            as="textarea"
+                                            value={inputDescription}
+                                            placeholder="Описание"
+                                            id="form-description"
+                                            style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+                                        >
+                                        </Form.Control>
+                                    
+                                        {!loading 
+                                            ? <>{!editDict
+                                                ? <>
+                                                    <Button type="submit" variant="outline-success" onClick={() => AddWord()}><FaPlus /> Добавить </Button>
+                                                </>
+                                                : <>
+                                                    <Button type="submit" variant="outline-success" onClick={() => SaveWord()}><FaPlus /> Сохранить </Button>
+                                                    <Button variant="outline-danger" onClick={() => {
+                                                        setEditDict(null)
+                                                    }}><FaPlus /> Отмена </Button>
+                                                </>
+                                            }</>
+                                            :  <>{!editDict
+                                                ? <>
+                                                    <Button variant="outline-success" disabled><Spinner size="sm"/> Добавить </Button>
+                                                </>
+                                                : <>
+                                                    <Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
+                                                    <Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+                                                </>
+                                            }</>
+                                        }
+                                    </Form>
+                                    {dictError && 
+                                        <div id="dictError" className="form-text">
+                                            {dictError}
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </Tab>
                     <Tab eventKey="members" title="Участники">
                         <div className="row">

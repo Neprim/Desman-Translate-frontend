@@ -39,6 +39,7 @@ function LinkWithTooltip({ id, children, href, tooltip, where }) {
 
 let strings = []
 let rearrange_strings = []
+let dictionary = []
 
 export default function Editor() {
 
@@ -76,13 +77,13 @@ export default function Editor() {
 	const [members, setMembers] = useState([]);
 	const [roles, setRoles] = useState([]);
 	const [userRole, setUserRole] = useState(null);
-
+	
 	const [loading, setLoading] = useState(false)
 	const [editMode, setEditMode] = useState(false)
-
+	
 	const [moveMode, setMoveMode] = useState(false)
 	const [draggedElem, setDraggedElem] = useState(-1)
-
+	
 	const link = useParams()
 
 	let navigate = useNavigate();
@@ -110,6 +111,16 @@ export default function Editor() {
         }
     }
 
+	async function GetDictionary() {
+        try {
+            let dict = await fetchSomeAPI(`/api/projects/${link["project_id"]}/dictionary`)
+            console.log(dict)
+            dictionary = dict
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
 	async function GetUserRole() {
         if (!user)
             return
@@ -127,12 +138,13 @@ export default function Editor() {
     }
 
 	useEffect(() => {
-        GetProject();
-    }, []);
+        GetProject()
+		GetDictionary()
+    }, [])
 
 	useEffect(() => {
         GetUserRole();
-    }, [project, user]);
+    }, [project, user])
 
 	async function GetStrings() {
 		setLoading(true)
@@ -539,7 +551,10 @@ export default function Editor() {
 							}} disabled={!userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
-							<Button variant="outline-primary" style={{ marginLeft: "10px" }} disabled={true}><FaBook style={{ marginBottom: "3px" }} /></Button>
+							<Dropdown>
+								<Dropdown.Toggle as={DictionaryButton}></Dropdown.Toggle>
+								<Dropdown.Menu as={DictionaryForm} data={dictionary}></Dropdown.Menu>
+							</Dropdown>
 						</LinkWithTooltip>
 					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
@@ -898,11 +913,11 @@ const FilterButton = React.forwardRef(({ children, onClick }, ref) => (
 
 const FilterForm = React.forwardRef(
 	({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
-	const [key, setKey] = useState("orig")
-	const [value, setValue] = useState("")
-
-	return <>
-	<div id="filter" ref={ref} className={className} style={{backgroundColor: "white", position: "absolute", padding: "15px 15px 15px", width: "250px"}}
+		const [key, setKey] = useState("orig")
+		const [value, setValue] = useState("")
+		
+		return <>
+	<div id="filter" ref={ref} className={className} style={{backgroundColor: "white", position: "absolute", padding: "15px 15px 15px", minWidth: "250px"}}
 	onClose={(e) => {
 		console.log("hmm")
 	}}>
@@ -924,6 +939,42 @@ const FilterForm = React.forwardRef(
 			</Form.Select>
 		}
 		{children}
+	</div>
+	</>
+})
+
+const DictionaryButton = React.forwardRef(({ children, onClick }, ref) => (
+	<Button ref={ref} variant="outline-primary" style={{ marginLeft: "10px" }} onClick={(e) => {
+		e.preventDefault();
+		onClick(e);
+	}}><FaBook style={{ marginBottom: "3px" }} /></Button>
+));
+
+const DictionaryForm = React.forwardRef(
+	({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
+	return <>
+	<div id="filter" ref={ref} className={className} style={{backgroundColor: "white", position: "absolute", padding: "15px 15px 15px", minWidth: "400px"}}
+	onClose={(e) => {
+		console.log("hmm")
+	}}>
+		<table className="table align-items-center">
+			<thead>
+				<tr>
+					<th scope="col">Слово</th>
+					<th scope="col">Перевод</th>
+					<th scope="col">Описание</th>
+				</tr>
+			</thead>
+			<tbody>
+				{dictionary.map((dict, index) =>
+					<tr key={dict.word}>
+						<td>{dict.word}</td>
+						<td>{dict.translate}</td>
+						<td>{dict.desc}</td>
+					</tr>
+				)}
+			</tbody>
+		</table>
 	</div>
 	</>
 })
