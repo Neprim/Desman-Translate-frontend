@@ -6,6 +6,7 @@ import Col from "react-bootstrap/Col"
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
 import { FaCog, FaFilter, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt } from "react-icons/fa"
+import { CiWarning } from "react-icons/ci"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
 import Pagination from 'react-bootstrap/Pagination';
@@ -66,7 +67,7 @@ export default function Editor() {
 
 	const [filters, setFilters] = useState([])
 	
-	const translationChange = e => setInputTranslation(e.target.value);
+	const translationChange = e => setInputTranslation(e.target.value)
 	const textChange 		= e => setInputText(e.target.value);
 	const keyChange 		= e => setInputKey(e.target.value);
 	const contextChange 	= e => setInputContext(e.target.value);
@@ -83,6 +84,8 @@ export default function Editor() {
 	
 	const [moveMode, setMoveMode] = useState(false)
 	const [draggedElem, setDraggedElem] = useState(-1)
+
+	const [translateWarning, setTranslateWarning] = useState("")
 	
 	const link = useParams()
 
@@ -116,6 +119,15 @@ export default function Editor() {
             let dict = await fetchSomeAPI(`/api/projects/${link["project_id"]}/dictionary`)
             console.log(dict)
             dictionary = dict
+
+			for (let dict of dictionary) {
+				dict.word_key = new RegExp(dict.word_key, 'gi')
+				dict.translate_key = new RegExp(dict.translate_key, 'gi')
+			}
+
+			if (strings.length) {
+				FindWordsInStrings()
+			}
         } catch (err) {
             console.log(err)
         }
@@ -165,6 +177,10 @@ export default function Editor() {
 
 			strings = strs
 			console.log(strings)
+
+			if (dictionary.length) {
+				FindWordsInStrings()
+			}
 			
 			UpdateDrawStrings()
 
@@ -223,6 +239,62 @@ export default function Editor() {
 		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
 		setCurString(null)
 	}, [filters])
+
+	function FindWordsInString(str) {
+		let draw_text = []
+		let words = []
+		let dicts = []
+		for (let i = 0; i < dictionary.length; i++) {
+			const d = dictionary[i]
+			for (let f of str.text.matchAll(d.word_key, 'gi')) {
+				words.push({dict: i, ind: f.index, word: f[0]})
+			}
+		}
+		words = words.sort((a, b) => a.ind - b.ind)
+		let cur = 0
+		for (let i = 0; i < words.length; i++) {
+			if (words[i].ind < cur)
+				continue
+			draw_text.push({text: str.text.substring(cur, words[i].ind)})
+			draw_text.push({text: words[i].word, desc: dictionary[words[i].dict].desc})
+			dicts.push(i)
+
+			cur = words[i].ind + words[i].word.length
+		}
+		draw_text.push({text: str.text.substring(cur)})
+
+		draw_text = draw_text.map((word) => {
+			if (word.desc) {
+				return <abbr title={word.desc}>{word.text}</abbr>
+			}
+			return word.text
+		})
+
+		str.draw_text = draw_text
+		str.dicts = dicts
+		return str
+	}
+
+	function FindWordsInStrings() {
+		for (let i = 0; i < strings.length; i++) {
+			strings[i] = FindWordsInString(strings[i])
+		}
+
+		UpdateDrawStrings()
+	}
+
+	useEffect(() => {
+		if (!curString)
+			return 
+		
+		let warn = ""
+		for (let i of curString.dicts) {
+			if (!inputTranslation.match(dictionary[i]?.translate_key)) {
+				warn += `Отсутствует перевод "${dictionary[i].translate}"\n`
+			}
+		}
+		setTranslateWarning(warn)
+	}, [inputTranslation])
 
 	function UpdateDrawStrings() {
 		setDrawStrings(FilterStrings())
@@ -654,7 +726,7 @@ export default function Editor() {
 											className="text-left text-break"
 											style={{ paddingTop: "5px", paddingLeft: "10px" }}
 										>
-											{str.text}
+											{str?.draw_text || str.text}
 										</div>
 										<div className="text-left text-break" style={{position: "relative", bottom: "0", padding: "4px"}}>
 											<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
@@ -706,8 +778,22 @@ export default function Editor() {
 									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 								>
 								</Form.Control>
-								<div style={{ color: (inputTranslation.length > curString?.max_tr_length ? "red" : "black") }}>{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(макс. ${curString?.max_tr_length})` : ""}</div>
 								<h6> {curString?.context ? `Контекст: ${curString?.context}` : `` }</h6>
+								<div style={{ color: (inputTranslation.length > curString?.max_tr_length ? "red" : "black") }}>
+									{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(макс. ${curString?.max_tr_length})` : ""}
+									{translateWarning &&
+										<OverlayTrigger
+											placement="top"
+											overlay={
+											<Tooltip>
+												{translateWarning}
+											</Tooltip>
+											}
+										>
+											<Button variant="warning" size="sm"><CiWarning/></Button>
+										</OverlayTrigger>
+									}
+								</div>
 
 							
 								{translationEdit 
