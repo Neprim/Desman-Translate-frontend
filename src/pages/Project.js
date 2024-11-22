@@ -488,7 +488,7 @@ function Project(props) {
                                         <th scope="row">{index + 1}</th>
                                         <td>
                                         {!section.statistics || section?.statistics?.strings_amount > 0 &&
-                                            <Link to={`/projects/${project.id}/sections/${section.id}/editor`} className="link-primary">
+                                            <Link to={`/projects/${project.id}/editor/${section.id.toString(16)}`} className="link-primary">
                                                 {section.name}
                                             </Link>
                                         }

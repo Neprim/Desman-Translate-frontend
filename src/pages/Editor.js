@@ -1,3 +1,4 @@
+import '../misc.css';
 import Button from "react-bootstrap/Button"
 import Container from 'react-bootstrap/Container'
 import Form from "react-bootstrap/Form"
@@ -21,7 +22,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import React, { setState, useEffect, useState, formData, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { FormLabel, OverlayTrigger, Tooltip } from "react-bootstrap"
-import { fetchSomeAPI, fetchProject, fetchStrings, fetchString, fetchSection } from "../APIController"
+import { fetchSomeAPI, fetchProject, fetchStrings, fetchString, fetchSection, fetchSections } from "../APIController"
 
 function LinkWithTooltip({ id, children, href, tooltip, where }) {
 	return (
@@ -74,7 +75,7 @@ export default function Editor() {
 	const maxLengthChange 	= e => setInputMaxLength(e.target.value);
 
 	const [project, setProject] = useState({});
-	const [section, setSection] = useState({});
+	const [sections, setSections] = useState([]);
 	const [members, setMembers] = useState([]);
 	const [roles, setRoles] = useState([]);
 	const [userRole, setUserRole] = useState(null);
@@ -99,10 +100,26 @@ export default function Editor() {
         try {
             let project = await fetchProject(link["project_id"], true, true)
             setProject(project)
+			console.log(project)
             setMembers(project.members)
             setRoles(project.roles)
 
-			setSection(await fetchSection(link["project_id"], link["section_id"]))
+			let secs = []
+
+			if (link["sections_list"] == 'all') {
+				secs = (await fetchSections(link["project_id"]))
+			} else {
+				let sec_ids = link["sections_list"].split("_").map((x) => parseInt(x, 16))
+				secs = []
+				for (const id of sec_ids) {
+					secs.push(await fetchSection(link["project_id"], id))
+				}
+				console.log(secs)
+			}
+
+			setSections(secs)
+			
+			// setSections(await fetchSection(link["project_id"], link["section_id"]))
         } catch (err) {
             console.log(err)
             if (err.status == 404) {
@@ -161,7 +178,24 @@ export default function Editor() {
 	async function GetStrings() {
 		setLoading(true)
 		try {
-			let strs = await fetchStrings(link["project_id"], link["section_id"], true, true)
+			let sec_ids = []
+
+			if (link["sections_list"] == 'all') {
+				sec_ids = (await fetchSections(link["project_id"])).map((x) => x.id)
+			} else {
+				sec_ids = link["sections_list"].split("_").map((x) => parseInt(x, 16))
+			}
+
+			let strs = []
+			for (let i = 0; i < sec_ids.length; i++) {
+				const id = sec_ids[i]
+				let strs_t = await fetchStrings(link["project_id"], id, true, true)
+				for (let str of strs_t) {
+					str.sec_ind = i
+					strs.push(str)
+				}
+			}
+			// console.log(strs)
 			let sel = -1
 
 			for (let i = 0; i < strs.length; i++) {
@@ -358,8 +392,9 @@ export default function Editor() {
 	}
 
 	async function UpdateTranslation() {
-		const str = await fetchString(link["project_id"], link["section_id"], curString.id, true, true)
-		strings[curString.index] = {...str, index: curString.index}
+		const sec = sections[curString.sec_ind]
+		const str = await fetchString(link["project_id"], sec.id, curString.id, true, true)
+		strings[curString.index] = {...curString, ...str}
 		setCurString(strings[curString.index])
 		UpdateDrawStrings()
 	}
@@ -373,7 +408,8 @@ export default function Editor() {
 	async function AddTranslation() {
 		setLoading(true)
 		try {
-			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations`, "POST", { "text": inputTranslation })
+			const sec = sections[curString.sec_ind]
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${curString.id}/translations`, "POST", { "text": inputTranslation })
 			await UpdateTranslation()
 		} catch (err) {
 			console.log(err)
@@ -384,7 +420,8 @@ export default function Editor() {
 	async function DeleteString(str_index) {
 		setLoading(true)
 		try {
-			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${strings[str_index].id}`, "DELETE")
+			const sec = sections[curString.sec_ind]
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${strings[str_index].id}`, "DELETE")
 			strings.splice(str_index, 1)
 			for (let i = 0; i < strings.length; i++) {
 				strings[i].index = i
@@ -403,7 +440,8 @@ export default function Editor() {
 		setLoading(true)
 		try {
 			const str_index = curString.index
-			let str = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${strings[str_index].id}`, "PATCH", {
+			const sec = sections[curString.sec_ind]
+			let str = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${strings[str_index].id}`, "PATCH", {
 				text: inputText,
 				key: inputKey,
 				context: inputContext,
@@ -426,7 +464,10 @@ export default function Editor() {
 	async function AddString(str_index) {
 		setLoading(true)
 		try {
-			let str = (await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings?pos=${str_index}`, "POST", {text: " "}))[0]
+			// Костыль, по-хорошему указывать главу, в которую добавляем строку.
+			// Но это добавлю как-нибудь потом. Пока что это будет возможно только при одной главе в редакторе.
+			const sec = sections[0]
+			let str = (await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings?pos=${str_index}`, "POST", {text: " "}))[0]
 			strings.splice(str_index, 0, {...str, translations: []})
 			for (let i = 0; i < strings.length; i++) {
 				strings[i].index = i
@@ -447,7 +488,8 @@ export default function Editor() {
 	async function DeleteTranslation(string_id, translation_id) {
 		setLoading(true)
 		try {
-			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${string_id}/translations/${translation_id}`, "DELETE")
+			const sec = sections[curString.sec_ind]
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${string_id}/translations/${translation_id}`, "DELETE")
 			await UpdateTranslation()
 		} catch (err) {
 			console.log(err)
@@ -458,7 +500,8 @@ export default function Editor() {
 	async function EditTranslation() {
 		setLoading(true)
 		try {
-			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations/${translationEdit.id}`, "PATCH", { "text": inputTranslation })
+			const sec = sections[curString.sec_ind]
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${curString.id}/translations/${translationEdit.id}`, "PATCH", { "text": inputTranslation })
 			await UpdateTranslation()
 		} catch (err) {
 			console.log(err)
@@ -469,7 +512,8 @@ export default function Editor() {
 	async function ChangeVote(translation_id, is_voted, is_minus) {
 		setLoading(true)
 		try {
-			const tr = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations/${translation_id}/
+			const sec = sections[curString.sec_ind]
+			const tr = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${curString.id}/translations/${translation_id}/
 			${is_voted ? "unvote" : "vote"}	
 			`, "POST", { "is_minus": is_minus },)
 
@@ -483,7 +527,8 @@ export default function Editor() {
 	async function ChangeApprove(translation_id, approve = true) {
 		setLoading(true)
 		try {
-			const tr = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings/${curString.id}/translations/${translation_id}/
+			const sec = sections[curString.sec_ind]
+			const tr = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings/${curString.id}/translations/${translation_id}/
 			${approve ? "approve" : "unapprove"}	
 			`, "POST")
 
@@ -557,7 +602,9 @@ export default function Editor() {
 			for (const str of rearrange_strings) {
 				ids.push(str.id)
 			}
-			ids = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${link["section_id"]}/strings`, "PATCH", {
+			// Аналогично добавлению, будет доступно только при редактировании одного раздела.
+			const sec = sections[0]
+			ids = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings`, "PATCH", {
 				strings: ids
 			})
 			let rev_str = {}
@@ -591,7 +638,14 @@ export default function Editor() {
 						</LinkWithTooltip>
 					</div>
 					<div className="d-inline-flex align-items-center">
-						<h3 className="pt-1">Раздел: {section.name}</h3>
+						<h3 className="pt-1">
+							{sections.length == 1 
+								? `Раздел: ${sections[0].name}` 
+								: link["sections_list"] == 'all'
+									? "Все разделы"
+								 	: "Разделы: " + sections.map((sec) => sec.name).join("; ")
+							}
+						</h3>
 					</div>
 					<div className="d-inline-flex align-items-center">
 						<LinkWithTooltip tooltip="Настройки редактора" id="tooltip-settings" where="bottom">
@@ -626,7 +680,7 @@ export default function Editor() {
 								setMoveMode(!moveMode)
 								rearrange_strings = strings
 								UpdateDrawStrings()
-							}} disabled={!userRole?.permissions?.can_manage_strings}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
+							}} disabled={!(filters.length == 0 && sections.length == 1 && userRole?.permissions?.can_manage_strings)}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
 							<Dropdown>
@@ -715,7 +769,7 @@ export default function Editor() {
 											<Dropdown.Item onClick={(e) => {
 												DeleteString(str.index)
 											}}>Удалить строку</Dropdown.Item>
-											{filters.length == 0 && 
+											{filters.length == 0 && sections.length == 1 && 
 											<Dropdown.Item onClick={(e) => {
 												AddString(str.index + 1)
 											}}>Добавить строку</Dropdown.Item>
@@ -738,8 +792,13 @@ export default function Editor() {
 											<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
 												{str.key}
 											</div>
+											{sections.length > 1 &&
+												<div class="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+													{sections[str.sec_ind].name}
+												</div>
+											}
 											<div>
-												<a href={`/projects/${link["project_id"]}/sections/${link["section_id"]}/editor#${str.index}`} onClick={(e) => {PreudoReload(str.index)}}>#{str.index + 1}</a>
+												<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index}`} onClick={(e) => {PreudoReload(str.index)}}>#{str.index + 1}</a>
 												{/* <a href={`${window.location.href}#${str.index}`}>#{str.index + 1}</a> */}
 											</div>	
 										</div>	
@@ -902,7 +961,7 @@ export default function Editor() {
 								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 							>
 							</Form.Control>
-							{section?.type == "json" &&  <>
+							{sections[curString.sec_ind]?.type == "json" &&  <>
 								<h6>Ключ:</h6>
 								<Form.Control className="d-flex align-items-start"
 									onChange={keyChange}

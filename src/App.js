@@ -34,7 +34,7 @@ function App() {
           <Route path="signup" element={<Signup />} />
           <Route path="projects/:project_id" element={<Project />} />
           <Route path="create" element={<Create />} />
-          <Route path="projects/:project_id/sections/:section_id/editor" element={<Editor />} />
+          <Route path="projects/:project_id/editor/:sections_list" element={<Editor />} />
           <Route path="notfound" element={<Notfound />} />
           <Route path="users/:user_id" element={<User />} />
           <Route path="projects/:project_id/sections/:section_id/load_strings" element={<LoadSection />} />
