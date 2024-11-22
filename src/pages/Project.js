@@ -283,7 +283,7 @@ function Project(props) {
         setLoading(false)
     }
 
-    async function DownloadOriginal(index) {
+    async function DownloadSectionOriginal(index) {
         const section = sections[index]
         let strings = await fetchStrings(project.id, section.id)
         if (strings.length == 0) {
@@ -312,7 +312,7 @@ function Project(props) {
         DownloadFile(text, filename)
     }
 
-    async function DownloadTranslation(index) {
+    async function DownloadSectionTranslation(index) {
         const section = sections[index]
         let strings = await fetchStrings(project.id, section.id, true)
         if (strings.length == 0) {
@@ -338,6 +338,52 @@ function Project(props) {
         }
 
         DownloadFile(text, filename)
+    }
+
+    async function DownloadProjectTranslation() {
+        setLoading(true)
+        try {
+            let strings = []
+            let type = sections[0].type
+            for (const sec of sections) {
+                if ((sec.type == "json" && type == "text") || (sec.type == "text" && type == "json")) {
+                    alert("Я без понятия, как смешать обычный текст и JSON")
+                    return
+                }
+                let strs = await fetchStrings(project.id, sec.id, true)
+                for (let str of strs) {
+                    strings.push(str)
+                }
+            }
+            // await fetchStrings(project.id, section.id, true)
+            if (strings.length == 0) {
+                alert("А строк то нема")
+                return
+            }
+
+            let filename = project.name
+
+            let text = ""
+            if (type == 'text') {
+                for (const str of strings) {
+                    text += (str.translations?.[0]?.text || str.text) + '\n'
+                }
+                filename += '.txt'
+            } else if (type == 'json') {
+                let strs = {}
+                for (const str of strings) {
+                    strs[str.key] = (str.translations?.[0]?.text || str.text)
+                }
+                text = JSON.stringify(strs, null, 4)
+                filename += '.json'
+            }
+
+            DownloadFile(text, filename)
+        } catch (err) {
+            console.log(err)
+        }
+
+        setLoading(false)
     }
 
     async function DownloadFile(text, filename) {
@@ -474,6 +520,12 @@ function Project(props) {
                                             Загрузить перевод
                                         </Button>
                                     }
+                                    {sections?.length > 0 &&
+                                        <Button onClick={(e) => DownloadProjectTranslation()} disabled={loading}>
+                                            {loading && <Spinner size="sm"/>}
+                                            Скачать перевод
+                                        </Button>
+                                    }
                                 </Col>
                             }
                         </Row>
@@ -531,7 +583,7 @@ function Project(props) {
                                                     <FaBars/>
                                                 </Dropdown.Toggle>
                                                 <Dropdown.Menu>
-                                                    <Dropdown.Item onClick={(e) => DownloadTranslation(index)}>
+                                                    <Dropdown.Item onClick={(e) => DownloadSectionTranslation(index)}>
                                                         Скачать перевод
                                                     </Dropdown.Item>
                                                 {userRole?.permissions?.can_translate && section?.statistics?.strings_amount > 0 &&
@@ -539,7 +591,7 @@ function Project(props) {
                                                        Загрузить перевод
                                                     </Dropdown.Item>
                                                 }
-                                                    <Dropdown.Item onClick={(e) => DownloadOriginal(index)}>
+                                                    <Dropdown.Item onClick={(e) => DownloadSectionOriginal(index)}>
                                                         Скачать оригинал
                                                     </Dropdown.Item>
                                                 {userRole?.permissions?.can_manage_sections && 
