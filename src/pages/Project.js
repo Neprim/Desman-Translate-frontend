@@ -348,7 +348,7 @@ function Project(props) {
             for (const sec of sections) {
                 if ((sec.type == "json" && type == "text") || (sec.type == "text" && type == "json")) {
                     alert("Я без понятия, как смешать обычный текст и JSON")
-                    return
+                    throw "Разные типы разделов"
                 }
                 let strs = await fetchStrings(project.id, sec.id, true)
                 for (let str of strs) {
@@ -358,7 +358,7 @@ function Project(props) {
             // await fetchStrings(project.id, section.id, true)
             if (strings.length == 0) {
                 alert("А строк то нема")
-                return
+                throw "Пустые разделы"
             }
 
             let filename = project.name
