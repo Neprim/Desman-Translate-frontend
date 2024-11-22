@@ -472,6 +472,11 @@ function Project(props) {
                             }
                         </Row>
                         <h2>Разделы</h2>
+                        <Link to={`/projects/${link["project_id"]}/editor`} className="link-primary">
+                            <Button type="submit" variant="primary">
+                                Редактор
+                            </Button>
+                        </Link>
                         <table className="table table-striped">
                             <thead>
                                 <tr>

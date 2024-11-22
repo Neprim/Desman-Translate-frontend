@@ -10,6 +10,7 @@ import Signup from "./pages/Signup.js";
 import Project from './pages/Project.js';
 import Create from './pages/Create.js';
 import Editor from './pages/Editor.js';
+import EditorSelector from './pages/EditorSelector.js';
 import { Notfound, Forbidden, Unathorized } from './pages/Errors.js';
 import LoadSection from './pages/LoadSection.js';
 import UploadSectionTranslations from './pages/UploadSectionTranslations.js';
@@ -34,6 +35,7 @@ function App() {
           <Route path="signup" element={<Signup />} />
           <Route path="projects/:project_id" element={<Project />} />
           <Route path="create" element={<Create />} />
+          <Route path="projects/:project_id/editor" element={<EditorSelector />} />
           <Route path="projects/:project_id/editor/:sections_list" element={<Editor />} />
           <Route path="notfound" element={<Notfound />} />
           <Route path="users/:user_id" element={<User />} />
