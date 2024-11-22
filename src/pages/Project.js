@@ -110,7 +110,7 @@ function Project(props) {
             
             sections = await fetchSections(link["project_id"], true)
             for (let sec of sections) {
-                if (sec.statistics.translated_strings_amount) {
+                if (sec.statistics.strings_amount) {
                     sec.statistics.completeness = sec.statistics.strings_amount ? sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100 : 0
                     sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
                 }
@@ -468,6 +468,12 @@ function Project(props) {
                                     { userRole &&
                                     <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
                                     }
+                                    
+                                    {userRole?.permissions?.can_translate && sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
+                                        <Button onClick={(e) => window.location.href = `/projects/${link["project_id"]}/upload_translations`}>
+                                            Загрузить перевод
+                                        </Button>
+                                    }
                                 </Col>
                             }
                         </Row>
@@ -503,7 +509,7 @@ function Project(props) {
                                             
                                         </td>
                                         {section?.statistics?.strings_amount > 0
-                                            ?   <>{section.statistics.translated_strings_amount 
+                                            ?   <>{section.statistics.last_update
                                                     ? <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
                                                     : <td><Spinner size="sm"/></td>
                                                 }</>

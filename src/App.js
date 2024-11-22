@@ -14,6 +14,7 @@ import EditorSelector from './pages/EditorSelector.js';
 import { Notfound, Forbidden, Unathorized } from './pages/Errors.js';
 import LoadSection from './pages/LoadSection.js';
 import UploadSectionTranslations from './pages/UploadSectionTranslations.js';
+import UploadProjectTranslations from './pages/UploadProjectTranslations.js';
 import { AuthProvider } from "./AuthContext";
 
 const api_link = "127.0.0.1:3000"
@@ -40,6 +41,7 @@ function App() {
           <Route path="notfound" element={<Notfound />} />
           <Route path="users/:user_id" element={<User />} />
           <Route path="projects/:project_id/sections/:section_id/load_strings" element={<LoadSection />} />
+          <Route path="projects/:project_id/upload_translations" element={<UploadProjectTranslations />} />
           <Route path="projects/:project_id/sections/:section_id/upload_translations" element={<UploadSectionTranslations />} />
           <Route path="*" element={<Notfound />} />
         </Routes>

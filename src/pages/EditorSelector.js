@@ -9,7 +9,7 @@ import { fetchSections, fetchSomeAPI } from "../APIController";
 import { Link, useParams } from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
 
-export default function LoadSection() {
+export default function EditorSelector() {
 
     const [sections, setSections] = useState([])
     const [sectionsSelected, setSectionsSelected] = useState([])

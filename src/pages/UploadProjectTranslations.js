@@ -5,20 +5,20 @@ import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
-import { fetchSection, fetchSomeAPI, fetchStrings } from "../APIController";
+import { fetchProject, fetchSections, fetchSomeAPI, fetchStrings } from "../APIController";
 import { Link, useParams } from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
 import { ProgressBar } from "react-bootstrap";
 
 let strings = []
 
-export default function UploadSectionTranslations() {
+export default function UploadProjectTranslations() {
 
     const { user } = useContext(AuthContext);
 
+    const [project, setProject] = useState(null)
     const [translations, setTranslations] = useState(null)
-    const [section, setSection] = useState(null)
-    const [sectionType, setSectionType] = useState('text')
+    const [sections, setSections] = useState([])
     const [translationsError, setTranslationsError] = useState(null)
     const [translationLoadNum, setTranslationLoadNum] = useState(0)
 
@@ -30,8 +30,9 @@ export default function UploadSectionTranslations() {
 
     async function GetSection() {
         try {
-            const sec = await fetchSection(link['project_id'], link['section_id'])
-            setSection(sec)
+            let secs = await fetchSections(link["project_id"])
+            setProject(await fetchProject(link["project_id"]))
+            setSections(secs)
         } catch (err) {
             console.log(err)
             if (err.status == 404) {
@@ -45,7 +46,16 @@ export default function UploadSectionTranslations() {
 
     async function GetStrings() {
 		try {
-			strings = await fetchStrings(link["project_id"], link["section_id"], true, true)
+            strings = []
+            for (const sec of sections) {
+                if (sec.type != "json")
+                    continue
+			    let strs = await fetchStrings(link["project_id"], sec.id, true, true)
+                for (let str of strs) {
+                    str.section_id = sec.id
+                    strings.push(str)
+                }
+            }
 		} catch (err) {
 			console.log(err)
 		}
@@ -53,23 +63,24 @@ export default function UploadSectionTranslations() {
 
     useEffect(() => {
         GetSection()
-        GetStrings()
     }, [])
+
+    useEffect(() => {
+        if (!sections.length)
+            return
+
+        GetStrings()
+    }, [sections])
 
     async function TransformTranslations(e) {
         e.preventDefault()
         setfetchingTranslationsLoad(true)
         try {
             setTranslationsError(null)
-            const type = section.type
             const loaded_translations = document.getElementById("settings-loaded-translations").value
             let translations = []
 
-            if (type == 'text') {
-                throw {errors: ["Я пока ещё не сделал для строк."]}
-                // strings = loaded_strings.split("\n").filter((str) => str != "").map((str) => {return { text: str }})
-                
-            } else if (type == 'json') {
+            if (true) {
                 let json
                 try {
                     json = JSON.parse(loaded_translations)
@@ -109,11 +120,11 @@ export default function UploadSectionTranslations() {
         try {
             for (let i = 0; i < translations.length; i++) {
                 const tr = translations[i]
-                await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}/strings/${tr.string.id}/translations`, "POST", {text: tr.text})
+                await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${tr.string.section_id}/strings/${tr.string.id}/translations`, "POST", {text: tr.text})
                 // await new Promise(resolve => setTimeout(resolve, 1000))
                 setTranslationLoadNum(i + 1)
             }
-            window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
+            window.location.href = `/projects/${link['project_id']}`
         } catch (err) {
             if (err.status == 400 && err.errors[0].key == 'text' && err.errors[0].kind == "required") {
                 setLoadError("Нельзя загружать пустые переводы.")
@@ -136,18 +147,11 @@ export default function UploadSectionTranslations() {
                     minWidth: '300px'
                 }}
             >
-                {section && !translations &&
+                {sections && !translations &&
                     <>
-                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">Загрузка переводов для раздела "{section.name}"</h1>
+                    <p className="text-middle text-break"><i>Утилита полунаколенная, потому может работать не так, если есть пересечения по ключам между разделами. Ну и не будет работать, если разделы не типа JSON.</i></p>
+                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">Загрузка переводов для проекта "{project?.name}"</h1>
                     <Form >
-                        <Form.Label htmlFor="settings-strings-type" className="mt-2">Тип строк: {
-                            section.type == 'text'
-                            ? "Текст"
-                            : "JSON"    
-                        }</Form.Label>
-                        {section.type == "text" &&
-                            <><br/><Form.Text>Строки без ключей загружаются по переносу строк. С этим надо быть аккуратней.</Form.Text></>
-                        }
                         <Form.Group>
                             <Form.Label htmlFor="settings-loaded-translations" className="form-label mt-2">Текст для загрузки</Form.Label>
                             <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-translations"/>
@@ -156,13 +160,11 @@ export default function UploadSectionTranslations() {
                                     {translationsError}
                                 </div>
                             }
-                            {section.type == "json" &&
-                                <Form.Check
-                                    type="checkbox"
-                                    id="checkbox-load-sames"
-                                    label='Загрузить совпадающие с оригиналом'
-                                />
-                            }
+                            <Form.Check
+                                type="checkbox"
+                                id="checkbox-load-sames"
+                                label='Загрузить совпадающие с оригиналом'
+                            />
                         </Form.Group>
                         <Button className="mt-2" type="submit" variant="primary" disabled={fetchingTranslationsLoad} onClick={(e) => TransformTranslations(e)}>
                             {fetchingTranslationsLoad
@@ -175,7 +177,7 @@ export default function UploadSectionTranslations() {
                     </Form>
                     </>
                 }
-                {section && translations &&
+                {sections && translations &&
                     <> 
                     <h3 className="mb-3">
                         Итоговые переводы для загрузки
@@ -186,6 +188,7 @@ export default function UploadSectionTranslations() {
                             <p className="mb-1 fw-semibold">Оригинал: {tr.string.text}</p>
                             <p className="mb-1 fw-semibold">Перевод: {tr.text}</p>
                             <p className="text-body-secondary mt-0"><i> Ключ: {tr.string.key}</i></p>
+                            <p className="text-body-secondary mt-0"><i> Раздел: {sections.find((sec) => sec.id == tr.string.section_id).name}</i></p>
                             </Container>
                         )}
                     </div>
