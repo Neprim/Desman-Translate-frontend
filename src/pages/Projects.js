@@ -174,40 +174,67 @@ function Projects() {
                                                         {invite.project.name}
                                                     </a>
                                                 </b>{" "}
-                                                <br /> Вы были приглашены пользователем{" "}
-                                                <a className="text-primary" href={`/users/${invite.inviter.id}`}>
-                                                    {invite.inviter.username}
-                                                </a>
-                                                .
+                                                <br /> 
+                                                {invite.inviter.id == invite.user.id
+                                                    ? <>
+                                                        Вы запросили приглашение.
+                                                    </>
+                                                    : <>
+                                                        Вы были приглашены пользователем{" "}
+                                                        <a className="text-primary" href={`/users/${invite.inviter.id}`}>
+                                                            {invite.inviter.username}
+                                                        </a>
+                                                        .
+                                                    </>
+                                                }
                                             </div>
                                             <div className="col-auto">
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-success"
-                                                    style={{
-                                                        padding: 5,
-                                                        margin: 2,
-                                                        marginLeft: 0,
-                                                        width: "100%"
-                                                    }}
-                                                    onClick={function (e) { ProcessInvitation(invite.id, true) }}
-                                                >
-                                                    Принять
-                                                </button>
-                                                <br />
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-danger"
-                                                    style={{
-                                                        padding: 5,
-                                                        margin: 2,
-                                                        marginLeft: 0,
-                                                        width: "100%"
-                                                    }}
-                                                    onClick={function (e) { ProcessInvitation(invite.id, false) }}
-                                                >
-                                                    Отклонить
-                                                </button>
+                                                {invite.inviter.id == invite.user.id
+                                                    ? <>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-danger"
+                                                            style={{
+                                                                padding: 5,
+                                                                margin: 2,
+                                                                marginLeft: 0,
+                                                                width: "100%"
+                                                            }}
+                                                            onClick={function (e) { ProcessInvitation(invite.id, false) }}
+                                                        >
+                                                            Отменить
+                                                        </button>
+                                                    </>
+                                                    : <>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-success"
+                                                            style={{
+                                                                padding: 5,
+                                                                margin: 2,
+                                                                marginLeft: 0,
+                                                                width: "100%"
+                                                            }}
+                                                            onClick={function (e) { ProcessInvitation(invite.id, true) }}
+                                                        >
+                                                            Принять
+                                                        </button>
+                                                        <br />
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-danger"
+                                                            style={{
+                                                                padding: 5,
+                                                                margin: 2,
+                                                                marginLeft: 0,
+                                                                width: "100%"
+                                                            }}
+                                                            onClick={function (e) { ProcessInvitation(invite.id, false) }}
+                                                        >
+                                                            Отклонить
+                                                        </button>
+                                                    </>
+                                                }
                                             </div>
                                         </div>
                                     </div>

@@ -14,7 +14,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { openConnection } from "../WSController";
-import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites, fetchStrings } from "../APIController";
+import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fetchProjectInvites, fetchUserInvites, fetchStrings } from "../APIController";
 import { ProgressBar, Stack } from "react-bootstrap";
 import { FaRegTrashAlt, FaBars, FaTrashAlt, FaPlus, FaPenAlt } from "react-icons/fa"
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -44,6 +44,8 @@ function Project(props) {
     const [inviteError, setInviteError] = useState(null)
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
     const [addChapterToggle, setAddChapterToggle] = useState(false);
+
+    const [requestedInvite, setRequestedInvite] = useState(false);
     
     const [loading, setLoading] = useState(false)
     
@@ -130,6 +132,7 @@ function Project(props) {
         const member = members.find(member => member.user.id == user.id)
         if (!member) {
             setUserRole(null)
+            GetInvite()
             return
         }
 
@@ -184,6 +187,30 @@ function Project(props) {
         try {
             await fetchSomeAPI(`/api/projects/${link["project_id"]}/invites/${invite_id}`, "DELETE")
             await GetInvites()
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function ResolveInvite(invite_id, accept) {
+        try {
+            await fetchSomeAPI(`/api/projects/${link["project_id"]}/invites/${invite_id}`, "POST", {
+                accept: accept,
+            })
+            GetProject()
+            await GetInvites()
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    async function GetInvite() {
+        try {
+            const invites = await fetchUserInvites(false, false) || []
+            console.log(invites)
+            if (invites.find((inv) => inv.project_id == project.id)) {
+                setRequestedInvite(true)
+            }
         } catch (err) {
             console.log(err)
         }
@@ -490,6 +517,15 @@ function Project(props) {
         }
         setLoading(false)
     }
+
+    async function RequestInvite() {
+        try {
+            await fetchSomeAPI(`/api/projects/${project.id}/request_invite`, "POST")
+            setRequestedInvite(true)
+        } catch (err) {
+            console.log(err)
+        }
+    }
     
     return (
         <>
@@ -525,8 +561,21 @@ function Project(props) {
                                         </div>
                                     :   <div className="py-2 border-bottom"><b>Прогресс: <Spinner size="sm"/>%</b></div>
                                     }
-                                    { userRole &&
-                                    <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
+                                    {user && <>
+                                        { userRole
+                                            ? <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
+                                            : !requestedInvite 
+                                                ? <>    
+                                                    <Button onClick={(e) => RequestInvite(e)}>
+                                                        Запросить приглашение
+                                                    </Button>
+                                                </>
+                                                : <>    
+                                                    <Button disabled>
+                                                        Приглашение запрошено
+                                                    </Button>
+                                                </>
+                                        }</>
                                     }
                                     
                                     {userRole?.permissions?.can_translate && sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
@@ -843,10 +892,18 @@ function Project(props) {
                                                 </td>
                                                 <td>
                                                 <Link to={"/users/" + invite.inviter.id} reloadDocument className="nav-link link-primary px-2">
-                                                    {invite.inviter.username}
+                                                    {invite.inviter.id != invite.user.id && invite.inviter.username}
                                                 </Link></td>
                                                 {userRole?.permissions?.can_manage_members &&
-                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>Отменить</button></td>
+                                                    <>{invite.inviter.id == invite.user.id
+                                                        ?   <td style={{ display: 'inline-flexbox' }}>
+                                                                <div><button type="button" className="btn btn-success" style={{ padding: '0px 5px' }} onClick={ function (e) { ResolveInvite(invite.id, true) } }>Принять</button></div>
+                                                                <div><button type="button" className="btn btn-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { ResolveInvite(invite.id, false) } }>Отказать</button></div>
+                                                            </td>
+                                                        :   <td style={{ display: 'inline-flexbox' }}>
+                                                                <button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>Отменить</button>
+                                                            </td>
+                                                    }</>
                                                 }
                                             </tr>
                                             )
