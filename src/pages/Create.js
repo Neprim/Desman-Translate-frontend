@@ -231,6 +231,10 @@ export default function Create() {
 							<option value="private">Приватный</option>
 							<option value="public">Публичный</option>
 						</Form.Select>
+						<Form.Text id="visibilityDesc">
+							<div>Публичные проекты могут видеть все пользователи, но участвовать в переводе могут только участники проекта.</div>
+							<div>Приватные проекты могут видеть только участники проекта.</div>
+                        </Form.Text>
 					</Form.Group>
 					
 					<Button variant="primary"
