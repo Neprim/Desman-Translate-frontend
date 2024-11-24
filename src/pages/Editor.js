@@ -661,10 +661,12 @@ export default function Editor() {
 					<Col className="py-1 d-inline-flex align-items-center">
 						<LinkWithTooltip tooltip="Фильтр" id="tooltip-settings" where="bottom">
 							<Dropdown>
+								<form>
 								<Dropdown.Toggle as={FilterButton}></Dropdown.Toggle>
 								<Dropdown.Menu as={FilterForm}>
 									{/* Да пошло оно всё, сделаю костылём*/}
-									<Dropdown.Item as={Button} onClick={(e) => {
+									<Dropdown.Item type="submit" as={Button} onClick={(e) => {
+											e.preventDefault()
 											AddFilter(
 												document.getElementById("select-filter-key").value,
 												document.getElementById("select-filter-value").value	
@@ -673,6 +675,7 @@ export default function Editor() {
 										Добавить
 									</Dropdown.Item>
 								</Dropdown.Menu>
+								</form>
 							</Dropdown>
 						</LinkWithTooltip>
 						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
