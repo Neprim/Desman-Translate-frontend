@@ -75,7 +75,7 @@ function Home() {
                                     <img
                                         width={60}
                                         height={60}
-                                        src={project?.cover_url ?? placeholder}
+                                        src={project?.cover_url || placeholder}
                                         alt="thumbnail"
                                     />
                                     <Container className="text-left text-break">
@@ -95,7 +95,7 @@ function Home() {
                                     <img
                                         width={60}
                                         height={60}
-                                        src={project?.cover_url ?? placeholder}
+                                        src={project?.cover_url || placeholder}
                                         alt="thumbnail"/>
                                     <Container className="text-left text-break">
                                         <Link to={"/projects/" + project.handle} className="link-primary">

@@ -504,7 +504,7 @@ function Project(props) {
                     <Tab eventKey="project" title="Проект">
                         <Row>
                             <Col xs={7}>
-                                <img src={project?.cover_url ?? placeholder} height={250} width={250} alt="Тут должна быть обложка проекта" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
+                                <img src={project?.cover_url || placeholder} height={250} width={250} alt="Тут должна быть обложка проекта" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
                                 <Stack className="text-left text-break">
                                     <h3>Описание проекта</h3>
                                     <p style={{fontSize: "smaller"}}>{project?.description}</p>

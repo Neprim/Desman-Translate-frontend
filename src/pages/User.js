@@ -114,7 +114,7 @@ export default function User() {
 
                         <Row>
                             <Col md={5} className="border rounded ms-2 p-2">
-                                <img src={user?.avatar_url ?? placeholder} height={200} width={200} alt="project cover" style={{ float: 'left'}} className="border rounded me-3 p-2" />
+                                <img src={user?.avatar_url || placeholder} height={200} width={200} alt="project cover" style={{ float: 'left'}} className="border rounded me-3 p-2" />
                                 <h2>{user?.username}</h2>
                                 {gotUser &&
                                     <h4>{flagCurrentUser ? "О вас" : "О пользователе"}</h4>
