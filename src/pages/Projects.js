@@ -127,7 +127,7 @@ function Projects() {
                                                 <img
                                                     width={60}
                                                     height={60}
-                                                    src={placeholder}
+                                                    src={project?.cover_url ?? placeholder}
                                                     alt="thumbnail"
                                                     style={{ marginRight: 10 }}
                                                 />
@@ -160,7 +160,7 @@ function Projects() {
                                                 <img
                                                     width={60}
                                                     height={60}
-                                                    src={placeholder}
+                                                    src={invite.project?.cover_url ?? placeholder}
                                                     alt="thumbnail"
                                                     style={{ marginRight: 10 }}
                                                 />

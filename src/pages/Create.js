@@ -43,6 +43,7 @@ export default function Create() {
 	const [name, setName] = useState("")
 	const [handle, setHandle] = useState("")
 	const [description, setDescription] = useState("")
+	const [cover, setCover] = useState("")
 
 	const [langSource, setLangSource] = useState("en")
 	const [langTarget, setLangTarget] = useState("ru")
@@ -54,9 +55,11 @@ export default function Create() {
 	const [handleError, setHandleError] = useState("")
 	const [nameError, setNameError] = useState("")
 	const [descriptionError, setDescriptionError] = useState("")
+	const [coverError, setCoverError] = useState("")
 
 	const handleChange = event => setHandle(event.target.value);
 	const desciptionChange = event => setDescription(event.target.value);
+	const coverChange = event => setCover(event.target.value);
 
 	function translit(str) {
 		let letters = {}
@@ -127,6 +130,7 @@ export default function Create() {
 				"source_lang": langSource,
 				"visibility": visibility,
 				"description": description,
+				"cover_url": cover,
 			})
 
 			window.location.href = `/projects/${project.id}`
@@ -207,10 +211,18 @@ export default function Create() {
 						</Form.Select>
 					</Form.Group>
 
-					<Form.Group className="mb-3">
+					{/* <Form.Group className="mb-3">
 						<Form.Label className="mt-2" htmlFor="inputLogo">Загрузить обложку</Form.Label>
 						<Form.Control type="file" id="inputLogo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
 						<Form.Text id="logo-desc">Принимаются картинки в формате png и jpeg</Form.Text>
+					</Form.Group> */}
+					<Form.Group className="mb-3">
+						<Form.Label htmlFor="inputDesc">Ссылка на обложку проекта (можно оставить пустой)</Form.Label>
+						<Form.Control type="text" id="inputName" onChange={coverChange} aria-describedby="coverError" maxLength={1000}/>
+						{/* <Form.Text id="logo-desc">Принимаются ссылки на изображения</Form.Text> */}
+						{coverError != "" && <Form.Text id="coverError">
+                            {coverError}
+                        </Form.Text>}
 					</Form.Group>
 
 					<Form.Group className="mb-3">

@@ -75,10 +75,13 @@ export default function User() {
             const user = await fetchSomeAPI("/api/users", "PATCH", {
                 about: document.getElementById("settings-user-about").value,
                 gender: document.getElementById("settings-user-gender").value,
+                avatar_url: document.getElementById("settings-user-avatar").value,
             })
 
             await ReAuth()
             setUser(user)
+
+            window.location.reload()
         } catch (err) {
             console.log(err)
         }
@@ -111,7 +114,7 @@ export default function User() {
 
                         <Row>
                             <Col md={5} className="border rounded ms-2 p-2">
-                                <img src={placeholder} height={200} alt="project cover" style={{ float: 'left'}} className="border rounded me-3 p-2" />
+                                <img src={user?.avatar_url ?? placeholder} height={200} width={200} alt="project cover" style={{ float: 'left'}} className="border rounded me-3 p-2" />
                                 <h2>{user?.username}</h2>
                                 {gotUser &&
                                     <h4>{flagCurrentUser ? "О вас" : "О пользователе"}</h4>
@@ -163,6 +166,8 @@ export default function User() {
                                 <div id="logo-desc" className="form-text">
                                     Принимаются картинки в формате .png и .jpeg
                                 </div> */}
+                                <label htmlFor="settings-user-avatar" className="form-label" style={{ marginTop: '10px' }}>Ссылка на аватарку</label>
+                                <input type="text" className="form-control" id="settings-user-avatar" defaultValue={cur_user?.avatar_url} maxLength={1000} />
                                 <label htmlFor="settings-user-gender" className="form-label" style={{ marginTop: '10px' }}>Пол</label>
                                 <select className="form-select" defaultValue={cur_user.gender || "hidden"} id="settings-user-gender">
                                     <option value="hidden">Не скажу</option>

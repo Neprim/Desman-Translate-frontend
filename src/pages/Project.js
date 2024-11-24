@@ -238,8 +238,10 @@ function Project(props) {
                 source_lang:    document.getElementById("settings-source-lang").value,
                 target_lang:    document.getElementById("settings-target-lang").value,
                 visibility:     document.getElementById("settings-access").value,
+                cover_url:      document.getElementById("settings-cover").value,
             })
             GetProject()
+            window.location.reload()
         } catch (err) {
             console.log(err)
         }
@@ -502,7 +504,7 @@ function Project(props) {
                     <Tab eventKey="project" title="Проект">
                         <Row>
                             <Col xs={7}>
-                                <img src={placeholder} height={250} alt="project cover" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
+                                <img src={project?.cover_url ?? placeholder} height={250} width={250} alt="Тут должна быть обложка проекта" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
                                 <Stack className="text-left text-break">
                                     <h3>Описание проекта</h3>
                                     <p style={{fontSize: "smaller"}}>{project?.description}</p>
@@ -898,9 +900,11 @@ function Project(props) {
                                         <textarea className="form-control" aria-label="With textarea" id="settings-description" maxLength={1000} defaultValue={project.description} />
                                         {/* <label htmlFor="settings-logo" className="form-label" style={{ marginTop: '10px' }}>Сменить обложку</label>
                                         <input type="file" className="form-control" id="settings-logo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
-                                        <div id="logo-desc" className="form-text">Принимаются картинки в формате png и jpeg.</div> */}
+                                    <div id="logo-desc" className="form-text">Принимаются картинки в формате png и jpeg.</div> */}
                                         {/* <label htmlFor="settings-author" className="form-label" style={{ marginTop: '10px' }}>Владелец проекта</label>
                                         <input type="text" className="form-control" id="settings-author" defaultValue="Нынешний владелец" /> */}
+                                        <label htmlFor="settings-cover" className="form-label" style={{ marginTop: '10px' }}>Ссылка на обложку проекта</label>
+                                        <input type="text" className="form-control" id="settings-cover" defaultValue={project.cover_url} maxLength={1000} />
                                         <label htmlFor="settings-source-lang" className="form-label" style={{ marginTop: '10px' }}>Язык оригинала</label>
                                         <select className="form-select" defaultValue={project.source_lang} id="settings-source-lang">
                                             <option value="ru">русский</option>
