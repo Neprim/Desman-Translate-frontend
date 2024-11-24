@@ -453,6 +453,12 @@ function Project(props) {
                 desc: inputDescription
             })
             await GetDictionary()
+
+            setInputWord("")
+            setInputWordKey("")
+            setInputTranslate("")
+            setInputTranslateKey("")
+            setInputDescription("")
         } catch (err) {
             setDictError(JSON.stringify(err))
         }
@@ -471,6 +477,12 @@ function Project(props) {
                 desc: inputDescription
             })
             await GetDictionary()
+            
+            setInputWord("")
+            setInputWordKey("")
+            setInputTranslate("")
+            setInputTranslateKey("")
+            setInputDescription("")
         } catch (err) {
             setDictError(JSON.stringify(err))
         }
