@@ -101,7 +101,7 @@ export default function LoadSection() {
             // console.log(strings)
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}/strings`, "POST", strings)
             await fetchSomeAPI(`/api/projects/${link['project_id']}/sections/${link['section_id']}`, "PATCH", {type: sectionType})
-            window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
+            window.location.href = `/projects/${link['project_id']}/editor/${section.id.toString(16)}`
         } catch (err) {
             if (err.status == 413) {
                 setLoadError("Слишком большой объём строк, в одной главе может быть не больше 10000 строк.")
