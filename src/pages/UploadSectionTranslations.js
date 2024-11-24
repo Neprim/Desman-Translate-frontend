@@ -67,12 +67,21 @@ export default function UploadSectionTranslations() {
 
             if (type == 'text') {
                 // throw {errors: ["Я пока ещё не сделал для строк."]}
-                translations = loaded_translations.split("\n").filter((str) => str != "").map((str) => {return { text: str }})
-                if (translations.length != strings.length) {
+                let trs = loaded_translations.split("\n").filter((str) => str != "").map((str) => {return { text: str }})
+                if (trs.length != strings.length) {
                     throw {errors: ["Кол-во загружаемых строк не совпадает с кол-вом оригинальных строк. Иначе я без понятия, как загружать переводы для строкого типа."]}
                 }
-                for (let i = 0; i < translations.length; i++) {
-                    translations[i].string = strings[i]
+
+                let load_sames = document.getElementById('checkbox-load-sames').checked
+                for (let i = 0; i < trs.length; i++) {
+                    let str = strings[i]
+                    if (!load_sames && str.text == trs[i].text)
+                        continue
+
+                    if (str.translations.find((tr) => tr.text == trs[i].text))
+                        continue
+                    
+                    translations.push({string: str, text: trs[i].text})
                 }
             } else if (type == 'json') {
                 let json
@@ -161,13 +170,11 @@ export default function UploadSectionTranslations() {
                                     {translationsError}
                                 </div>
                             }
-                            {section.type == "json" &&
-                                <Form.Check
-                                    type="checkbox"
-                                    id="checkbox-load-sames"
-                                    label='Загрузить совпадающие с оригиналом'
-                                />
-                            }
+                            <Form.Check
+                                type="checkbox"
+                                id="checkbox-load-sames"
+                                label='Загрузить совпадающие с оригиналом'
+                            />
                         </Form.Group>
                         <Button className="mt-2" type="submit" variant="primary" disabled={fetchingTranslationsLoad} onClick={(e) => TransformTranslations(e)}>
                             {fetchingTranslationsLoad
