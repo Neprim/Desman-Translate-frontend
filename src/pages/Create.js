@@ -44,8 +44,8 @@ export default function Create() {
 	const [handle, setHandle] = useState("")
 	const [description, setDescription] = useState("")
 
-	const [langSource, setLangSource] = useState("ru")
-	const [langTarget, setLangTarget] = useState("en")
+	const [langSource, setLangSource] = useState("en")
+	const [langTarget, setLangTarget] = useState("ru")
 
 	const [visibility, setVisibility] = useState("private")
 
