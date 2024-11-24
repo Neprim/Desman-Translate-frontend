@@ -495,7 +495,7 @@ function Project(props) {
             <Container style={{ marginTop: 50 }}>
                 <h1 className="my-4 text-break">{project?.name}</h1>
                 <Tabs
-                    defaultActiveKey="project"
+                    defaultActiveKey={window.location.hash.substring(1) == "dictionary" ? "dictionary" : "project"}
                     id="project-id-tabs"
                     className="mb-3"
                 >

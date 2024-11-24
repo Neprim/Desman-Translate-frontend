@@ -688,7 +688,15 @@ export default function Editor() {
 						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
 							<Dropdown>
 								<Dropdown.Toggle as={DictionaryButton}></Dropdown.Toggle>
-								<Dropdown.Menu as={DictionaryForm} data={dictionary}></Dropdown.Menu>
+								<Dropdown.Menu as={DictionaryForm} data={dictionary}>
+									{userRole?.permissions?.can_manage_strings &&
+										<Link to={`/projects/${link["project_id"]}#dictionary`} className="link-primary">
+											<Button type="submit" variant="primary">
+												Перейти в словарь проекта
+											</Button>
+										</Link>
+									}
+								</Dropdown.Menu>
 							</Dropdown>
 						</LinkWithTooltip>
 					</Col>
@@ -1129,6 +1137,7 @@ const DictionaryForm = React.forwardRef(
 				)}
 			</tbody>
 		</table>
+		{children}
 	</div>
 	</>
 })
