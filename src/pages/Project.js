@@ -532,7 +532,7 @@ function Project(props) {
                                             Загрузить перевод
                                         </Button>
                                     }
-                                    {sections?.length > 0 &&
+                                    {sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
                                         <Button onClick={(e) => DownloadProjectTranslation()} disabled={loading}>
                                             {loading && <Spinner size="sm"/>}
                                             Скачать перевод
