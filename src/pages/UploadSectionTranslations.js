@@ -66,9 +66,14 @@ export default function UploadSectionTranslations() {
             let translations = []
 
             if (type == 'text') {
-                throw {errors: ["Я пока ещё не сделал для строк."]}
-                // strings = loaded_strings.split("\n").filter((str) => str != "").map((str) => {return { text: str }})
-                
+                // throw {errors: ["Я пока ещё не сделал для строк."]}
+                translations = loaded_translations.split("\n").filter((str) => str != "").map((str) => {return { text: str }})
+                if (translations.length != strings.length) {
+                    throw {errors: ["Кол-во загружаемых строк не совпадает с кол-вом оригинальных строк. Иначе я без понятия, как загружать переводы для строкого типа."]}
+                }
+                for (let i = 0; i < translations.length; i++) {
+                    translations[i].string = strings[i]
+                }
             } else if (type == 'json') {
                 let json
                 try {
@@ -185,7 +190,7 @@ export default function UploadSectionTranslations() {
                             <Container className="text-left text-break border rounded my-2 pt-3" key={tr.string.id} style={{whiteSpace: "pre-wrap"}}>
                             <p className="mb-1 fw-semibold">Оригинал: {tr.string.text}</p>
                             <p className="mb-1 fw-semibold">Перевод: {tr.text}</p>
-                            <p className="text-body-secondary mt-0"><i> Ключ: {tr.string.key}</i></p>
+                            {tr.string.key && <p className="text-body-secondary mt-0"><i> Ключ: {tr.string.key}</i></p>}
                             </Container>
                         )}
                     </div>
