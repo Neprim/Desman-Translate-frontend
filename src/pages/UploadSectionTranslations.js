@@ -113,7 +113,7 @@ export default function UploadSectionTranslations() {
                 // await new Promise(resolve => setTimeout(resolve, 1000))
                 setTranslationLoadNum(i + 1)
             }
-            window.location.href = `/projects/${link['project_id']}/sections/${link['section_id']}/editor`
+            window.location.href = `/projects/${link['project_id']}/editor/${section.id.toString(16)}`
         } catch (err) {
             if (err.status == 400 && err.errors[0].key == 'text' && err.errors[0].kind == "required") {
                 setLoadError("Нельзя загружать пустые переводы.")
