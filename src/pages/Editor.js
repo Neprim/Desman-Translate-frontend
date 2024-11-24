@@ -249,8 +249,8 @@ export default function Editor() {
 		console.log(curPage)
 
 		if (sel != -1) {
-			SelectString(sel)
 			ScrollTo('str' + strings[sel].id)
+			SelectString(sel)
 		}
 	}
 
@@ -266,8 +266,8 @@ export default function Editor() {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
 		setEditMode(false)
-		if (curString) {
-		let page = Math.floor((curString?.index || 0) / page_size) + 1
+		if (curString && filters.length == 0) {
+			let page = Math.floor((curString?.index || 0) / page_size) + 1
 			setCurPage(page)
 			setMiddlePage(page)
 		}
