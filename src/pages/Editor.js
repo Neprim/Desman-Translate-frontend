@@ -468,10 +468,12 @@ export default function Editor() {
 			// Но это добавлю как-нибудь потом. Пока что это будет возможно только при одной главе в редакторе.
 			const sec = sections[0]
 			let str = (await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sec.id}/strings?pos=${str_index}`, "POST", {text: " "}))[0]
+			str.sec_ind = 0
 			strings.splice(str_index, 0, {...str, translations: []})
 			for (let i = 0; i < strings.length; i++) {
 				strings[i].index = i
 			}
+			setInputMaxLength(str.max_tr_length)
 			setCurString(strings[str_index])
 			setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
 			UpdateDrawStrings()
