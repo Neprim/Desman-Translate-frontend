@@ -25,16 +25,13 @@ export default function Login() {
 
     async function Submit(event) {
         event.preventDefault()
-        console.log(JSON.stringify({
-            "username": inputMail,
-            "password": inputPass
-        }))
-        let jopa = await fetch("/api/login",
+        await fetch("/api/login",
             {
                 method: "POST",
                 body: JSON.stringify({
                     "username": inputMail,
-                    "password": inputPass
+                    "password": inputPass,
+                    "remember": document.getElementById("rememberCheck").checked
                 }),
                 headers: {
                     'Content-Type': 'application/json; charset=UTF-8',
@@ -88,14 +85,20 @@ export default function Login() {
                             aria-describedby="forgotPassword"
                         />
                         <Form.Text id="forgotPassword">
-                            Забыли пароль?
+                            <details>
+                                <summary>Забыли пароль?</summary>
+                                <strike>Ну грустно вам.</strike> Напишите Неприму, чтобы придумал что-нибудь.    
+                            </details>
                         </Form.Text>
                     </Form.Group>
                     <Form.Check className="mb-3">
                         <input type="checkbox" className="form-check-input" id="rememberCheck" />
                         <Form.Check.Label className="form-check-label" htmlFor="rememberCheck">
-                            Запомнить аккаунт
-                        </Form.Check.Label>
+                            Запомнить меня
+                        </Form.Check.Label><br/>
+                        <Form.Text>
+                            Если выставить, бразуер запомнит авторизацию на 30 дней.
+                        </Form.Text>
                     </Form.Check>
                     {errorVisibility && <div id="error" className="my-1">Неверный логин или пароль.</div>}
                     <Button type="submit" variant="primary" onClick={Submit}>
