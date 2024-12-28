@@ -2,11 +2,12 @@ import '../misc.css';
 import Button from "react-bootstrap/Button"
 import Container from 'react-bootstrap/Container'
 import Form from "react-bootstrap/Form"
+import InputGroup from "react-bootstrap/InputGroup";
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
-import { FaCog, FaFilter, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt } from "react-icons/fa"
+import { FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt } from "react-icons/fa"
 import { CiWarning } from "react-icons/ci"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
@@ -17,24 +18,25 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Stack from 'react-bootstrap/Stack';
 import CloseButton from 'react-bootstrap/CloseButton';
 import Spinner from 'react-bootstrap/Spinner';
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 
 
 import React, { setState, useEffect, useState, formData, useContext } from "react"
 import { AuthContext } from "../AuthContext";
-import { FormLabel, OverlayTrigger, Tooltip } from "react-bootstrap"
+import { FormGroup, FormLabel, OverlayTrigger, Tooltip } from "react-bootstrap"
 import { fetchSomeAPI, fetchProject, fetchStrings, fetchString, fetchSection, fetchSections } from "../APIController"
 
 function LinkWithTooltip({ id, children, href, tooltip, where }) {
-	return (
+	return (<>
 		<OverlayTrigger
 			overlay={<Tooltip id={id}>{tooltip}</Tooltip>}
 			placement={where}
 			delayShow={300}
 			delayHide={150}
 		>
-			<a href={href}>{children}</a>
+		<div>{children}</div>
 		</OverlayTrigger>
-	);
+	</>);
 }
 
 
@@ -238,8 +240,8 @@ export default function Editor() {
 		}, 100)
 	}
 
-	function PreudoReload(sel) {
-		setFilters([])
+	function PseudoReload(sel) {
+		// setFilters([])
 
 		ChangePage(1 + Math.floor(sel / page_size))
 
@@ -541,10 +543,7 @@ export default function Editor() {
 		setLoading(false)
 	}
 
-	function AddFilter(key, value) {
-		if (value == "" || filters.find((filter) => filter.key == key && filter.value == value))
-			return
-
+	function UpdateFilters(fls) {
 		const ResolveName = (key, value) => {
 			if (key == "orig")
 				return "Оригинал содержит: " + value
@@ -566,23 +565,9 @@ export default function Editor() {
 			}
 		}
 
-		setFilters(filters.concat({
-			key: key,
-			value: value,
-			name: ResolveName(key, value)
-		}))
+		setFilters(fls)
 
 		ChangePage(1)
-
-		console.log(filters)
-	}
-
-	function RemoveFilter(key, value) {
-		let index = filters.findIndex((filter) => filter.key == key && filter.value == value)
-		if (index != -1) {
-			setFilters(filters.toSpliced(index, 1))
-			ChangePage(1)
-		}
 	}
 
 	function MoveElemTo(pos) {
@@ -629,6 +614,27 @@ export default function Editor() {
 		setLoading(false)
 	}
 
+	
+
+	const [statusValue, setStatusValue] = useState("non_tr")
+	const [keyValue, setKeyValue] = useState("")
+	const [origValue, setOrigValue] = useState("")
+	const [transValue, setTransValue] = useState("")
+
+	const [statusChecked, setStatusChecked] = useState(false)
+	const [keyChecked, setKeyChecked] = useState(false)
+	const [origChecked, setOrigChecked] = useState(false)
+	const [transChecked, setTransChecked] = useState(false)
+
+	function ChangeValueAndSetChecked(value, func_v, func_c) {
+		func_v(value)
+		if (value) {
+			func_c(true)
+		} else {
+			func_c(false)
+		}
+	}
+
 	return (
 		<>
 		<div style={{ height: "100vh" }}>
@@ -661,25 +667,69 @@ export default function Editor() {
 					style={{ margin: "0px" }}
 				>
 					<Col className="py-1 d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Фильтр" id="tooltip-settings" where="bottom">
-							<Dropdown>
-								<form>
-								<Dropdown.Toggle as={FilterButton}></Dropdown.Toggle>
-								<Dropdown.Menu as={FilterForm}>
-									{/* Да пошло оно всё, сделаю костылём*/}
-									<Dropdown.Item type="submit" as={Button} onClick={(e) => {
-											e.preventDefault()
-											AddFilter(
-												document.getElementById("select-filter-key").value,
-												document.getElementById("select-filter-value").value	
-											)
-										}}>
-										Добавить
-									</Dropdown.Item>
-								</Dropdown.Menu>
-								</form>
-							</Dropdown>
-						</LinkWithTooltip>
+						<Dropdown>
+							<LinkWithTooltip tooltip="Фильтр" id="tooltip-settings" where="bottom"><div></div>
+								<Dropdown.Toggle variant={filters.length ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
+									<FaFilter style={{ marginBottom: "3px" }} />
+								</Dropdown.Toggle>
+							</LinkWithTooltip>
+							<Form className="form-inline">
+							<Dropdown.Menu style={{ padding: "15px 15px 15px", minWidth: "300px"}}>
+								<InputGroup style={{ marginBottom: "5px" }}>
+									<InputGroup.Checkbox id='filter-status-checkbox' checked={statusChecked} onChange={(e) => {setStatusChecked(e.target.checked)}}/>
+									<Form.Select id='filter-status-value' value={statusValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setStatusValue, setStatusChecked)}}>
+										<option value="non_tr">Непереведенное</option>
+										<option value="tr">Переведенное</option>
+										<option value="non_app">Не одобрено</option>
+										<option value="app">Одобрено</option>
+									</Form.Select>
+								</InputGroup>
+								<InputGroup style={{ marginBottom: "5px" }}>
+									<InputGroup.Checkbox id='filter-key-checkbox' checked={keyChecked} onChange={(e) => {setKeyChecked(e.target.checked)}}/>
+									<Form.Control id='filter-key-value' value={keyValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setKeyValue, setKeyChecked)}} placeholder='Ключ содержит' />
+								</InputGroup>
+								<InputGroup style={{ marginBottom: "5px" }}>
+									<InputGroup.Checkbox id='filter-orig-checkbox' checked={origChecked} onChange={(e) => {setOrigChecked(e.target.checked)}}/>
+									<Form.Control id='filter-orig-value' value={origValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setOrigValue, setOrigChecked)}} placeholder='Оригинал содержит' />
+								</InputGroup>
+								<InputGroup style={{ marginBottom: "5px" }}>
+									<InputGroup.Checkbox id='filter-tr-checkbox' checked={transChecked} onChange={(e) => {setTransChecked(e.target.checked)}}/>
+									<Form.Control id='filter-tr-value' value={transValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setTransValue, setTransChecked)}} placeholder='Перевод содержит' />
+								</InputGroup>
+								<ButtonToolbar className="justify-content-around">
+									<Button type="submit" variant='primary' onClick={(e) => {
+										e.preventDefault()
+										let fls = []
+										if (statusChecked)
+											fls.push({key: "status", value: statusValue})
+										if (keyChecked && keyValue)
+											fls.push({key: "key", value: keyValue})
+										if (origChecked && origValue)
+											fls.push({key: "orig", value: origValue})
+										if (transChecked && transValue)
+											fls.push({key: "trans", value: transValue})
+
+										UpdateFilters(fls)
+									}}>Применить</Button>
+									<Button variant='secondary' onClick={(e) => {
+										e.preventDefault()
+										setStatusValue("non_tr")
+										setKeyValue("")
+										setOrigValue("")
+										setTransValue("")
+										setStatusChecked(false)
+										setKeyChecked(false)
+										setOrigChecked(false)
+										setTransChecked(false)
+
+										UpdateFilters([])
+									}}>Сбросить</Button>
+								</ButtonToolbar>
+							</Dropdown.Menu>
+							</Form>
+						</Dropdown>
+
+						{userRole?.permissions?.can_manage_strings &&
 						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
 							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} onClick={(e) => {
 								setMoveMode(!moveMode)
@@ -687,20 +737,45 @@ export default function Editor() {
 								UpdateDrawStrings()
 							}} disabled={!(filters.length == 0 && sections.length == 1 && userRole?.permissions?.can_manage_strings)}><FaArrowsAlt style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
-						<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
-							<Dropdown>
-								<Dropdown.Toggle as={DictionaryButton}></Dropdown.Toggle>
-								<Dropdown.Menu as={DictionaryForm} data={dictionary}>
-									{userRole?.permissions?.can_manage_strings &&
-										<Link to={`/projects/${link["project_id"]}#dictionary`} className="link-primary">
-											<Button type="submit" variant="primary">
-												Перейти в словарь проекта
-											</Button>
-										</Link>
-									}
-								</Dropdown.Menu>
-							</Dropdown>
-						</LinkWithTooltip>
+						}
+
+						
+						<Dropdown>
+							<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
+								<Dropdown.Toggle variant="outline-primary" style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
+									<FaBook style={{ marginBottom: "3px" }} />
+								</Dropdown.Toggle>
+							</LinkWithTooltip>
+							<Form>
+							<Dropdown.Menu style={{padding: "15px 15px 15px", minWidth: "400px"}}>
+							<table className="table align-items-center">
+								<thead>
+									<tr>
+										<th scope="col">Слово</th>
+										<th scope="col">Перевод</th>
+										<th scope="col">Описание</th>
+									</tr>
+								</thead>
+								<tbody>
+									{dictionary.map((dict, index) =>
+										<tr key={dict.word}>
+											<td>{dict.word}</td>
+											<td>{dict.translate}</td>
+											<td>{dict.desc}</td>
+										</tr>
+									)}
+								</tbody>
+							</table>
+								{userRole?.permissions?.can_manage_strings &&
+									<Link to={`/projects/${link["project_id"]}#dictionary`} className="link-primary">
+										<Button type="submit" variant="primary">
+											Перейти в словарь проекта
+										</Button>
+									</Link>
+								}
+							</Dropdown.Menu>
+							</Form>
+						</Dropdown>
 					</Col>
 					<Col className="py-1 d-inline-flex align-items-center">
 						{ maxPage > 1 && !moveMode &&
@@ -747,20 +822,9 @@ export default function Editor() {
 						}
 					</Col>
 				</Container>
-			{/* </header> */}
 			<Container>
 				{/* <FilterForm/> */}
 			</Container>
-			<Stack direction="horizontal">
-				{filters.map((filter, i) =>
-					<>
-					<div style={{padding: "10px", border: "1px solid"}}>
-						{filter.name}
-						<CloseButton onClick={(e) => {RemoveFilter(filter.key, filter.value)}}></CloseButton>
-					</div>
-					</>
-				)}
-			</Stack>
 			<Container fluid style={{ height: "80%" }}>
 			{!moveMode 
 				? 	<Row  style={{ height: "100%" }}>
@@ -791,9 +855,9 @@ export default function Editor() {
 									</Dropdown>
 								}
 
-								<Col style={{ marginRight: "10px", minWidth: "50%" }}>
+								<Col style={{ marginRight: "10px", minWidth: "50%", marginLeft: "5px" }}>
 									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
-									<Stack style={{border: "1px solid", height: "100%", position: "relative", whiteSpace: "pre-wrap"}}>
+									<Stack className="border rounded" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap"}}>
 										<div
 											readOnly
 											className="text-left text-break"
@@ -811,14 +875,14 @@ export default function Editor() {
 												</div>
 											}
 											<div>
-												<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index}`} onClick={(e) => {PreudoReload(str.index)}}>#{str.index + 1}</a>
+												<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a>
 												{/* <a href={`${window.location.href}#${str.index}`}>#{str.index + 1}</a> */}
 											</div>	
 										</div>	
 									</Stack>
 								</Col>
 								<Col>
-									<Stack style={{border: "1px solid", height: "100%", whiteSpace: "pre-wrap"}}>
+									<Stack className="border rounded" style={{height: "100%", whiteSpace: "pre-wrap"}}>
 										<div
 											readOnly
 											className="text-left text-break"
@@ -902,10 +966,11 @@ export default function Editor() {
 							<h3>Варианты перевода</h3>
 							{curString?.translations?.map((tr, i) =>
 							<>
-								<Container key={tr.id} style={{ border: (tr.id == translationEdit?.id ? "1px solid orange" : "1px solid")}}>
+								<Container key={tr.id} className="border rounded" style={{ backgroundColor: (tr.id == translationEdit?.id ? "rgb(240, 240, 240)" : "white")}}>
 									<div
 										readOnly
-										style={{ marginTop: "10px", wordWrap: "break-word", border: "1px solid", whiteSpace: "pre-wrap" }}
+										className="border rounded"
+										style={{ marginTop: "10px", wordWrap: "break-word", whiteSpace: "pre-wrap" }}
 									>
 										{tr.text}
 									</div>
@@ -1065,81 +1130,3 @@ export default function Editor() {
 		</>
 	);
 }
-
-
-
-const FilterButton = React.forwardRef(({ children, onClick }, ref) => (
-	<Button ref={ref} variant="outline-primary" style={{ marginLeft: "10px" }} onClick={(e) => {
-		e.preventDefault();
-		onClick(e);
-	}}><FaFilter style={{ marginBottom: "3px" }} /></Button>
-));
-
-const FilterForm = React.forwardRef(
-	({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
-		const [key, setKey] = useState("orig")
-		const [value, setValue] = useState("")
-		
-		return <>
-	<div id="filter" ref={ref} className={className} style={{backgroundColor: "white", position: "absolute", padding: "15px 15px 15px", minWidth: "250px"}}
-	onClose={(e) => {
-		console.log("hmm")
-	}}>
-		<Form.Select defaultValue="orig" id="select-filter-key" onChange={(e) => {setKey(e.target.value)}} >
-			<option value="orig">Оригинал содержит</option>
-			<option value="trans">Перевод содержит</option>
-			<option value="key">Ключ содержит</option>
-			<option value="status">Статус</option>
-		</Form.Select>
-		{(key == "orig" || key == "trans" || key == "key") &&
-			<Form.Control id="select-filter-value" onChange={(e) => {setValue(e.target.value)}}></Form.Control>
-		}
-		{key == "status" &&
-			<Form.Select defaultValue="non_tr" id="select-filter-value" onChange={(e) => {setValue(e.target.value)}}>
-				<option value="non_tr">Непереведенное</option>
-				<option value="tr">Переведенное</option>
-				<option value="non_app">Не одобрено</option>
-				<option value="app">Одобрено</option>
-			</Form.Select>
-		}
-		{children}
-	</div>
-	</>
-})
-
-const DictionaryButton = React.forwardRef(({ children, onClick }, ref) => (
-	<Button ref={ref} variant="outline-primary" style={{ marginLeft: "10px" }} onClick={(e) => {
-		e.preventDefault();
-		onClick(e);
-	}}><FaBook style={{ marginBottom: "3px" }} /></Button>
-));
-
-const DictionaryForm = React.forwardRef(
-	({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
-	return <>
-	<div id="filter" ref={ref} className={className} style={{backgroundColor: "white", position: "absolute", padding: "15px 15px 15px", minWidth: "400px"}}
-	onClose={(e) => {
-		console.log("hmm")
-	}}>
-		<table className="table align-items-center">
-			<thead>
-				<tr>
-					<th scope="col">Слово</th>
-					<th scope="col">Перевод</th>
-					<th scope="col">Описание</th>
-				</tr>
-			</thead>
-			<tbody>
-				{dictionary.map((dict, index) =>
-					<tr key={dict.word}>
-						<td>{dict.word}</td>
-						<td>{dict.translate}</td>
-						<td>{dict.desc}</td>
-					</tr>
-				)}
-			</tbody>
-		</table>
-		{children}
-	</div>
-	</>
-})
