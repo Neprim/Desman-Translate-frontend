@@ -24,7 +24,7 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import React, { setState, useEffect, useState, formData, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { FormGroup, FormLabel, OverlayTrigger, Tooltip } from "react-bootstrap"
-import { fetchSomeAPI, fetchProject, fetchStrings, fetchString, fetchSection, fetchSections } from "../APIController"
+import { fetchSomeAPI, fetchProject, fetchStrings, fetchString, fetchSection, fetchSections, fetchUser } from "../APIController"
 
 function LinkWithTooltip({ id, children, href, tooltip, where }) {
 	return (<>
@@ -79,6 +79,7 @@ export default function Editor() {
 	const [project, setProject] = useState({});
 	const [sections, setSections] = useState([]);
 	const [members, setMembers] = useState([]);
+	const [translators, setTranslators] = useState([])
 	const [roles, setRoles] = useState([]);
 	const [userRole, setUserRole] = useState(null);
 	
@@ -187,6 +188,7 @@ export default function Editor() {
 			} else {
 				sec_ids = link["sections_list"].split("_").map((x) => parseInt(x, 16))
 			}
+			let trs = {}
 
 			let strs = []
 			for (let i = 0; i < sec_ids.length; i++) {
@@ -195,9 +197,13 @@ export default function Editor() {
 				for (let str of strs_t) {
 					str.sec_ind = i
 					strs.push(str)
+					for (let tr of str.translations) {
+						trs[tr.author_id] = 1
+						if (tr.editor_id)
+							trs[tr.editor_id] = 1
+					}
 				}
 			}
-			// console.log(strs)
 			let sel = -1
 
 			for (let i = 0; i < strs.length; i++) {
@@ -224,6 +230,12 @@ export default function Editor() {
 				SelectString(sel)
 				ScrollTo('str' + strings[sel].id)
 			}
+
+			let trs_e = []
+			for (let tr in trs) {
+				trs_e.push(await fetchUser(tr))
+			}
+			setTranslators(trs_e)
 		} catch (err) {
 			console.log(err)
 		}
@@ -348,42 +360,68 @@ export default function Editor() {
 				if (filter.is_regex) {
 					filter.value = filter.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 				}
-				if (filter.key == "orig") {
-					if (!new RegExp(filter.value, 'i').test(str.text))
-						return false
-				} else 
-				if (filter.key == "trans") {
-					let flag = false
-					for (let tr of str.translations) {
-						if (new RegExp(filter.value, 'i').test(tr.text)) {
-							flag = true
-							break
+				let flag = false
+				switch (filter.key) {
+					case "orig":
+						if (!new RegExp(filter.value, 'i').test(str.text))
+							return false
+						break
+
+
+					case "trans":
+						flag = false
+						for (let tr of str.translations) {
+							if (new RegExp(filter.value, 'i').test(tr.text)) {
+								flag = true
+								break
+							}
 						}
-					}
-					if (!flag)
-						return false
-				} else
-				if (filter.key == "key") {
-					if (!new RegExp(filter.value, 'i').test(str.key))
-						return false
-				} else 
-				if (filter.key == "status") {
-					if (filter.value == "non_tr") {
-						if (str.translations.length > 0)
+						if (!flag)
 							return false
-					} else
-					if (filter.value == "tr") {
-						if (str.translations.length == 0)
+						break
+
+
+					case "key":
+						if (!new RegExp(filter.value, 'i').test(str.key))
 							return false
-					} else 
-					if (filter.value == "non_app") {
-						if (str.translations?.[0]?.is_approved)
+						break
+
+
+					case "status":
+						switch (filter.value) {
+							case "non_tr":
+								if (str.translations.length > 0)
+									return false
+								break
+							
+							case "tr":
+								if (str.translations.length == 0)
+									return false
+								break
+							
+							case "non_app":
+								if (str.translations?.[0]?.is_approved)
+									return false
+								break
+
+							case "app":
+								if (!str.translations?.[0]?.is_approved)
+									return false
+								break
+						}
+						break
+
+					case "user":
+						flag = false
+						for (let tr of str.translations) {
+							if (tr.author_id == filter.value || tr.editor_id == filter.value) {
+								flag = true
+								break
+							}
+						}
+						if (!flag)
 							return false
-					} else
-					if (filter.value == "app") {
-						if (!str.translations?.[0]?.is_approved)
-							return false
-					}
+						break
 				}
 			}
 
@@ -620,11 +658,13 @@ export default function Editor() {
 	const [keyValue, setKeyValue] = useState("")
 	const [origValue, setOrigValue] = useState("")
 	const [transValue, setTransValue] = useState("")
+	const [userValue, setUserValue] = useState("")
 
 	const [statusChecked, setStatusChecked] = useState(false)
 	const [keyChecked, setKeyChecked] = useState(false)
 	const [origChecked, setOrigChecked] = useState(false)
 	const [transChecked, setTransChecked] = useState(false)
+	const [userChecked, setUserChecked] = useState(false)
 
 	function ChangeValueAndSetChecked(value, func_v, func_c) {
 		func_v(value)
@@ -685,6 +725,15 @@ export default function Editor() {
 									</Form.Select>
 								</InputGroup>
 								<InputGroup style={{ marginBottom: "5px" }}>
+									<InputGroup.Checkbox id='filter-user-checkbox' checked={userChecked} onChange={(e) => {setUserChecked(e.target.checked)}}/>
+									<Form.Select id='filter-user-value' value={userValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setUserValue, setUserChecked)}}>
+										<option value="">-- От переводчика --</option>
+										{translators?.map((tr) =>
+											<option value={tr.id}>{tr.username}</option>
+										)}
+									</Form.Select>
+								</InputGroup>
+								<InputGroup style={{ marginBottom: "5px" }}>
 									<InputGroup.Checkbox id='filter-key-checkbox' checked={keyChecked} onChange={(e) => {setKeyChecked(e.target.checked)}}/>
 									<Form.Control id='filter-key-value' value={keyValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setKeyValue, setKeyChecked)}} placeholder='Ключ содержит' />
 								</InputGroup>
@@ -708,6 +757,8 @@ export default function Editor() {
 											fls.push({key: "orig", value: origValue})
 										if (transChecked && transValue)
 											fls.push({key: "trans", value: transValue})
+										if (userChecked && userValue)
+											fls.push({key: "user", value: userValue})
 
 										UpdateFilters(fls)
 									}}>Применить</Button>
@@ -717,10 +768,12 @@ export default function Editor() {
 										setKeyValue("")
 										setOrigValue("")
 										setTransValue("")
+										setUserValue("")
 										setStatusChecked(false)
 										setKeyChecked(false)
 										setOrigChecked(false)
 										setTransChecked(false)
+										setUserChecked(false)
 
 										UpdateFilters([])
 									}}>Сбросить</Button>
