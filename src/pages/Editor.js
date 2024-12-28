@@ -69,6 +69,7 @@ export default function Editor() {
 	const [translationEdit, setTranslationEdit] = useState(null)
 
 	const [filters, setFilters] = useState([])
+	const [sortBy, setSortBy] = useState("")
 	
 	const translationChange = e => setInputTranslation(e.target.value)
 	const textChange 		= e => setInputText(e.target.value);
@@ -254,8 +255,12 @@ export default function Editor() {
 
 	function PseudoReload(sel) {
 		// setFilters([])
+		setSortBy("")
 
-		ChangePage(1 + Math.floor(sel / page_size))
+		const strs = FilterStrings(strings)
+		setDrawStrings(strs)
+
+		ChangePage(1 + Math.floor(strs.findIndex((str) => str.index == sel) / page_size))
 
 		UpdateDrawStrings()
 
@@ -280,19 +285,19 @@ export default function Editor() {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
 		setEditMode(false)
-		if (curString && filters.length == 0) {
-			let page = Math.floor((curString?.index || 0) / page_size) + 1
-			setCurPage(page)
-			setMiddlePage(page)
-		}
+		// if (curString && filters.length == 0) {
+		// 	let page = Math.floor((curString?.index || 0) / page_size) + 1
+		// 	setCurPage(page)
+		// 	setMiddlePage(page)
+		// }
 	}, [curString])
 
 	useEffect(() => {
-		let strs = FilterStrings() 
+		let strs = SortStrings(FilterStrings(strings))
 		setDrawStrings(strs)
 		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
 		setCurString(null)
-	}, [filters])
+	}, [filters, sortBy])
 
 	function FindWordsInString(str) {
 		let draw_text = []
@@ -351,11 +356,11 @@ export default function Editor() {
 	}, [inputTranslation])
 
 	function UpdateDrawStrings() {
-		setDrawStrings(FilterStrings())
+		setDrawStrings(SortStrings(FilterStrings(strings)))
 	}
 
-	function FilterStrings() {
-		let draws = strings.filter((str) => {
+	function FilterStrings(strs) {
+		let draws = strs.filter((str) => {
 			for (let filter of filters) {
 				if (filter.is_regex) {
 					filter.value = filter.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -429,6 +434,22 @@ export default function Editor() {
 		})
 
 		return draws
+	}
+
+	function SortStrings(strs) {
+		if (sortBy == "")
+			return strs 
+		
+		if (sortBy == "last_str_time")
+		return strs.sort((a, b) => {
+			return b.updated_at - a.updated_at
+		})
+		
+		if (sortBy == "last_tr_time")
+		return strs.sort((a, b) => {
+			return 	  b.translations.reduce((tm, tr) => Math.max(tm, tr.updated_at), 0)
+					- a.translations.reduce((tm, tr) => Math.max(tm, tr.updated_at), 0)
+		})
 	}
 
 	async function UpdateTranslation() {
@@ -778,6 +799,26 @@ export default function Editor() {
 										UpdateFilters([])
 									}}>Сбросить</Button>
 								</ButtonToolbar>
+							</Dropdown.Menu>
+							</Form>
+						</Dropdown>
+
+						<Dropdown>
+							<LinkWithTooltip tooltip="Сортировка" id="tooltip-settings" where="bottom"><div></div>
+								<Dropdown.Toggle variant={sortBy ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
+									<FaSortAmountDownAlt style={{ marginBottom: "3px" }} />
+								</Dropdown.Toggle>
+							</LinkWithTooltip>
+							<Form className="form-inline">
+							<Dropdown.Menu style={{ padding: "15px 15px 15px", minWidth: "300px"}}>
+								Сортировать по
+								<InputGroup style={{ marginBottom: "5px" }}>
+									<Form.Select id='filter-status-value' value={sortBy} onChange={(e) => {setSortBy(e.target.value)}}>
+										<option value="">Индексу строки</option>
+										<option value="last_tr_time">Времени последнего перевода</option>
+										<option value="last_str_time">Времени последнего изменения</option>
+									</Form.Select>
+								</InputGroup>
 							</Dropdown.Menu>
 							</Form>
 						</Dropdown>
