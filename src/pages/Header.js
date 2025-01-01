@@ -7,6 +7,7 @@ import Container from "react-bootstrap/Container"
 import Form from "react-bootstrap/Form"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
+import { getLoc } from "../Translation";
 
 function Header() {
 	const [input, setInput] = useState("");
@@ -31,9 +32,6 @@ function Header() {
 						<img width={250} height={100} src={logo} alt="logo"/>
 					</a>
 					<div className="d-flex align-items-center">
-						{/* <Form role="search">
-							<Form.Control type="search" className="form-control" placeholder="Поиск..." aria-label="Search"/>
-						</Form> */}
 					</div>
 				</Container>
 			</header>
@@ -41,13 +39,13 @@ function Header() {
 				<Container className="d-flex flex-wrap">
 					<Nav className="me-auto">
 						<Nav.Item>
-							<Link to="/" className="nav-link link-body-emphasis px-2 active" aria-current="page">Главная</Link>
+							<Link to="/" className="nav-link link-body-emphasis px-2 active" aria-current="page">{getLoc("header_homepage")}</Link>
 						</Nav.Item>
 						<Nav.Item>
-							<Link to="/projects" className="nav-link link-body-emphasis px-2">Проекты</Link>
+							<Link to="/projects" className="nav-link link-body-emphasis px-2">{getLoc("header_my_projects")}</Link>
 						</Nav.Item>
 						<Nav.Item>
-							<Link to="/search" className="nav-link link-body-emphasis px-2">Поиск проектов</Link>
+							<Link to="/search" className="nav-link link-body-emphasis px-2">{getLoc("header_search")}</Link>
 						</Nav.Item>
 					</Nav>
 					{user 
@@ -63,7 +61,7 @@ function Header() {
 							variant="outline-secondary"
 							style={{ height: "75%"}}
 							onClick={Logout}>
-							Выйти
+							{getLoc("header_logout")}
 						</Button>
 
 					</Nav> 
@@ -71,12 +69,12 @@ function Header() {
 					<Nav style={{ display: "flex" }}>
 						<Nav.Item>
 							<Link to="/login" className="nav-link link-body-emphasis px-2">
-								Войти
+								{getLoc("header_signin")}
 							</Link>
 						</Nav.Item>
 						<Nav.Item>
 							<Link to="/signup" className="nav-link link-body-emphasis px-2">
-								Зарегистрироваться
+								{getLoc("header_signup")}
 							</Link>
 						</Nav.Item>
 					</Nav>

@@ -18,17 +18,7 @@ import { fetchProject, fetchSections, fetchSomeAPI, fetchUser, fetchMembers, fet
 import { ProgressBar, Stack } from "react-bootstrap";
 import { FaRegTrashAlt, FaBars, FaTrashAlt, FaPlus, FaPenAlt } from "react-icons/fa"
 import Dropdown from 'react-bootstrap/Dropdown';
-
-const kostyl_lang_tr = {
-    en: "Английский",
-    ru: "Русский",
-}
-
-const kostyl_status_tr = {
-    opened: "Открыт",
-    closed: "Закрыт",
-    frozen: "Заморожен",
-}
+import { getLoc } from "../Translation"
 
 function Project(props) {
 
@@ -162,11 +152,11 @@ function Project(props) {
         } catch (err) {
             switch (err.status) {
                 case 404:
-                    setInviteError("Такого пользователя не существует"); break;
+                    setInviteError(getLoc("project_invite_error_404")); break;
                 case 400:
-                    setInviteError("Пользователь уже является участником проекта"); break;
+                    setInviteError(getLoc("project_invite_error_400")); break;
                 case 409:
-                    setInviteError("Пользователь уже приглашён"); break;
+                    setInviteError(getLoc("project_invite_error_409")); break;
             }
             console.log(err)
         }
@@ -316,7 +306,7 @@ function Project(props) {
         const section = sections[index]
         let strings = await fetchStrings(project.id, section.id)
         if (strings.length == 0) {
-            alert("А строк то нема")
+            alert(getLoc("project_section_download_original_no_strings"))
             return
         }
 
@@ -345,7 +335,7 @@ function Project(props) {
         const section = sections[index]
         let strings = await fetchStrings(project.id, section.id, true)
         if (strings.length == 0) {
-            alert("А строк то нема")
+            alert(getLoc("project_section_download_translation_no_strings"))
             return
         }
 
@@ -376,8 +366,8 @@ function Project(props) {
             let type = sections[0].type
             for (const sec of sections) {
                 if ((sec.type == "json" && type == "text") || (sec.type == "text" && type == "json")) {
-                    alert("Я без понятия, как смешать обычный текст и JSON")
-                    throw "Разные типы разделов"
+                    alert(getLoc("project_download_translation_different_sections_types"))
+                    throw "different sections types"
                 }
                 let strs = await fetchStrings(project.id, sec.id, true)
                 for (let str of strs) {
@@ -386,8 +376,8 @@ function Project(props) {
             }
             // await fetchStrings(project.id, section.id, true)
             if (strings.length == 0) {
-                alert("А строк то нема")
-                throw "Пустые разделы"
+                alert(getLoc("project_download_translation_no_strings"))
+                throw "empty sections"
             }
 
             let filename = project.name
@@ -441,22 +431,16 @@ function Project(props) {
             return ""
         const delta = (Date.now() - timestamp) / 1000
         if (delta < 60)
-            return `${Math.round(delta)} сек. назад`
+            return `${Math.round(delta)} ${getLoc("project_section_seconds_ago")}`
         if (delta < 60 * 60)
-            return `${Math.round(delta / 60)} мин. назад`
+            return `${Math.round(delta / 60)} ${getLoc("project_section_minutes_ago")}`
         if (delta < 60 * 60 * 24)
-            return `${Math.round(delta / 60 / 60)} час. назад`
+            return `${Math.round(delta / 60 / 60)} ${getLoc("project_section_hours_ago")}`
         if (delta < 60 * 60 * 24 * 30)
-            return `${Math.round(delta / 60 / 60 / 24)} дн. назад`
+            return `${Math.round(delta / 60 / 60 / 24)} ${getLoc("project_section_days_ago")}`
         if (delta < 60 * 60 * 24 * 30 * 12)
-            return `${Math.round(delta / 60 / 60 / 24 / 30)} мес. назад`
-        return `Больше года назад`
-        // if($t < 60) return $this->idle_time . " сек.";
-		// if($t < 60 * 60) return round($this->idle_time / 60) . " мин.";
-		// if($t < 60 * 60 * 24) return round($this->idle_time / 3600) . " час.";
-		// if($t < 60 * 60 * 24 * 30) return round($this->idle_time / 86400) . " дней.";
-		// if($t < 60 * 60 * 24 * 30 * 12) return round($this->idle_time / 2592000) . " мес.";
-		// return "> 1 года.";
+            return `${Math.round(delta / 60 / 60 / 24 / 30)} ${getLoc("project_section_months_ago")}`
+        return `${getLoc("project_section_year_ago")}`
     }
 
     async function DeleteDictEntry(dict_id) {
@@ -537,42 +521,42 @@ function Project(props) {
                     id="project-id-tabs"
                     className="mb-3"
                 >
-                    <Tab eventKey="project" title="Проект">
+                    <Tab eventKey="project" title={getLoc("project_project_tab")}>
                         <Row>
                             <Col xs={7}>
-                                <img src={project?.cover_url || placeholder} height={250} width={250} alt="Тут должна быть обложка проекта" style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
+                                <img src={project?.cover_url || placeholder} height={250} width={250} alt={getLoc("project_project_cover_stub")} style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
                                 <Stack className="text-left text-break">
-                                    <h3>Описание проекта</h3>
+                                    <h3>{getLoc("project_project_description")}</h3>
                                     <p style={{fontSize: "smaller"}}>{project?.description}</p>
                                 </Stack>
                             </Col>
                             {project &&
                                 <Col className="border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
-                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>Информация</h3>
-                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык оригинала:</b> {kostyl_lang_tr[project?.source_lang]}</div>
-                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>Язык перевода:</b> {kostyl_lang_tr[project?.target_lang]}</div>
-                                    <div className="py-2 border-bottom"><b>Дата создания:</b> {new Date(project?.created_at).toLocaleDateString()}</div>
-                                    <div className="py-2 border-bottom"><b>Статус:</b> {kostyl_status_tr[project?.status]}</div>
+                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>{getLoc("project_project_information")}</h3>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_source_lang")}:</b> {getLoc("lang_" + project?.source_lang)}</div>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div>
+                                    <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString()}</div>
+                                    <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div>
                                     {project?.statistics?.completeness
-                                    ?   <div className="py-2 border-bottom"><b>Прогресс: {project?.statistics?.completeness}%</b>
+                                    ?   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: {project?.statistics?.completeness}%</b>
                                             <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
                                                 <ProgressBar className="progress" striped animated label={`${project?.statistics?.completeness}%`} style={{ width: project?.statistics?.completeness + '%' }} aria-valuenow={project?.statistics?.completeness} aria-valuemin={0} aria-valuemax={100}/>
                                             </div>
                                         </div>
-                                    :   <div className="py-2 border-bottom"><b>Прогресс: <Spinner size="sm"/>%</b></div>
+                                    :   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: <Spinner size="sm"/>%</b></div>
                                     }
                                     {user && <>
                                         { userRole
-                                            ? <div className="py-2 border-bottom"><b>Ваша роль:</b> {userRole?.name}</div>
+                                            ? <div className="py-2 border-bottom"><b>{getLoc("project_your_role")}:</b> {getLoc("role_" + userRole?.name)}</div>
                                             : !requestedInvite 
                                                 ? <>    
                                                     <Button onClick={(e) => RequestInvite(e)}>
-                                                        Запросить приглашение
+                                                    {getLoc("project_request_invite")}
                                                     </Button>
                                                 </>
                                                 : <>    
                                                     <Button disabled>
-                                                        Приглашение запрошено
+                                                    {getLoc("project_inivte_requested")}
                                                     </Button>
                                                 </>
                                         }</>
@@ -580,33 +564,33 @@ function Project(props) {
                                     
                                     {userRole?.permissions?.can_translate && sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
                                         <Button onClick={(e) => window.location.href = `/projects/${link["project_id"]}/upload_translations`}>
-                                            Загрузить перевод
+                                            {getLoc("project_upload_translation")}
                                         </Button>
                                     }
                                     {user && sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
                                         <Button onClick={(e) => DownloadProjectTranslation()} disabled={loading}>
                                             {loading && <Spinner size="sm"/>}
-                                            Скачать перевод
+                                            {getLoc("project_download_translation")}
                                         </Button>
                                     }
                                 </Col>
                             }
                         </Row>
-                        <h2>Разделы</h2>
+                        <h2>{getLoc("project_sections")}</h2>
                         {user &&
                             <Link to={`/projects/${link["project_id"]}/editor`} className="link-primary">
                                 <Button type="submit" variant="primary">
-                                    Редактор
+                                    {getLoc("project_editor")}
                                 </Button>
                             </Link>
                         }
                         <table className="table table-striped">
                             <thead>
                                 <tr>
-                                    <th scope="col">№</th>
-                                    <th scope="col">Название</th>
-                                    <th scope="col">Прогресс</th>
-                                    <th scope="col">Активность</th>
+                                    <th scope="col">{getLoc("project_section_numero")}</th>
+                                    <th scope="col">{getLoc("project_section_name")}</th>
+                                    <th scope="col">{getLoc("project_section_completeness")}</th>
+                                    <th scope="col">{getLoc("project_section_activity")}</th>
                                     <th scope="col"></th>
                                 </tr>
                             </thead>
@@ -639,7 +623,7 @@ function Project(props) {
                                             :   <>   
                                                     <td>
                                                         <Link to={`/projects/${project.id}/sections/${section.id}/load_strings`} className="link-primary">
-                                                            Загрузить строки
+                                                        {getLoc("project_section_upload_strings")}
                                                         </Link>
                                                     </td>
                                                 </>
@@ -656,25 +640,23 @@ function Project(props) {
                                                 </Dropdown.Toggle>
                                                 <Dropdown.Menu>
                                                 <Dropdown.Item onClick={(e) => DownloadSectionTranslation(index)}>
-                                                    Скачать перевод
+                                                {getLoc("project_section_download_translation")}
                                                 </Dropdown.Item>
                                                 {userRole?.permissions?.can_translate && section?.statistics?.strings_amount > 0 &&
                                                     <Dropdown.Item onClick={(e) => UploadTranslations(section.id)}>
-                                                       Загрузить перевод
+                                                    {getLoc("project_section_upload_translation")}
                                                     </Dropdown.Item>
                                                 }
                                                     <Dropdown.Item onClick={(e) => DownloadSectionOriginal(index)}>
-                                                        Скачать оригинал
+                                                    {getLoc("project_section_upload_translation")}
+                                                        
                                                     </Dropdown.Item>
                                                 {userRole?.permissions?.can_manage_sections && 
                                                     <Dropdown.Item onClick={(e) => DeleteSection(section.id)}>
-                                                       Удалить
+                                                        {getLoc("project_section_delete")}
                                                     </Dropdown.Item>
                                                 }
                                                 </Dropdown.Menu>
-                                            {/* {userRole?.permissions?.can_manage_sections && 
-                                                <td><Button variant="danger" style={{ marginLeft: "10px" }} onClick={(e) => DeleteSection(section.id)}><FaRegTrashAlt style={{ marginBottom: "3px" }} /></Button></td>
-                                            } */}
                                             </Dropdown>
                                         }
                                         </td>
@@ -683,41 +665,41 @@ function Project(props) {
                             </tbody>
                         </table>
                         {userRole?.permissions?.can_manage_sections && 
-                            <Button type="submit" variant="primary" hidden={addChapterToggle} onClick={(e) => setAddChapterToggle(true)}>Добавить раздел</Button>
+                            <Button type="submit" variant="primary" hidden={addChapterToggle} onClick={(e) => setAddChapterToggle(true)}>{getLoc("project_section_add")}</Button>
                         }
                         <Form className="mb-2" id="divAddChapter" hidden={!addChapterToggle}>
                             <Form.Control
                                 type="text"
                                 className="mb-2"
                                 id="inputSectionName"
-                                placeholder="Название главы"
+                                placeholder={getLoc("project_section_name_placeholder")}
                             />
                             {!loading  
                             ? <>
                                 <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); AddChapter()}}>
-                                    Добавить
+                                {getLoc("project_add_section")}
                                 </Button>
                                 <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); setAddChapterToggle(false)}}>
-                                    Отмена
+                                {getLoc("project_cancel_button")}
                                 </Button>
                             </>
                             : <>
-                                <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> Добавить</Button>
-                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> Отмена</Button>
+                                <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> {getLoc("project_add_section")}</Button>
+                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel_button")}</Button>
                             </>}
                         </Form>
                     </Tab>
                     {user &&
-                        <Tab eventKey="dictionary" title="Словарь">
+                        <Tab eventKey="dictionary" title={getLoc("project_dictionary_tab")}>
                             <div className="row">
                                 <div className="col-8">
-                                    <h2>Словарь</h2>
+                                    <h2>{getLoc("project_dictionary")}</h2>
                                     <table className="table table-striped align-items-center">
                                         <thead>
                                             <tr>
-                                                <th scope="col">Слово</th>
-                                                <th scope="col">Перевод</th>
-                                                <th scope="col">Описание</th>
+                                                <th scope="col">{getLoc("project_dictionary_word")}</th>
+                                                <th scope="col">{getLoc("project_dictionary_translate")}</th>
+                                                <th scope="col">{getLoc("project_dictionary_description")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -753,54 +735,54 @@ function Project(props) {
                                 </div>
                                 {userRole?.permissions?.can_manage_strings &&
                                     <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
-                                        <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Добавить слово</h3>
+                                        <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>{getLoc("project_dictionary_add")}</h3>
                                         <Form>
-                                            <h6>Текст:</h6>
+                                            <h6>{getLoc("project_dictionary_text")}:</h6>
                                             <Form.Control className="d-flex align-items-start"
                                                 onChange={wordChange}
                                                 as="textarea"
                                                 value={inputWord}
-                                                placeholder="Слово"
+                                                placeholder={getLoc("project_dictionary_text_placeholder")}
                                                 id="form-word"
                                                 style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
                                             >
                                             </Form.Control>
-                                            <h6>Ключ слова:</h6>
+                                            <h6>{getLoc("project_dictionary_key")}:</h6>
                                             <Form.Control className="d-flex align-items-start"
                                                 onChange={wordKeyChange}
                                                 as="textarea"
                                                 value={inputWordKey}
-                                                placeholder="Ключ слова"
+                                                placeholder={getLoc("project_dictionary_key_placeholder")}
                                                 id="form-word-key"
                                                 style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
                                             >
                                             </Form.Control>
-                                            <h6>Перевод:</h6>
+                                            <h6>{getLoc("project_dictionary_translate")}:</h6>
                                             <Form.Control className="d-flex align-items-start"
                                                 onChange={translateChange}
                                                 as="textarea"
                                                 value={inputTranslate}
-                                                placeholder="Перевод слова"
+                                                placeholder={getLoc("project_dictionary_translate_placeholder")}
                                                 id="form-translate"
                                                 style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
                                             >
                                             </Form.Control>
-                                            <h6>Ключ перевода:</h6>
+                                            <h6>{getLoc("project_dictionary_translate_key")}:</h6>
                                             <Form.Control className="d-flex align-items-start"
                                                 onChange={translateKeyChange}
                                                 as="textarea"
                                                 value={inputTranslateKey}
-                                                placeholder="Ключ перевода"
+                                                placeholder={getLoc("project_dictionary_translate_key_placeholder")}
                                                 id="form-translate-key"
                                                 style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
                                             >
                                             </Form.Control>
-                                            <h6>Описание:</h6>
+                                            <h6>{getLoc("project_dictionary_description")}:</h6>
                                             <Form.Control className="d-flex align-items-start"
                                                 onChange={descriptionChange}
                                                 as="textarea"
                                                 value={inputDescription}
-                                                placeholder="Описание"
+                                                placeholder={getLoc("project_dictionary_description_placeholder")}
                                                 id="form-description"
                                                 style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
                                             >
@@ -809,22 +791,22 @@ function Project(props) {
                                             {!loading 
                                                 ? <>{!editDict
                                                     ? <>
-                                                        <Button type="submit" variant="outline-success" onClick={() => AddWord()}><FaPlus /> Добавить </Button>
+                                                        <Button type="submit" variant="outline-success" onClick={() => AddWord()}><FaPlus /> {getLoc("project_dictionary_add_word")} </Button>
                                                     </>
                                                     : <>
-                                                        <Button type="submit" variant="outline-success" onClick={() => SaveWord()}><FaPlus /> Сохранить </Button>
+                                                        <Button type="submit" variant="outline-success" onClick={() => SaveWord()}><FaPlus /> {getLoc("project_dictionary_save_word")} </Button>
                                                         <Button variant="outline-danger" onClick={() => {
                                                             setEditDict(null)
-                                                        }}><FaPlus /> Отмена </Button>
+                                                        }}><FaPlus /> {getLoc("project_dictionary_cancel_word")} </Button>
                                                     </>
                                                 }</>
                                                 :  <>{!editDict
                                                     ? <>
-                                                        <Button variant="outline-success" disabled><Spinner size="sm"/> Добавить </Button>
+                                                        <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("project_dictionary_add_word")} </Button>
                                                     </>
                                                     : <>
-                                                        <Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
-                                                        <Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+                                                        <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("project_dictionary_save_word")} </Button>
+                                                        <Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("project_dictionary_cancel_word")} </Button>
                                                     </>
                                                 }</>
                                             }
@@ -839,17 +821,17 @@ function Project(props) {
                             </div>
                         </Tab>
                     }
-                    <Tab eventKey="members" title="Участники">
+                    <Tab eventKey="members" title={getLoc("project_members_tab")}>
                         <div className="row">
                             <div className="col-8">
-                                <h2>Участники перевода</h2>
+                                <h2>{getLoc("project_members")}</h2>
                                 <table className="table table-striped align-items-center">
                                     <thead>
                                         <tr>
-                                            <th scope="col">№</th>
-                                            <th scope="col">Пользователь</th>
-                                            <th scope="col">Роль</th>
-                                            <th scope="col">Рейтинг</th>
+                                            <th scope="col">{getLoc("project_members_numero")}</th>
+                                            <th scope="col">{getLoc("project_members_user")}</th>
+                                            <th scope="col">{getLoc("project_members_role")}</th>
+                                            <th scope="col">{getLoc("project_members_rating")}</th>
                                             <th scope="col"></th>
                                         </tr>
                                     </thead>
@@ -864,17 +846,17 @@ function Project(props) {
                                                 {!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members || (userRole?.permissions.is_owner && user?.id != member.user.id)
                                                 ?   <Form.Select defaultValue={member.role_id} onChange={(e) => ChangeRole(member.user.id, e.target.value)}>
                                                     {Object.keys(roles).filter((id) => id != '0' && (!roles[id].permissions.can_manage_members || userRole?.permissions.is_owner)).map((id, index) =>
-                                                            <option value={id} key={id}>{roles[id].name}</option>
+                                                            <option value={id} key={id}>{getLoc("role_" + roles[id].name)}</option>
                                                     )}
                                                     </Form.Select>
-                                                :   <td>{roles[member.role_id].name}</td>
+                                                :   <td>{getLoc("role_" + roles[member.role_id].name)}</td>
                                                 }
                                                 <td>0</td>
                                                 {(!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members || (userRole?.permissions.is_owner && user?.id != member.user.id)) &&
-                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Исключить</button></td>
+                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>{getLoc("project_members_kick")}</button></td>
                                                 }
                                                 {user?.id == member.user.id && project.owner_id != user?.id && 
-                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>Покинуть проект</button></td>
+                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>{getLoc("project_members_leave")}</button></td>
                                                 }
                                                 <td></td>
                                             </tr>
@@ -883,18 +865,17 @@ function Project(props) {
                                 </table>
                                 {invites.length > 0 &&
                                 <>
-                                    <h2>Приглашённые</h2>
+                                    <h2>{getLoc("project_members_invited")}</h2>
                                     <table className="table table-striped align-items-center">
                                         <thead>
                                             <tr>
-                                                <th scope="col">№</th>
-                                                <th scope="col">Пользователь</th>
-                                                <th scope="col">Приглашён</th>
+                                                <th scope="col">{getLoc("project_members_numero")}</th>
+                                                <th scope="col">{getLoc("project_members_user")}</th>
+                                                <th scope="col">{getLoc("project_members_invited_by")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                         {invites.map((invite, index) =>
-                                            // Соня, сделай список приглашений красиво
                                             <tr key={invite.user.id}>
                                                 <th scope="row">{index + 1}</th>
                                                 <td>
@@ -909,11 +890,11 @@ function Project(props) {
                                                 {userRole?.permissions?.can_manage_members &&
                                                     <>{invite.inviter.id == invite.user.id
                                                         ?   <td style={{ display: 'inline-flexbox' }}>
-                                                                <div><button type="button" className="btn btn-success" style={{ padding: '0px 5px' }} onClick={ function (e) { ResolveInvite(invite.id, true) } }>Принять</button></div>
-                                                                <div><button type="button" className="btn btn-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { ResolveInvite(invite.id, false) } }>Отказать</button></div>
+                                                                <div><button type="button" className="btn btn-success" style={{ padding: '0px 5px' }} onClick={ function (e) { ResolveInvite(invite.id, true) } }>{getLoc("project_members_invite_approve")}</button></div>
+                                                                <div><button type="button" className="btn btn-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { ResolveInvite(invite.id, false) } }>{getLoc("project_members_invite_refuse")}</button></div>
                                                             </td>
                                                         :   <td style={{ display: 'inline-flexbox' }}>
-                                                                <button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>Отменить</button>
+                                                                <button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { DeleteInvite(invite.id) } }>{getLoc("project_members_invite_cancel")}</button>
                                                             </td>
                                                     }</>
                                                 }
@@ -927,15 +908,15 @@ function Project(props) {
                             </div>
                             {userRole?.permissions?.can_manage_members &&
                                 <div className="col border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
-                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>Пригласить участника</h3>
+                                    <h3 className="py-2 border-bottom" style={{ marginTop: '-5px' }}>{getLoc("project_members_invite_user")}</h3>
                                     <form style={{ marginTop: '10px' }}>
-                                        <input className="form-control" placeholder="Введите ник пользователя" aria-label="Invite" onChange={fieldInviteUserChange} />
+                                        <input className="form-control" placeholder={getLoc("project_members_invite_username_placeholder")} aria-label="Invite" onChange={fieldInviteUserChange} />
                                         <button className="btn btn-primary" style={{ marginTop: '10px', marginBottom: '5px' }} disabled={fetchingInvite} onClick={(e) => {e.preventDefault(); SendInvite()}}>
                                             {fetchingInvite
                                              ?  <Spinner animation="border" role="output" size="sm">
-                                                    <span className="visually-hidden">Загрузка...</span>
+                                                    <span className="visually-hidden">{getLoc("project_members_invite_loading")}</span>
                                                 </Spinner>
-                                             :  <span>Пригласить</span>
+                                             :  <span>{getLoc("project_members_invite")}</span>
                                             }
                                         </button>
                                     </form>
@@ -949,81 +930,42 @@ function Project(props) {
                         </div>
                     </Tab>
                     {userRole?.permissions?.can_manage_project &&
-                        <Tab eventKey="settings" title="Настройки">
-                            <h2 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки проекта</h2>
+                        <Tab eventKey="settings" title={getLoc("project_settings_tab")}>
+                            <h2 style={{ marginTop: '20px', marginBottom: '20px' }}>{getLoc("project_settings")}</h2>
                             <div className="row">
                                 <div className="border rounded py-3" style={{ padding: '0px 20px', margin: '0px 20px' }}>
                                     <form className="row">
-                                        <label htmlFor="settings-handle" className="form-label">Уникальная ссылка</label>
+                                        <label htmlFor="settings-handle" className="form-label">{getLoc("project_settings_handle")}</label>
                                         <div className="col-3">
                                             <input type="text" className="form-control" id="settings-handle" minLength={4} maxLength={100} defaultValue={project.handle}/>
                                         </div>
-                                        {/* <div className="col">
-                                            <button className="btn btn-primary" type="submit">Применить</button>
-                                        </div> */}
                                     </form>
                                     <form>
-                                        <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>Название проекта</label>
+                                        <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_name")}</label>
                                         <input type="text" className="form-control" id="settings-name" defaultValue={project.name} minLength={4} maxLength={100} />
-                                        <label htmlFor="settings-description" className="form-label" style={{ marginTop: '10px' }}>Описание проекта</label>
+                                        <label htmlFor="settings-description" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_description")}</label>
                                         <textarea className="form-control" aria-label="With textarea" id="settings-description" maxLength={1000} defaultValue={project.description} />
-                                        {/* <label htmlFor="settings-logo" className="form-label" style={{ marginTop: '10px' }}>Сменить обложку</label>
-                                        <input type="file" className="form-control" id="settings-logo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
-                                    <div id="logo-desc" className="form-text">Принимаются картинки в формате png и jpeg.</div> */}
-                                        {/* <label htmlFor="settings-author" className="form-label" style={{ marginTop: '10px' }}>Владелец проекта</label>
-                                        <input type="text" className="form-control" id="settings-author" defaultValue="Нынешний владелец" /> */}
-                                        <label htmlFor="settings-cover" className="form-label" style={{ marginTop: '10px' }}>Ссылка на обложку проекта</label>
+                                        <label htmlFor="settings-cover" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_cover_link")}</label>
                                         <input type="text" className="form-control" id="settings-cover" defaultValue={project.cover_url} maxLength={1000} />
-                                        <label htmlFor="settings-source-lang" className="form-label" style={{ marginTop: '10px' }}>Язык оригинала</label>
+                                        <label htmlFor="settings-source-lang" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_source_lang")}</label>
                                         <select className="form-select" defaultValue={project.source_lang} id="settings-source-lang">
-                                            <option value="ru">русский</option>
-                                            <option value="en">английский</option>
-                                            <option value="de">немецкий</option>
-                                            <option value="fr">французский</option>
+                                            <option value="ru">{getLoc("lang_ru")}</option>
+                                            <option value="en">{getLoc("lang_en")}</option>
                                         </select>
-                                        <label htmlFor="settings-target-lang" className="form-label" style={{ marginTop: '10px' }}>Язык перевода</label>
+                                        <label htmlFor="settings-target-lang" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_target_lang")}</label>
                                         <select className="form-select" defaultValue={project.target_lang} id="settings-target-lang">
-                                            <option value="ru">русский</option>
-                                            <option value="en">английский</option>
-                                            <option value="de">немецкий</option>
-                                            <option value="fr">французский</option>
+                                            <option value="ru">{getLoc("lang_ru")}</option>
+                                            <option value="en">{getLoc("lang_en")}</option>
                                         </select>
-                                        <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>Видимость проекта</label>
+                                        <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_visibility")}</label>
                                         <select className="form-select" defaultValue={project.visibility} id="settings-access">
-                                            <option value="private">Приватный проект</option>
-                                            <option value="public">Публичный проект</option>
+                                            <option value="private">{getLoc("project_settings_visibility_public")}</option>
+                                            <option value="public">{getLoc("project_settings_visibility_private")}</option>
                                         </select>
-                                        {/* <label htmlFor="settings-category" className="form-label" style={{ marginTop: '10px' }}>Категория</label>
-                                        <select className="form-select" defaultValue="none" id="settings-category" aria-describedby="category-desc">
-                                            <option value="none">Не выбрано</option>
-                                            <option value="movie">Фильмы</option>
-                                            <option value="text">Тексты</option>
-                                            <option value="program">Программы</option>
-                                        </select>
-                                        <div id="category-desc" className="form-text">* Если вы выбрали категорию, и ваш проект публичный,
-                                            он будет отображаться в соответствующей категории во вкладке "Публичные переводы".
-                                            Приватные проекты не будут отображаться в этой вкладке вне зависимости от категории.
-                                        </div>
-                                        <label htmlFor="settings-status" className="form-label" style={{ marginTop: '10px' }}>Статус</label>
-                                        <div className="form-check">
-                                            <input type="radio" name="radios" className="form-check-input" id="settings-status-opened" defaultValue="opened" defaultChecked />
-                                            <label className="form-check-label" htmlFor="settings-status-opened">Проект открыт</label>
-                                        </div>
-                                        <div className="form-check">
-                                            <input type="radio" name="radios" className="form-check-input" id="settings-status-frozen" defaultValue="frozen" />
-                                            <label className="form-check-label" htmlFor="settings-status-frozen">Проект заморожен</label>
-                                        </div>
-                                        <div className="form-check">
-                                            <input type="radio" name="radios" className="form-check-input" id="settings-status-closed" defaultValue="closed" />
-                                            <label className="form-check-label" htmlFor="settings-status-closed">Проект закрыт</label>
-                                        </div>
-                                        <div id="status-desc" className="form-text">* Статус проекта отображается на странице проекта. Вы можете пометить проект как замороженный, чтобы обозначить,
-                                            что временно не будете над ним работать, или как закрытый, если работа завершена и не будет продолжаться.
-                                        </div> */}
                                     </form>
-                                    <Button variant="primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>Применить</Button>
+                                    <Button variant="primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>{getLoc("project_settings_save")}</Button>
                                     { userRole?.permissions?.is_owner && 
-                                    <div><Button variant="danger" type="submit" style={{ marginTop: '20px' }} onClick={DeleteProject}>Удалить проект</Button></div>
+                                    <div><Button variant="danger" type="submit" style={{ marginTop: '20px' }} onClick={DeleteProject}>{getLoc("project_settings_delete")}</Button></div>
                                     }
                                 </div>
                             </div>

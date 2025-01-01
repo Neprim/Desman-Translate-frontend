@@ -8,6 +8,7 @@ import { useEffect, useState, useContext } from "react"
 import { fetchSection, fetchSomeAPI } from "../APIController";
 import { Link, useParams } from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
+import { getLoc } from "../Translation";
 
 export default function LoadSection() {
 
@@ -66,19 +67,19 @@ export default function LoadSection() {
                 try {
                     json = JSON.parse(loaded_strings)
                 } catch (err) {
-                    throw {errors: ["Битый JSON"]}
+                    throw {errors: [getLoc("load_section_error_bad_json")]}
                 }
                 
                 for (const key in json) {
                     if (typeof(json[key]) != 'string') {
-                        throw {errors: ["Вложенные JSONы пока не сделал"]}
+                        throw {errors: [getLoc("load_section_error_nested_json")]}
                     }
 
                     strings.push({ text: json[key], key: key })
                 }
             }
             if (!strings.length)
-                throw {errors: ["А строки то где?"]}
+                throw {errors: [getLoc("load_section_error_no_strings")]}
 
             setSectionType(type)
             setStrings(strings)
@@ -104,9 +105,9 @@ export default function LoadSection() {
             window.location.href = `/projects/${link['project_id']}/editor/${section.id.toString(16)}`
         } catch (err) {
             if (err.status == 413) {
-                setLoadError("Слишком большой объём строк, в одной главе может быть не больше 10000 строк.")
+                setLoadError(getLoc("load_section_error_too_many_strings"))
             } else if (err.status == 400 && err.errors[0].key == 'text' && err.errors[0].kind == "required") {
-                setLoadError("Нельзя загружать пустые строки.")
+                setLoadError(getLoc("load_section_error_empty_strings"))
             } else {
                 setLoadError(JSON.stringify(err))
             }
@@ -150,17 +151,17 @@ export default function LoadSection() {
             >
                 {section && !strings &&
                     <>
-                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">Загрузка строк для раздела "{section.name}"</h1>
+                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">{getLoc("load_section_load_strings_sections")}"{section.name}"</h1>
                     <Form>
                         <Form.Group>
-                            <Form.Label htmlFor="settings-strings-type" className="mt-2">Тип строк</Form.Label>
+                            <Form.Label htmlFor="settings-strings-type" className="mt-2">{getLoc("load_section_type")}</Form.Label>
                             <Form.Select defaultValue="text" id="settings-strings-type">
-                                <option value="text">Текст</option>
-                                <option value="json">JSON</option>
+                                <option value="text">{getLoc("load_section_type_text")}</option>
+                                <option value="json">{getLoc("load_section_type_json")}</option>
                             </Form.Select>
                     </Form.Group>
                     <Form.Group>
-                        <Form.Label htmlFor="settings-loaded-strings" className="form-label mt-2">Текст для загрузки</Form.Label>
+                        <Form.Label htmlFor="settings-loaded-strings" className="form-label mt-2">{getLoc("load_section_load_text")}</Form.Label>
                         <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-strings" onChange={(e) => {CheckStringsType()}}/>
                         {stringsError && 
                             <div id="stringsError" className="form-text">
@@ -171,9 +172,9 @@ export default function LoadSection() {
                     <Button className="mt-2" type="submit" variant="primary" disabled={fetchingStringsLoad} onClick={(e) => TransformStrings(e)}>
                         {fetchingStringsLoad
                             ?  <Spinner animation="border" role="output" size="sm">
-                                <span className="visually-hidden">Загрузка...</span>
+                                <span className="visually-hidden">{getLoc("load_section_loading")}</span>
                             </Spinner>
-                            :  <span>Преобразовать</span>
+                            :  <span>{getLoc("load_section_transform")}</span>
                         }
                     </Button>
 
@@ -183,7 +184,7 @@ export default function LoadSection() {
                 {section && drawStrings &&
                     <> 
                     <h3 className="mb-3">
-                        Итоговое разбиение на строки
+                    {getLoc("load_section_final_strings")}
                     </h3>
                     <div id="div-strings-to-load" style={{ height: "80vh", overflowY: "auto" }}>
                         {drawStrings.map((str, i) => 
@@ -204,21 +205,21 @@ export default function LoadSection() {
                                 e.preventDefault();
                             }}>
                             <p className="mb-1 fw-semibold">{str.text}</p>
-                            <p className="text-body-secondary mt-0">{str.key && <i> ключ: {str.key}</i>}</p>
+                            <p className="text-body-secondary mt-0">{str.key && <i> {getLoc("load_section_string_key")}: {str.key}</i>}</p>
                             </Container>
                         )}
                     </div>
                     <Button className="mt-2 me-2" type="submit" variant="primary" disabled={fetchingStringsLoad} onClick={LoadStrings}>
                         {fetchingStringsLoad
                             ?  <Spinner animation="border" role="output" size="sm">
-                                <span className="visually-hidden">Загрузка...</span>
+                                <span className="visually-hidden">{getLoc("load_section_loading")}</span>
                             </Spinner>
-                            :  <span>Загрузить</span>
+                            :  <span>{getLoc("load_section_upload")}</span>
                         }
                     </Button>
                     {!fetchingStringsLoad &&
                         <Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setStrings(null)}}>
-                            Отмена
+                            {getLoc("load_section_cancel")}
                         </Button>
                     }
                     {loadError && 

@@ -12,6 +12,7 @@ import Container from "react-bootstrap/Container"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { fetchUser, fetchSomeAPI } from "../APIController";
+import { getLoc } from "../Translation";
 
 
 export default function User() {
@@ -54,8 +55,8 @@ export default function User() {
     async function GetUserInfo() {
         try {
             let user = await fetchUser(link["user_id"])
-            if (user.about == undefined) {
-                user.about = "Описание отсутствует."
+            if (!user.about) {
+                user.about = getLoc("userpage_about_nothing")
             }
             setUser(user)
         } catch (err) {
@@ -110,21 +111,21 @@ export default function User() {
                     defaultActiveKey="user"
                     id="project-id-tabs"
                     className="mb-3">
-                    <Tab eventKey="user" title="Пользователь">
+                    <Tab eventKey="user" title={getLoc("userpage_user_tab")}>
 
                         <Row>
                             <Col md={5} className="border rounded ms-2 p-2">
                                 <img src={user?.avatar_url || placeholder} height={200} width={200} alt="project cover" style={{ float: 'left'}} className="border rounded me-3 p-2" />
                                 <h2>{user?.username}</h2>
                                 {gotUser &&
-                                    <h4>{flagCurrentUser ? "О вас" : "О пользователе"}</h4>
+                                    <h4>{flagCurrentUser ? getLoc("userpage_about_you") : getLoc("userpage_about_user")}</h4>
                                 }
                                 <p>{user?.about}</p>
                             </Col>
                             <Col className="p-3 mx-3">
-                                <h2 style={{ marginBottom: '20px' }}>Участие в проектах</h2>
+                                <h2 style={{ marginBottom: '20px' }}>{getLoc("userpage_user_projects")}</h2>
                                 { flagCurrentUser &&
-                                    <Button variant="primary" style={{ marginTop: '0px', marginBottom: '5px' }} onClick={routeChange}>Создать проект</Button>
+                                    <Button variant="primary" style={{ marginTop: '0px', marginBottom: '5px' }} onClick={routeChange}>{getLoc("userpage_create_project")}</Button>
                                 }
                                 <div className="container text-left" style={{ paddingBottom: '10px' }}>
                                     {projects.map((project, i) =>
@@ -133,7 +134,7 @@ export default function User() {
                                             <strong>
                                                 <Link className="link-primary" to={"/projects/" + project.id}>{project.name}</Link>
                                             </strong>
-                                            <br /> Роль: {project.user_role}
+                                            <br /> {getLoc("userpage_project_role")}: {project.user_role && getLoc("role_" + project.user_role)}
                                         </Col>
                                     </Row>
                                     )}
@@ -142,61 +143,29 @@ export default function User() {
                         </Row>
                     </Tab>
                     { flagCurrentUser &&
-                    <Tab eventKey="settings" title="Настройки">
-                        <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>Настройки пользователя</h3>
+                    <Tab eventKey="settings" title={getLoc("userpage_settings_tab")}>
+                        <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>{getLoc("userpage_user_settings")}</h3>
                         <div id="settings-user" className="border rounded py-3" style={{ padding: '0px 20px', marginBottom: '10px' }}>
                             <form className="row">
-                                {/* <label htmlFor="settings-user-id" className="form-label">Уникальный хэндл</label>
-                                <div className="col-auto">
-                                    <input type="text" className="form-control" id="settings-user-id" minLength={4} maxLength={100} defaultValue={cur_user.username} />
-                                    <div className="valid-feedback">Можно использовать!</div>
-                                    <div className="invalid-feedback">Такая ссылка уже занята!</div>
-                                </div> */}
-                                {/* <div className="col">
-                                    <button className="btn btn-primary" type="submit">Применить</button>
-                                </div> */}
                             </form>
                             <form>
-                                {/* <label htmlFor="settings-user-name" className="form-label">Имя пользователя</label>
-                                <input type="text" className="form-control" id="settings-user-name" defaultValue="Ленивая выхухоль" minLength={4} maxLength={100} /> */}
-                                <label htmlFor="settings-user-about" className="form-label" style={{ marginTop: '10px' }}>Описание</label>
-                                <textarea className="form-control" aria-label="With textarea" id="settings-user-about" maxLength={1000} placeholder="Напишите здесь все, что хотели бы рассказать о себе: род деятельности, любимые жанры, какими языками вы владеете..." defaultValue={cur_user.about} />
-                                {/* <label htmlFor="settings-user-avatar" className="form-label" style={{ marginTop: '10px' }}>Сменить аватар</label>
-                                <input type="file" className="form-control" id="settings-user-avatar" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
-                                <div id="logo-desc" className="form-text">
-                                    Принимаются картинки в формате .png и .jpeg
-                                </div> */}
-                                <label htmlFor="settings-user-avatar" className="form-label" style={{ marginTop: '10px' }}>Ссылка на аватарку</label>
+                                <label htmlFor="settings-user-about" className="form-label" style={{ marginTop: '10px' }}>{getLoc("userpage_description")}</label>
+                                <textarea className="form-control" aria-label="With textarea" id="settings-user-about" maxLength={1000} placeholder={getLoc("userpage_desc_placeholder")} defaultValue={cur_user.about} />
+                                <label htmlFor="settings-user-avatar" className="form-label" style={{ marginTop: '10px' }}>{getLoc("userpage_avatar_link")}</label>
                                 <input type="text" className="form-control" id="settings-user-avatar" defaultValue={cur_user?.avatar_url} maxLength={1000} />
-                                <label htmlFor="settings-user-gender" className="form-label" style={{ marginTop: '10px' }}>Пол</label>
+                                <label htmlFor="settings-user-gender" className="form-label" style={{ marginTop: '10px' }}>{getLoc("userpage_gender")}</label>
                                 <select className="form-select" defaultValue={cur_user.gender || "hidden"} id="settings-user-gender">
-                                    <option value="hidden">Не скажу</option>
-                                    <option value="male">Мужской</option>
-                                    <option value="female">Женский</option>
+                                    <option value="hidden">{getLoc("userpage_gender_hidden")}</option>
+                                    <option value="male">{getLoc("userpage_gender_male")}</option>
+                                    <option value="female">{getLoc("userpage_gender_female")}</option>
                                 </select>
-                                {/* <label htmlFor="settings-user-access" className="form-label" style={{ marginTop: '10px' }}>Доступ к аккаунту</label>
-                                <div className="form-check">
-                                    <input type="radio" name="radios" className="form-check-input" id="settings-account-private" defaultValue="private" defaultChecked />
-                                    <label className="form-check-label" htmlFor="settings-account-private">Открытый</label>
-                                </div>
-                                <div className="form-check">
-                                    <input type="radio" name="radios" className="form-check-input" id="settings-account-public" defaultValue="public" />
-                                    <label className="form-check-label" htmlFor="settings-account-public">Закрытый</label>
-                                </div> */}
                             </form>
-                            <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>Применить</button>
+                            <button className="btn btn-primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>{getLoc("userpage_save")}</button>
                         </div>
                     </Tab>
                     }
                 </Tabs>
-
-
-
-                {/* настройки. */}
-
-
             </Container>
-
             <Footer />
         </>
     );

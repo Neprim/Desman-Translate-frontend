@@ -8,6 +8,7 @@ import { useEffect, useState, useContext } from "react"
 import { fetchSections, fetchSomeAPI } from "../APIController";
 import { Link, useParams } from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
+import { getLoc } from "../Translation";
 
 export default function EditorSelector() {
 
@@ -85,11 +86,11 @@ export default function EditorSelector() {
             >
                 {sections &&
                     <>
-                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">Выбор разделов для редактора</h1>
+                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">{getLoc("editor_selector_sections_choose")}</h1>
                     <Form>
                     <Form.Check
                         type="checkbox"
-                        label="Выбрать все"
+                        label={getLoc("editor_selector_choose_all")}
                         name="all"
                         id="checkbox-all"
                         onChange={(e) => {SelectSection(e)}}
@@ -104,7 +105,7 @@ export default function EditorSelector() {
                         />
                     )}
                     <Button className="mt-2" variant="primary" onClick={(e) => ProceedSelectedSections(e)}>
-                        Выбрать
+                        {getLoc("editor_selector_choose")}
                     </Button>
                     </Form>
                     </>

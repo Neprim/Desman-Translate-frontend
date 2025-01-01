@@ -1,7 +1,6 @@
 import './App.css';
 import { Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
-import About from './pages/About';
 import Projects from "./pages/Projects.js";
 import Search from "./pages/Search.js";
 import User from "./pages/User.js";
@@ -16,6 +15,7 @@ import LoadSection from './pages/LoadSection.js';
 import UploadSectionTranslations from './pages/UploadSectionTranslations.js';
 import UploadProjectTranslations from './pages/UploadProjectTranslations.js';
 import { AuthProvider } from "./AuthContext";
+import { getLoc } from './Translation';
 
 const api_link = "127.0.0.1:3000"
 
@@ -28,7 +28,6 @@ function App() {
           <Route path="404" element={<Notfound />} />
           <Route path="403" element={<Forbidden />} />
           <Route path="401" element={<Unathorized />} />
-          <Route path="about" element={<About />} />
           <Route path="projects" element={<Projects />} />
           <Route path="search" element={<Search />} />
           <Route path="user" element={<User />} />

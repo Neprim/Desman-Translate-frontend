@@ -6,6 +6,7 @@ import Container from "react-bootstrap/Container"
 import Form from "react-bootstrap/Form"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { getLoc } from "../Translation"
 
 export default function Login() {
     const navigate = useNavigate();
@@ -66,17 +67,17 @@ export default function Login() {
                     minWidth: 300
                 }}
             >
-                <h1 className="mb-3">Вход</h1>
+                <h1 className="mb-3">{getLoc("signin_signin")}</h1>
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label htmlFor="inputEmailLogin">
-                            Имя пользователя
+                            {getLoc("signin_username_email")}
                         </Form.Label>
                         <Form.Control id="inputEmailLogin" onChange={mailChange} />
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label htmlFor="inputPasswordLogin">
-                            Пароль
+                            {getLoc("signin_password")}
                         </Form.Label>
                         <Form.Control
                             onChange={passChange}
@@ -86,23 +87,23 @@ export default function Login() {
                         />
                         <Form.Text id="forgotPassword">
                             <details>
-                                <summary>Забыли пароль?</summary>
-                                <strike>Ну грустно вам.</strike> Напишите Неприму, чтобы придумал что-нибудь.    
+                                <summary>{getLoc("signin_forgot_password")}</summary>
+                                <strike>{getLoc("signin_cry_about_it")}</strike> {getLoc("signin_password_restore")} 
                             </details>
                         </Form.Text>
                     </Form.Group>
                     <Form.Check className="mb-3">
                         <input type="checkbox" className="form-check-input" id="rememberCheck" />
                         <Form.Check.Label className="form-check-label" htmlFor="rememberCheck">
-                            Запомнить меня
+                            {getLoc("signin_remember_me")}
                         </Form.Check.Label><br/>
                         <Form.Text>
-                            Если выставить, бразуер запомнит авторизацию на 30 дней.
+                            {getLoc("signin_remember_me_note")}
                         </Form.Text>
                     </Form.Check>
-                    {errorVisibility && <div id="error" className="my-1">Неверный логин или пароль.</div>}
+                    {errorVisibility && <div id="error" className="my-1">{getLoc("signin_error_bad_login_password")}</div>}
                     <Button type="submit" variant="primary" onClick={Submit}>
-                        Войти
+                        {getLoc("signin_login")}
                     </Button>
                 </Form>
             </Container>

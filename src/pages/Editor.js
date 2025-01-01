@@ -19,6 +19,7 @@ import Stack from 'react-bootstrap/Stack';
 import CloseButton from 'react-bootstrap/CloseButton';
 import Spinner from 'react-bootstrap/Spinner';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+import { getLoc } from "../Translation"
 
 
 import React, { setState, useEffect, useState, formData, useContext, useRef } from "react"
@@ -363,7 +364,7 @@ export default function Editor() {
 		let warn = ""
 		for (let i of curString.dicts) {
 			if (!inputTranslation.match(dictionary[i]?.translate_key)) {
-				warn += `Отсутствует перевод "${dictionary[i].translate}"\n`
+				warn += `${getLoc("editor_missing_translation_warning")} "${dictionary[i].translate}"\n`
 			}
 		}
 		setTranslateWarning(warn)
@@ -721,27 +722,6 @@ export default function Editor() {
 	}
 
 	function UpdateFilters(fls) {
-		const ResolveName = (key, value) => {
-			if (key == "orig")
-				return "Оригинал содержит: " + value
-			else if (key == "trans")
-				return "Перевод содержит: " + value
-			else if (key == "key")
-				return "Ключ содержит: " + value
-			else if (key == "status") {
-				switch (value) {
-					case "non_tr":
-						return "Непереведённое"
-					case "tr":
-						return "Переведённое"
-					case "non_app":
-						return "Не одобренное"
-					case "app":
-						return "Одобренное"
-				}
-			}
-		}
-
 		setFilters(fls)
 
 		setCurString(drawStrings[0])
@@ -822,22 +802,22 @@ export default function Editor() {
 			{/* <header className="fixed-top" expand="lg"> */}
 				<Container fluid className="bg-white py-1 border-bottom d-flex flex-wrap justify-content-between">
 					<div className="d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Вернуться к проекту" id="tooltip-back" where="bottom">
+						<LinkWithTooltip tooltip={getLoc("editor_back_to_project")} id="tooltip-back" where="bottom">
 							<Button variant="outline-dark" onClick={routeChange}><BsReplyFill style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</div>
 					<div className="d-inline-flex align-items-center">
 						<h3 className="pt-1">
 							{sections.length == 1 
-								? `Раздел: ${sections[0].name}` 
+								? `${getLoc("editor_current_chapter")}: ${sections[0].name}` 
 								: link["sections_list"] == 'all'
-									? "Все разделы"
-								 	: "Разделы: " + sections.map((sec) => sec.name).join("; ")
+									? `${getLoc("editor_all_chapters")}`
+								 	: `${getLoc("editor_current_chapters")}: ` + sections.map((sec) => sec.name).join("; ")
 							}
 						</h3>
 					</div>
 					<div className="d-inline-flex align-items-center">
-						<LinkWithTooltip tooltip="Настройки редактора" id="tooltip-settings" where="bottom">
+						<LinkWithTooltip tooltip={getLoc("editor_settings")} id="tooltip-settings" where="bottom">
 							<Button variant="outline-dark" disabled={true}><FaCog style={{ marginBottom: "3px" }} /></Button>
 						</LinkWithTooltip>
 					</div>
@@ -849,7 +829,7 @@ export default function Editor() {
 				>
 					<Col className="py-1 d-inline-flex align-items-center">
 						<Dropdown>
-							<LinkWithTooltip tooltip="Фильтр" id="tooltip-settings" where="bottom"><div></div>
+							<LinkWithTooltip tooltip={getLoc("editor_filter")} id="tooltip-settings" where="bottom"><div></div>
 								<Dropdown.Toggle variant={filters.length ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
 									<FaFilter style={{ marginBottom: "3px" }} />
 								</Dropdown.Toggle>
@@ -859,16 +839,16 @@ export default function Editor() {
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<InputGroup.Checkbox id='filter-status-checkbox' checked={statusChecked} onChange={(e) => {setStatusChecked(e.target.checked)}}/>
 									<Form.Select id='filter-status-value' value={statusValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setStatusValue, setStatusChecked)}}>
-										<option value="non_tr">Непереведенное</option>
-										<option value="tr">Переведенное</option>
-										<option value="non_app">Не одобрено</option>
-										<option value="app">Одобрено</option>
+										<option value="non_tr">{getLoc("editor_filter_not_translated")}</option>
+										<option value="tr">{getLoc("editor_filter_translated")}</option>
+										<option value="non_app">{getLoc("editor_filter_not_approved")}</option>
+										<option value="app">{getLoc("editor_filter_approved")}</option>
 									</Form.Select>
 								</InputGroup>
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<InputGroup.Checkbox id='filter-user-checkbox' checked={userChecked} onChange={(e) => {setUserChecked(e.target.checked)}}/>
 									<Form.Select id='filter-user-value' value={userValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setUserValue, setUserChecked)}}>
-										<option value="">-- От переводчика --</option>
+										<option value="">-- {getLoc("editor_filter_from_translator")} --</option>
 										{translators?.map((tr) =>
 											<option value={tr.id}>{tr.username}</option>
 										)}
@@ -876,15 +856,15 @@ export default function Editor() {
 								</InputGroup>
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<InputGroup.Checkbox id='filter-key-checkbox' checked={keyChecked} onChange={(e) => {setKeyChecked(e.target.checked)}}/>
-									<Form.Control id='filter-key-value' value={keyValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setKeyValue, setKeyChecked)}} placeholder='Ключ содержит' />
+									<Form.Control id='filter-key-value' value={keyValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setKeyValue, setKeyChecked)}} placeholder={getLoc("editor_filter_key_contains")} />
 								</InputGroup>
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<InputGroup.Checkbox id='filter-orig-checkbox' checked={origChecked} onChange={(e) => {setOrigChecked(e.target.checked)}}/>
-									<Form.Control id='filter-orig-value' value={origValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setOrigValue, setOrigChecked)}} placeholder='Оригинал содержит' />
+									<Form.Control id='filter-orig-value' value={origValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setOrigValue, setOrigChecked)}} placeholder={getLoc("editor_filter_orig_contains")} />
 								</InputGroup>
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<InputGroup.Checkbox id='filter-tr-checkbox' checked={transChecked} onChange={(e) => {setTransChecked(e.target.checked)}}/>
-									<Form.Control id='filter-tr-value' value={transValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setTransValue, setTransChecked)}} placeholder='Перевод содержит' />
+									<Form.Control id='filter-tr-value' value={transValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setTransValue, setTransChecked)}} placeholder={getLoc("editor_filter_tr_contains")} />
 								</InputGroup>
 								<ButtonToolbar className="justify-content-around">
 									<Button type="submit" variant='primary' onClick={(e) => {
@@ -902,7 +882,7 @@ export default function Editor() {
 											fls.push({key: "user", value: userValue})
 
 										UpdateFilters(fls)
-									}}>Применить</Button>
+									}}>{getLoc("editor_filter_apply")}</Button>
 									<Button variant='secondary' onClick={(e) => {
 										e.preventDefault()
 										setStatusValue("non_tr")
@@ -917,29 +897,29 @@ export default function Editor() {
 										setUserChecked(false)
 
 										UpdateFilters([])
-									}}>Сбросить</Button>
+									}}>{getLoc("editor_filter_reset")}</Button>
 								</ButtonToolbar>
 							</Dropdown.Menu>
 							</Form>
 						</Dropdown>
 
 						<Dropdown>
-							<LinkWithTooltip tooltip="Сортировка" id="tooltip-settings" where="bottom"><div></div>
+							<LinkWithTooltip tooltip={getLoc("editor_sort")} id="tooltip-settings" where="bottom"><div></div>
 								<Dropdown.Toggle variant={sortBy ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
 									<FaSortAmountDownAlt style={{ marginBottom: "3px" }} />
 								</Dropdown.Toggle>
 							</LinkWithTooltip>
 							<Form className="form-inline">
 							<Dropdown.Menu style={{ padding: "15px 15px 15px", minWidth: "300px"}}>
-								Сортировать по
+								{getLoc("editor_sort_by")}
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<Form.Select id='filter-status-value' value={sortBy} onChange={(e) => {setSortBy(e.target.value)}}>
-										<option value="">-- Индексу строки --</option>
-										<option value="last_tr_time">Времени последнего перевода</option>
-										<option value="last_str_time">Времени последнего изменения</option>
-										<option value="tr_amount">Количеству переводов</option>
-										<option value="vote_plus_amount">Количеству плюсов</option>
-										<option value="vote_minus_amount">Количеству минусов</option>
+										<option value="">-- {getLoc("editor_sort_by_index")} --</option>
+										<option value="last_tr_time">{getLoc("editor_sort_by_last_translation_time")}</option>
+										<option value="last_str_time">{getLoc("editor_sort_by_last_string_change_time")}</option>
+										<option value="tr_amount">{getLoc("editor_sort_by_translations_amount")}</option>
+										<option value="vote_plus_amount">{getLoc("editor_sort_by_votes_plus")}</option>
+										<option value="vote_minus_amount">{getLoc("editor_sort_by_votes_minus")}</option>
 									</Form.Select>
 								</InputGroup>
 							</Dropdown.Menu>
@@ -947,7 +927,7 @@ export default function Editor() {
 						</Dropdown>
 
 						{userRole?.permissions?.can_manage_strings &&
-						<LinkWithTooltip tooltip="Режим перемещения"id="tooltip-settings" where="bottom">
+						<LinkWithTooltip tooltip={getLoc("editor_move_mode")}id="tooltip-settings" where="bottom">
 							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} onClick={(e) => {
 								setMoveMode(!moveMode)
 								rearrange_strings = strings
@@ -958,7 +938,7 @@ export default function Editor() {
 
 						
 						<Dropdown>
-							<LinkWithTooltip tooltip="Словарь" id="tooltip-settings" where="bottom">
+							<LinkWithTooltip tooltip={getLoc("editor_dictionary")} id="tooltip-settings" where="bottom">
 								<Dropdown.Toggle variant="outline-primary" style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
 									<FaBook style={{ marginBottom: "3px" }} />
 								</Dropdown.Toggle>
@@ -968,9 +948,9 @@ export default function Editor() {
 							<table className="table align-items-center">
 								<thead>
 									<tr>
-										<th scope="col">Слово</th>
-										<th scope="col">Перевод</th>
-										<th scope="col">Описание</th>
+										<th scope="col">{getLoc("editor_dictionary_word")}</th>
+										<th scope="col">{getLoc("editor_dictionary_translation")}</th>
+										<th scope="col">{getLoc("editor_dictionary_description")}</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -986,7 +966,7 @@ export default function Editor() {
 								{userRole?.permissions?.can_manage_strings &&
 									<Link to={`/projects/${link["project_id"]}#dictionary`} className="link-primary">
 										<Button type="submit" variant="primary">
-											Перейти в словарь проекта
+											{getLoc("editor_go_to_dictionary")}
 										</Button>
 									</Link>
 								}
@@ -1050,7 +1030,7 @@ export default function Editor() {
 						<div style={{display: "flex", justifyContent: "center"}}>
 						<div style={{marginTop: "10%"}}>
 						<div style={{justifySelf: "center", }}><Spinner></Spinner></div>
-						<h2>Загрузка строк</h2>
+						<h2>{getLoc("editor_strings_loading")}</h2>
 						</div></div>
 					}
 					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
@@ -1067,14 +1047,14 @@ export default function Editor() {
 												setInputKey(str.key)
 												setInputContext(str.context)
 												setInputMaxLength(str.max_tr_length)
-											}}>Редактировать строку</Dropdown.Item>
+											}}>{getLoc("editor_edit_string")}</Dropdown.Item>
 											<Dropdown.Item onClick={(e) => {
 												DeleteString(str.index)
-											}}>Удалить строку</Dropdown.Item>
+											}}>{getLoc("editor_delete_string")}</Dropdown.Item>
 											{filters.length == 0 && sections.length == 1 && 
 											<Dropdown.Item onClick={(e) => {
 												AddString(str.index + 1)
-											}}>Добавить строку</Dropdown.Item>
+											}}>{getLoc("editor_add_string")}</Dropdown.Item>
 											}
 										</Dropdown.Menu>
 									</Dropdown>
@@ -1159,13 +1139,13 @@ export default function Editor() {
 									as="textarea"
 									ref={textareaTranslate}
 									value={inputTranslation}
-									placeholder="Ваш вариант перевода..."
+									placeholder={getLoc("editor_translation_placeholder")}
 									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 								>
 								</Form.Control>
-								<h6> {curString?.context ? `Контекст: ${curString?.context}` : `` }</h6>
+								<h6> {curString?.context ? `${getLoc("editor_translation_context")}: ${curString?.context}` : `` }</h6>
 								<div style={{ color: (inputTranslation.length > curString?.max_tr_length ? "red" : "black") }}>
-									{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(макс. ${curString?.max_tr_length})` : ""}
+									{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(${getLoc("editor_translation_max_symbols")} ${curString?.max_tr_length})` : ""}
 									{translateWarning &&
 										<OverlayTrigger
 											placement="top"
@@ -1185,28 +1165,28 @@ export default function Editor() {
 									? 	<>
 											{!loading 
 												? <>
-													<Button variant="outline-success" onClick={() => EditTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> Сохранить </Button>
+													<Button variant="outline-success" onClick={() => EditTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_edit_save")} </Button>
 													<Button variant="outline-danger" onClick={() => {
 														setTranslationEdit(null)
 														setInputTranslation("")
-													}}><FaPlus /> Отмена </Button>
+													}}><FaPlus /> {getLoc("editor_translation_edit_cancel")} </Button>
 												</>
 												:  <>
-												<Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
-												<Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+												<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_edit_save")} </Button>
+												<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_translation_edit_cancel")} </Button>
 												</>
 											}
 										</>
 									: 	<>
 											{!loading 
-												? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> Добавить перевод </Button>
-												: <Button variant="outline-success" disabled><Spinner size="sm"/> Добавить перевод </Button>
+												? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_add")} </Button>
+												: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
 											}
 										</>
 								}
 							</>
 							}
-							<h3>Варианты перевода</h3>
+							<h3>{getLoc("editor_translations")}</h3>
 							<div style={{ overflowY: "auto" }}>
 							{curString?.translations?.map((tr, i) =>
 							<>
@@ -1218,9 +1198,9 @@ export default function Editor() {
 									>
 										{tr.text}
 									</div>
-									<div>Автор: {translators.find((el) => el.id == tr.author_id)?.username || "noname"}</div>
+									<div>{getLoc("editor_translations_author")}: {translators.find((el) => el.id == tr.author_id)?.username || "noname"}</div>
 									{ tr.editor_id && 
-										<div>Редактор: {translators.find((el) => el.id == tr.editor_id)?.username || "noname"}</div>
+										<div>{getLoc("editor_translations_editor")}: {translators.find((el) => el.id == tr.editor_id)?.username || "noname"}</div>
 									}
 									<div>{new Date(tr.updated_at).toLocaleString()}</div>
 
@@ -1275,51 +1255,51 @@ export default function Editor() {
 							</div>
 						</>
 						: <>
-							<h6>Текст:</h6>
+							<h6>{getLoc("editor_string_text")}:</h6>
 							<Form.Control className="d-flex align-items-start"
 								onChange={textChange}
 								as="textarea"
 								value={inputText}
-								placeholder="Текст строки"
+								placeholder={getLoc("editor_string_text_placeholder")}
 								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 							>
 							</Form.Control>
 							{sections[curString.sec_ind]?.type == "json" &&  <>
-								<h6>Ключ:</h6>
+								<h6>{getLoc("editor_string_key")}:</h6>
 								<Form.Control className="d-flex align-items-start"
 									onChange={keyChange}
 									as="textarea"
 									value={inputKey}
-									placeholder="Ключ строки"
+									placeholder={getLoc("editor_string_key_placeholder")}
 									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 								>
 								</Form.Control>
 							</>}
-							<h6>Контекст:</h6>
+							<h6>{getLoc("editor_string_context")}:</h6>
 							<Form.Control className="d-flex align-items-start"
 								onChange={contextChange}
 								as="textarea"
 								value={inputContext}
-								placeholder="Контекст строки"
+								placeholder={getLoc("editor_string_context_placeholder")}
 								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 							>
 							</Form.Control>
 
-							<h6>Макс. число символов:</h6>
+							<h6>{getLoc("editor_string_max_length")}:</h6>
 							<Form.Control type="number" onChange={maxLengthChange} min="1" max="2000" value={inputMaxLength} />
 							{/* <input type="number" id="tentacles" name="tentacles" min="10" max="100" /> */}
 
 						
 							{!loading 
 								? <>
-									<Button variant="outline-success" onClick={() => SaveString()}><FaPlus /> Сохранить </Button>
+									<Button variant="outline-success" onClick={() => SaveString()}><FaPlus /> {getLoc("editor_string_edit_save")} </Button>
 									<Button variant="outline-danger" onClick={() => {
 										setEditMode(false)
-									}}><FaPlus /> Отмена </Button>
+									}}><FaPlus /> {getLoc("editor_string_edit_cancel")} </Button>
 								</>
 								:  <>
-								<Button variant="outline-success" disabled><Spinner size="sm"/> Сохранить </Button>
-								<Button variant="outline-danger" disabled><Spinner size="sm"/> Отмена </Button>
+								<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_save")} </Button>
+								<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_cancel")} </Button>
 								</>
 							}
 						</>
@@ -1348,16 +1328,16 @@ export default function Editor() {
 							e.preventDefault();
 						}}>
 						<p className="mb-1 fw-semibold">{str.text}</p>
-						<p className="text-body-secondary mt-0">{str.key && <i> ключ: {str.key}</i>}</p>
+						<p className="text-body-secondary mt-0">{str.key && <i> {getLoc("editor_strings_move_key")}: {str.key}</i>}</p>
 						</Container>
 					)}
 				</div>
 				<Button className="mt-2 me-2" type="submit" variant="primary" disabled={loading} onClick={SaveRearrange}>
 					{loading
 						?  <Spinner animation="border" role="output" size="sm">
-							<span className="visually-hidden">Загрузка...</span>
+							<span className="visually-hidden">{getLoc("editor_strings_move_loading")}</span>
 						</Spinner>
-						:  <span>Сохранить</span>
+						:  <span>{getLoc("editor_strings_move_save")}</span>
 					}
 				</Button>
 				{!loading &&
@@ -1365,7 +1345,7 @@ export default function Editor() {
 						setMoveMode(false)
 						UpdateDrawStrings()
 					}}>
-						Отмена
+						{getLoc("editor_strings_move_cancel")}
 					</Button>
 				}
 				</>

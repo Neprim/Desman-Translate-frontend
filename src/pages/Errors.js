@@ -2,17 +2,17 @@ import { Link } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import { Container } from "react-bootstrap";
+import { getLoc } from "../Translation";
 
 export function Notfound() {
     return (
         <>
             <Header />
             <Container>
-                <h2 className="mt-5">404 Not Found</h2>
+                <h2 className="mt-5">{getLoc("errors_404")}</h2>
                 <br />
-                <p>Такой страницы не существует. 
-                    {/* Проверьте адрес страницы или <Link to="/create" className="link-primary">создайте свой проект с такой ссылкой!</Link> */}
-                    </p>
+                <p>{getLoc("errors_404_desc")}
+                </p>
             </Container>
             <Footer />
         </>
@@ -23,9 +23,9 @@ export function Forbidden() {
         <>
             <Header />
             <Container>
-                <h2 className="mt-5">403 Forbidden</h2>
+                <h2 className="mt-5">{getLoc("errors_403")}</h2>
                 <br />
-                <p>Доступ к этой странице запрещён.
+                <p>{getLoc("errors_403_desc")}
                 </p>
             </Container>
             <Footer />
@@ -37,9 +37,9 @@ export function Unathorized() {
         <>
             <Header />
             <Container>
-                <h2 className="mt-5">401 Unathorized</h2>
+                <h2 className="mt-5">{getLoc("errors_401")}</h2>
                 <br />
-                <p>Доступ к этой странице без авторизации невозможен.
+                <p>{getLoc("errors_401_desc")}
                 </p>
             </Container>
             <Footer />

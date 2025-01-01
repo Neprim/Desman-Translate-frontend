@@ -1,6 +1,7 @@
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import Container from 'react-bootstrap/Container';
+import { getLoc } from '../Translation';
 
 function Footer() {
     return (
@@ -9,13 +10,13 @@ function Footer() {
                 <Nav className="me-auto">
                     <Nav.Link className="px-2"
                     href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-                        Поддержка
+                        {getLoc("footer_help")}
                     </Nav.Link>
                 </Nav>
                 <Nav className="align-items-center">
                     <Nav.Link className="px-2"
                     href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-                        © Мяу
+                        {getLoc("footer_credits")}
                     </Nav.Link>
                 </Nav>
             </Container>

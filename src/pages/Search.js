@@ -10,6 +10,7 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import Container from "react-bootstrap/Container"
 import placeholder from "../images/placeholder.png"
+import { getLoc } from "../Translation";
 
 function Search() {
     // const { user } = useContext(AuthContext);
@@ -36,11 +37,11 @@ function Search() {
         <>
             <Header />
             <Container style={{ marginTop: 20, paddingRight: "5%" }}>
-                <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>Название</label>
+                <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>{getLoc("search_name")}</label>
                 <input type="text" className="form-control" id="settings-name" maxLength={100} onChange={(e) => {FindProjects(e.target.value)}} />
                 { projects &&
                     <>
-                    <h2 style={{ marginTop: 20 }}>Результаты поиска:</h2>
+                    <h2 style={{ marginTop: 20 }}>{getLoc("search_results")}:</h2>
                     {projects.map((project, i) =>
                         <Container className="text-left" style={{ paddingBottom: 10 }} key={project.id}>
                             <Row className="border rounded py-3 align-items-center"

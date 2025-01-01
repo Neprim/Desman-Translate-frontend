@@ -8,23 +8,24 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { fetchSomeAPI } from "../APIController"
+import { getLoc } from "../Translation"
 
 const errors_to_message = {
     name: {
-        "required": "Поле названия проекта должно быть заполнено",
-        "not unique": "Название проекта должно быть уникально",
-		"minlength": "Название проекта слишком короткое (не меньше 4 символов)",
-        "maxlength": "название проекта слишком длинное (не больше 100 символов)",
+        "required": getLoc("create_error_name_required"),
+        "not unique": getLoc("create_error_name_not_unique"),
+		"minlength": getLoc("create_error_short_name"),
+        "maxlength": getLoc("create_error_long_name"),
     },
     handle: {
-		"required": "Поле хэндла проекта должно быть заполнено",
-		"not unique": "Хэндл проекта должен быть уникальным",
-		"minlength": "Хэндл проекта слишком короткий (не меньше 4 символов)",
-        "maxlength": "Хэндл проекта слишком длинное (не больше 100 символов)",
-        "illegal symbols": "Хэндл проекта должен состоять только из строчных букв латинского алфавита, цифр и знака подчёркивания, а также не начинаться с цифры",
+		"required": getLoc("create_error_handle_required"),
+		"not unique": getLoc("create_error_handle_not_unique"),
+		"minlength": getLoc("create_error_short_handle"),
+        "maxlength": getLoc("create_error_long_handle"),
+        "illegal symbols": getLoc("create_error_illegal_symbols_handle"),
     },
 	description: {
-		"maxlength": "Описание проекта не должно превышать 1000 символов",
+		"maxlength": getLoc("create_error_long_description"),
 	}
 }
 
@@ -33,20 +34,15 @@ export default function Create() {
 
 	const { user } = useContext(AuthContext);
 
-	var id = 0 // ВРЕМЕННАЯ ФИГНЯ, ПОТОМ ПЕРЕДЕЛАТЬ
-	let navigate = useNavigate();
-	const routeChange = () => {
-		let path = '/project/:id';
-		navigate(path);
-	}
-
 	const [name, setName] = useState("")
 	const [handle, setHandle] = useState("")
 	const [description, setDescription] = useState("")
 	const [cover, setCover] = useState("")
 
+	console.log(localStorage.getItem("lang"))
+
 	const [langSource, setLangSource] = useState("en")
-	const [langTarget, setLangTarget] = useState("ru")
+	const [langTarget, setLangTarget] = useState(localStorage.getItem("lang") || "ru")
 
 	const [visibility, setVisibility] = useState("private")
 
@@ -139,13 +135,13 @@ export default function Create() {
 			for (const error of err.errors) {
 				switch (error.key) {
 					case "name":
-						setNameError(errors_to_message.name[error.kind] || "Какая-то ошибка")
+						setNameError(errors_to_message.name[error.kind] || getLoc("some_error"))
 						break;
 					case "handle":
-						setHandleError(errors_to_message.handle[error.kind] || "Какая-то ошибка")
+						setHandleError(errors_to_message.handle[error.kind] || getLoc("some_error"))
 						break;
 					case "description":
-						setDescriptionError(errors_to_message.description[error.kind] || "Какая-то ошибка")
+						setDescriptionError(errors_to_message.description[error.kind] || getLoc("some_error"))
 						break;
 				}
 			}
@@ -164,10 +160,10 @@ export default function Create() {
 			<Header />
 
 			<Container className="text-left mt-5 mx-auto" style={{width: '40%', minWidth: '300px' }}>
-				<h1 style={{ marginBottom: '20px' }}>Создать новый проект</h1>
+				<h1 style={{ marginBottom: '20px' }}>{getLoc("create_new_project")}</h1>
 				<Form>
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputName">Название проекта</Form.Label>
+						<Form.Label htmlFor="inputName">{getLoc("create_project_name")}</Form.Label>
 						<Form.Control type="text" id="inputName" onChange={nameChange} aria-describedby="nameError" required/>
 						{nameError != "" && <Form.Text id="nameError">
                             {nameError}
@@ -175,16 +171,15 @@ export default function Create() {
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputHandle">Уникальная ссылка</Form.Label>
+						<Form.Label htmlFor="inputHandle">{getLoc("create_project_handle")}</Form.Label>
 						<Form.Control type="text" id="inputHandle" aria-describedby="linkDesc handleError" onChange={handleChange} required/>
-						{/* <Form.Text id="linkDesc">Можно придумать позже</Form.Text> */}
 						{handleError != "" && <Form.Text id="handleError">
                             {handleError}
                         </Form.Text>}
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputDesc">Описание проекта</Form.Label>
+						<Form.Label htmlFor="inputDesc">{getLoc("create_project_description")}</Form.Label>
 						<Form.Control as="textarea" type="text" id="inputDesc" aria-describedby="descriptionError" onChange={desciptionChange} />
 						{descriptionError != "" && <Form.Text id="descriptionError">
                             {descriptionError}
@@ -192,55 +187,45 @@ export default function Create() {
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputSrcLang">Язык оригинала</Form.Label>
-						<Form.Select id="inputSrcLang" defaultValue="en" onChange={(e) => setLangSource(e.target.value)}>
-							<option value="ru">Русский</option>
-							<option value="en">Английский</option>
-							<option value="de">Немецкий</option>
-							<option value="fr">Французский</option>
+						<Form.Label htmlFor="inputSrcLang">{getLoc("create_project_source_lang")}</Form.Label>
+						<Form.Select id="inputSrcLang" defaultValue={langSource} onChange={(e) => setLangSource(e.target.value)}>
+							<option value="ru">{getLoc("lang_ru")}</option>
+							<option value="en">{getLoc("lang_en")}</option>
 						</Form.Select>
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label className="mt-2" htmlFor="inputTargLang">Язык перевода</Form.Label>
-						<Form.Select id="inputTargLang" defaultValue="ru" onChange={(e) => setLangTarget(e.target.value)}>
-							<option value="ru">Русский</option>
-							<option value="en">Английский</option>
-							<option value="de">Немецкий</option>
-							<option value="fr">Французский</option>
+						<Form.Label className="mt-2" htmlFor="inputTargLang">{getLoc("create_project_target_lang")}</Form.Label>
+						<Form.Select id="inputTargLang" defaultValue={langTarget} onChange={(e) => setLangTarget(e.target.value)}>
+						<option value="ru">{getLoc("lang_ru")}</option>
+							<option value="en">{getLoc("lang_en")}</option>
 						</Form.Select>
 					</Form.Group>
 
-					{/* <Form.Group className="mb-3">
-						<Form.Label className="mt-2" htmlFor="inputLogo">Загрузить обложку</Form.Label>
-						<Form.Control type="file" id="inputLogo" accept="image/png, image/jpeg" aria-describedby="logo-desc" />
-						<Form.Text id="logo-desc">Принимаются картинки в формате png и jpeg</Form.Text>
-					</Form.Group> */}
 					<Form.Group className="mb-3">
-						<Form.Label htmlFor="inputDesc">Ссылка на обложку проекта (можно оставить пустой)</Form.Label>
+						<Form.Label htmlFor="inputDesc">{getLoc("create_project_cover")}</Form.Label>
 						<Form.Control type="text" id="inputName" onChange={coverChange} aria-describedby="coverError" maxLength={1000}/>
-						{/* <Form.Text id="logo-desc">Принимаются ссылки на изображения</Form.Text> */}
 						{coverError != "" && <Form.Text id="coverError">
                             {coverError}
                         </Form.Text>}
 					</Form.Group>
 
 					<Form.Group className="mb-3">
-						<Form.Label className="mt-2">Доступ к проекту</Form.Label>
+						<Form.Label className="mt-2">{getLoc("create_project_visibility")}</Form.Label>
 						<Form.Select id="inputVisibility" defaultValue="private" onChange={(e) => setVisibility(e.target.value)}>
-							<option value="private">Приватный</option>
-							<option value="public">Публичный</option>
+							<option value="private">{getLoc("create_project_visibility_public")}</option>
+							<option value="public">{getLoc("create_project_visibility_private")}</option>
 						</Form.Select>
 						<Form.Text id="visibilityDesc">
-							<div>Публичные проекты могут видеть все пользователи, но участвовать в переводе могут только участники проекта.</div>
-							<div>Приватные проекты могут видеть только участники проекта.</div>
+							<div>{getLoc("create_project_visibility_public_description")}</div>
+							<div>{getLoc("create_project_visibility_private_description")}</div>
                         </Form.Text>
 					</Form.Group>
 					
 					<Button variant="primary"
 						className="mt-3"
 						onClick={CreateProject}>
-						Создать проект
+						{getLoc("create_project_create")}
 					</Button>
 				</Form>
 			</Container>

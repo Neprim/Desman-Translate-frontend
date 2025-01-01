@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom"
 
 import api_link from "../App"
 import { fetchProjects, fetchUser } from "../APIController"
+import { getLoc } from "../Translation"
 
 function Home() {
 
@@ -68,7 +69,7 @@ function Home() {
             <Container className="mt-5">
                 <Row>
                     <Col sm={6} className="text-left pe-5">
-                        <h2 className="mb-4">Недавние проекты:</h2>
+                        <h2 className="mb-4">{getLoc("homepage_recent_projects")}</h2>
                         {recentProjects.map((project, i) =>
                             <Container className="text-left pb-2" key={project.id}>
                                 <Stack direction="horizontal" gap="10" className="border rounded p-3 mt-1">
@@ -88,7 +89,7 @@ function Home() {
                             </Container>
                         )}
 
-                        <h2 className="my-4">Популярные проекты:</h2>
+                        <h2 className="my-4">{getLoc("homepage_popular_projects")}</h2>
                         {popularProjects.map((project, i) =>
                             <Container className="text-left pb-2" key={project.id}>
                                 <Stack direction="horizontal" gap="10" className="border rounded p-3 mt-1">
@@ -111,25 +112,25 @@ function Home() {
                     </Col>
                     <Col className="border-top border-start rounded py-1 mt-3 ps-3">
                         <h5 className="py-2 border-bottom" >
-                            Что такое Desman Translate?
+                            {getLoc("homepage_about_1")}
                         </h5>
                         <p>
-                            Добро пожаловать в веб-сервис для коллективных переводов! Desman Translate предназначен для совместных переводов книг, программ, субтитров и всего на свете, что имеет форму текста.
+                            {getLoc("homepage_about_2")}
                         </p>
                         <h5 className="py-2 border-bottom">
-                            Как это работает?
+                            {getLoc("homepage_about_3")}
                         </h5>
                         <p>
-                            Когда вы загружаете текст для работы, он разбивается на небольшие отрывки: строки, абзацы, отдельные субтитры — вы можете выбрать способ самостоятельно. Каждый пользователь может предложить свой вариант перевода для отрывка, а лучший вариант определяется голосованием.
+                            {getLoc("homepage_about_4")}
                         </p>
                         {/* <p>
                             Присоединяйтесь к командам переводчиков, создавайте собственные проекты, приглашайте других пользователей присоединиться, переводите книги, программы и субтитры, оттачивайте свои навыки и создавайте лучший перевод любого текста.
                         </p> */}
-                        <p>Have a lot of fun...</p>
+                        <p>{getLoc("homepage_about_5")}</p>
                         {user && 
                             <Button variant="primary"
                                 onClick={routeChange}>
-                                Создать проект
+                                {getLoc("homepage_create_project")}
                             </Button>
                         }
                     </Col>

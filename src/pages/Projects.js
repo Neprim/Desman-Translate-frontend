@@ -11,6 +11,7 @@ import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { fetchSomeAPI, fetchUser, fetchUserInvites, fetchProject } from "../APIController"
 import { openConnection } from "../WSController"
+import { getLoc } from "../Translation"
 
 function Projects() {
 
@@ -27,7 +28,7 @@ function Projects() {
             let projects = (await fetchUser(user.id, true)).projects || []
             setProjects(projects)
             for (let project of projects) {
-                project.user_role = (await fetchSomeAPI(`/api/projects/${project.id}/members/${user.id}`)).role_name
+                project.user_role = getLoc("role_" + (await fetchSomeAPI(`/api/projects/${project.id}/members/${user.id}`)).role_name)
             }
             setProjects([...projects])
         } catch (err) {
@@ -104,14 +105,14 @@ function Projects() {
                     id="projects-tabs"
                     className="mb-3"
                 >
-                    <Tab eventKey="my-projects" title="Мои проекты">
+                    <Tab eventKey="my-projects" title={getLoc("my_projects_my_projects_tab")}>
                         <div className="row">
                             <div className="col-6">
-                                <h2 style={{ marginBottom: 20 }}>Мои проекты</h2>
+                                <h2 style={{ marginBottom: 20 }}>{getLoc("my_projects_my_projects")}</h2>
                                 <Link to="/create" 
                                     className="btn btn-primary"
                                     style={{ marginTop: 0, marginBottom: 5 }}>
-                                    Создать проект
+                                    {getLoc("my_projects_create_project")}
                                 </Link>
                             </div>
                         </div>
@@ -146,8 +147,8 @@ function Projects() {
                             </div>
                         </div>
                     </Tab>
-                    <Tab eventKey="invitations" title="Приглашения">
-                        <h2 style={{ marginBottom: 20 }}>Приглашения</h2>
+                    <Tab eventKey="invitations" title={getLoc("my_projects_invites_tab")}>
+                        <h2 style={{ marginBottom: 20 }}>{getLoc("my_projects_invites")}</h2>
                         <div className="row">
                             <div className="col-6">
                                 {invites.map((invite, i) => 
@@ -177,10 +178,10 @@ function Projects() {
                                                 <br /> 
                                                 {invite.inviter.id == invite.user.id
                                                     ? <>
-                                                        Вы запросили приглашение.
+                                                        {getLoc("my_projects_you_requested")}
                                                     </>
                                                     : <>
-                                                        Вы были приглашены пользователем{" "}
+                                                        {getLoc("my_projects_you_invited")}{" "}
                                                         <a className="text-primary" href={`/users/${invite.inviter.id}`}>
                                                             {invite.inviter.username}
                                                         </a>
@@ -202,7 +203,7 @@ function Projects() {
                                                             }}
                                                             onClick={function (e) { ProcessInvitation(invite.id, false) }}
                                                         >
-                                                            Отменить
+                                                            {getLoc("my_projects_cancel")}
                                                         </button>
                                                     </>
                                                     : <>
@@ -217,7 +218,7 @@ function Projects() {
                                                             }}
                                                             onClick={function (e) { ProcessInvitation(invite.id, true) }}
                                                         >
-                                                            Принять
+                                                            {getLoc("my_projects_accept")}
                                                         </button>
                                                         <br />
                                                         <button
@@ -231,7 +232,7 @@ function Projects() {
                                                             }}
                                                             onClick={function (e) { ProcessInvitation(invite.id, false) }}
                                                         >
-                                                            Отклонить
+                                                            {getLoc("my_projects_cancel")}
                                                         </button>
                                                     </>
                                                 }

@@ -9,6 +9,7 @@ import { fetchProject, fetchSections, fetchSomeAPI, fetchStrings } from "../APIC
 import { Link, useParams } from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
 import { ProgressBar } from "react-bootstrap";
+import { getLoc } from "../Translation";
 
 let strings = []
 
@@ -85,7 +86,7 @@ export default function UploadProjectTranslations() {
                 try {
                     json = JSON.parse(loaded_translations)
                 } catch (err) {
-                    throw {errors: ["Битый JSON"]}
+                    throw {errors: [getLoc("upload_project_translations_error_bad_json")]}
                 }
 
                 let load_sames = document.getElementById('checkbox-load-sames').checked
@@ -104,7 +105,7 @@ export default function UploadProjectTranslations() {
                 }
             }
             if (!translations.length)
-                throw {errors: ["Отсутствуют строки для загрузки."]}
+                throw {errors: [getLoc("upload_project_translations_error_no_strings")]}
 
             console.log(translations)
             setTranslations(translations)
@@ -127,7 +128,7 @@ export default function UploadProjectTranslations() {
             window.location.href = `/projects/${link['project_id']}`
         } catch (err) {
             if (err.status == 400 && err.errors[0].key == 'text' && err.errors[0].kind == "required") {
-                setLoadError("Нельзя загружать пустые переводы.")
+                setLoadError(getLoc("upload_project_translations_error_empty_translations"))
             } else {
                 setLoadError(JSON.stringify(err))
             }
@@ -149,11 +150,11 @@ export default function UploadProjectTranslations() {
             >
                 {sections && !translations &&
                     <>
-                    <p className="text-middle text-break"><i>Утилита полунаколенная, потому может работать не так, если есть пересечения по ключам между разделами. Ну и не будет работать, если разделы не типа JSON.</i></p>
-                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">Загрузка переводов для проекта "{project?.name}"</h1>
+                    <p className="text-middle text-break"><i>{getLoc("upload_project_translations_attention")}</i></p>
+                    <h1 style={{ marginBottom: 20 }} className="text-middle text-break">{getLoc("upload_project_translations_load_strings_sections")} "{project?.name}"</h1>
                     <Form >
                         <Form.Group>
-                            <Form.Label htmlFor="settings-loaded-translations" className="form-label mt-2">Текст для загрузки</Form.Label>
+                            <Form.Label htmlFor="settings-loaded-translations" className="form-label mt-2">{getLoc("upload_project_translations_load_text")}</Form.Label>
                             <Form.Control as="textarea" aria-label="With textarea" id="settings-loaded-translations"/>
                             {translationsError && 
                                 <div id="translationsError" className="form-text">
@@ -163,15 +164,15 @@ export default function UploadProjectTranslations() {
                             <Form.Check
                                 type="checkbox"
                                 id="checkbox-load-sames"
-                                label='Загрузить совпадающие с оригиналом'
+                                label={getLoc("upload_project_translations_load_sames")}
                             />
                         </Form.Group>
                         <Button className="mt-2" type="submit" variant="primary" disabled={fetchingTranslationsLoad} onClick={(e) => TransformTranslations(e)}>
                             {fetchingTranslationsLoad
                                 ?  <Spinner animation="border" role="output" size="sm">
-                                    <span className="visually-hidden">Загрузка...</span>
+                                    <span className="visually-hidden">{getLoc("upload_project_translations_loading")}</span>
                                 </Spinner>
-                                :  <span>Преобразовать</span>
+                                :  <span>{getLoc("upload_project_translations_transform")}</span>
                             }
                         </Button>
                     </Form>
@@ -180,15 +181,15 @@ export default function UploadProjectTranslations() {
                 {sections && translations &&
                     <> 
                     <h3 className="mb-3">
-                        Итоговые переводы для загрузки
+                    {getLoc("upload_project_translations_final_strings")}
                     </h3>
                     <div id="div-translations-to-load" style={{ height: "80vh", overflowY: "auto" }}>
                         {translations.map((tr, i) => 
                             <Container className="text-left text-break border rounded my-2 pt-3" key={tr.string.id} style={{whiteSpace: "pre-wrap"}}>
-                            <p className="mb-1 fw-semibold">Оригинал: {tr.string.text}</p>
-                            <p className="mb-1 fw-semibold">Перевод: {tr.text}</p>
-                            <p className="text-body-secondary mt-0"><i> Ключ: {tr.string.key}</i></p>
-                            <p className="text-body-secondary mt-0"><i> Раздел: {sections.find((sec) => sec.id == tr.string.section_id).name}</i></p>
+                            <p className="mb-1 fw-semibold">{getLoc("upload_project_translations_original")}: {tr.string.text}</p>
+                            <p className="mb-1 fw-semibold">{getLoc("upload_project_translations_translations")}: {tr.text}</p>
+                            <p className="text-body-secondary mb-0"><i> {getLoc("upload_project_translations_key")}: {tr.string.key}</i></p>
+                            <p className="text-body-secondary mb-0"><i> {getLoc("upload_project_translations_section")}: {sections.find((sec) => sec.id == tr.string.section_id).name}</i></p>
                             </Container>
                         )}
                     </div>
@@ -200,14 +201,14 @@ export default function UploadProjectTranslations() {
                     <Button className="mt-2 me-2" type="submit" variant="primary" disabled={fetchingTranslationsLoad} onClick={UploadTranslations}>
                         {fetchingTranslationsLoad
                             ?  <Spinner animation="border" role="output" size="sm">
-                                <span className="visually-hidden">Загрузка...</span>
+                                <span className="visually-hidden">{getLoc("upload_project_translations_loading")}</span>
                             </Spinner>
-                            :  <span>Загрузить</span>
+                            :  <span>{getLoc("upload_project_translations_upload")}</span>
                         }
                     </Button>
                     {!fetchingTranslationsLoad &&
                         <Button className="mt-2" type="submit" variant="secondary" onClick={(e) => {setTranslations(null)}}>
-                            Отмена
+                            {getLoc("upload_project_translations_cancel")}
                         </Button>
                     }
                     {loadError && 

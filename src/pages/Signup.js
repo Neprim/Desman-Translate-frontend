@@ -5,24 +5,25 @@ import Form from "react-bootstrap/Form"
 import Button from "react-bootstrap/Button"
 
 import React, { useState } from "react"
+import { getLoc } from "../Translation"
 
 const errors_to_message = {
     email: {
-        "not email": "Введённое значение не является адресом электронной почты",
-        "required": "Поле электронной почты должно быть заполнено",
-        "not unique": "Поле электронной почты должно быть уникально",
+        "not email": getLoc("signup_error_not_email"),
+        "required": getLoc("signup_error_email_required"),
+        "not unique": getLoc("signup_error_not_unique_email"),
     },
     username: {
-        "required": "Поле имени пользователя должно быть заполнено",
-        "not unique": "Поле имени пользователя должно быть уникально",
-        "minlength": "Имя пользователя слишком короткое",
-        "maxlength": "Имя пользователя слишком длинное",
-        "illegal symbols": "Имя пользователя должно состоять только из строчных букв латинского алфавита, цифр и знака подчёркивания, а также не начинаться с цифры",
+        "required": getLoc("signup_error_username_required"),
+        "not unique": getLoc("signup_error_not_unique_username"),
+        "minlength": getLoc("signup_error_short_username"),
+        "maxlength": getLoc("signup_error_long_username"),
+        "illegal symbols": getLoc("signup_error_illegal_symbols_username"),
     },
     password: {
-        "required": "Поле пароля должно быть заполнено",
-        "minlength": "Пароль слишком короткий",
-        "illegal symbols": "Пароль содержит недопустимые символы",
+        "required": getLoc("signup_error_password_required"),
+        "minlength": getLoc("signup_error_short_password"),
+        "illegal symbols": getLoc("signup_error_illegal_symbols_password"),
     }
 }
 
@@ -65,13 +66,13 @@ export default function Signup() {
             for (const error of errors) {
                 switch (error.key) {
                     case "email":
-                        setEmailError(errors_to_message.email[error.kind] || "Какая-то ошибка")
+                        setEmailError(errors_to_message.email[error.kind] || getLoc("some_error"))
                         break;
                     case "username":
-                        setUsernameError(errors_to_message.username[error.kind] || "Какая-то ошибка")
+                        setUsernameError(errors_to_message.username[error.kind] || getLoc("some_error"))
                         break;
                     case "password":
-                        setPasswordError(errors_to_message.password[error.kind] || "Какая-то ошибка")
+                        setPasswordError(errors_to_message.password[error.kind] || getLoc("some_error"))
                         break;
                 }
             }
@@ -96,11 +97,11 @@ export default function Signup() {
                     minWidth: 300
                 }}
             >
-                <h1 className="mb-3">Регистрация</h1>
+                <h1 className="mb-3">{getLoc("signup_signup")}</h1>
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label htmlFor="inputEmail">
-                            Электронная почта
+                            {getLoc("signup_email")}
                         </Form.Label>
                         <Form.Control type="email" value={inputMail} id="inputEmail" onChange={mailChange} aria-describedby="emailError" />
                         {emailError && <Form.Text id="emailError" className="form-text">{emailError}</Form.Text>}
@@ -108,7 +109,7 @@ export default function Signup() {
 
                     <Form.Group className="mb-3">
                         <Form.Label htmlFor="inputLogin">
-                            Логин
+                            {getLoc("signup_login")}
                         </Form.Label>
                         <Form.Control
                             type="text"
@@ -122,7 +123,7 @@ export default function Signup() {
 
                     <Form.Group className="mb-3">
                         <Form.Label htmlFor="inputPassword">
-                            Пароль
+                            {getLoc("signup_password")}
                         </Form.Label>
                         <Form.Control type="password" value={inputPass} onChange={passChange} id="inputPassword" aria-describedby="passwordError" />
                         {passwordError && <Form.Text id="passwordError" className="form-text">{passwordError}</Form.Text>
@@ -135,7 +136,7 @@ export default function Signup() {
                     <input type="password" value={inputRepeatPass} onChange={repeatPassChange} className="form-control" id="repeatPassword" />
                     </div> */}
                     <Button type="submit" id="submit-button" className="btn-primary" onClick={Submit}>
-                        Зарегистрироваться
+                        {getLoc("signup_register")}
                     </Button>
                 </Form>
             </Container>
