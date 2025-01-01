@@ -85,6 +85,7 @@ export default function Editor() {
 	const [userRole, setUserRole] = useState(null);
 	
 	const [loading, setLoading] = useState(false)
+	const [loadingStrings, setLoadingStrings] = useState(false)
 	const [editMode, setEditMode] = useState(false)
 	
 	const [moveMode, setMoveMode] = useState(false)
@@ -181,6 +182,7 @@ export default function Editor() {
 
 	async function GetStrings() {
 		setLoading(true)
+		setLoadingStrings(true)
 		try {
 			let sec_ids = []
 
@@ -209,7 +211,7 @@ export default function Editor() {
 
 			for (let i = 0; i < strs.length; i++) {
 				strs[i].index = i
-				if (strs[i].index == window.location.hash.substring(1)) {
+				if (window.location.hash.substring(1) && strs[i].index == window.location.hash.substring(1) - 1) {
 					sel = i
 					ChangePage(1 + Math.floor(i / page_size))
 				}
@@ -225,11 +227,13 @@ export default function Editor() {
 				FindWordsInStrings()
 			}
 			
+			setLoadingStrings(false)
 			UpdateDrawStrings()
 
 			if (sel != -1) {
-				SelectString(sel)
-				ScrollTo('str' + strings[sel].id)
+				ScrollTo('str' + strings[sel].id, sel)
+			} else {
+				SelectString(0)
 			}
 
 			let trs_e = []
@@ -243,33 +247,40 @@ export default function Editor() {
 		setLoading(false)
 	}
 
-	function ScrollTo(id) {
+	function ScrollTo(id, sel) {
 		setTimeout(() => {
-			let str = document.getElementById(id);
+			let str = document.getElementById(id)
 			if (!str)
-				ScrollTo(id)
-			else
-				str.scrollIntoView({ behavior: "smooth" });
+				ScrollTo(id, sel)
+			else {
+				str.scrollIntoView({ behavior: "smooth" })
+				SelectString(sel)
+			}
 		}, 100)
 	}
 
 	function PseudoReload(sel) {
-		// setFilters([])
+		setFilters([])
 		setSortBy("")
+		setStatusChecked(false)
+		setKeyChecked(false)
+		setOrigChecked(false)
+		setTransChecked(false)
+		setUserChecked(false)
 
-		const strs = FilterStrings(strings)
+		const strs = strings
 		setDrawStrings(strs)
 
-		ChangePage(1 + Math.floor(strs.findIndex((str) => str.index == sel) / page_size))
+		ChangePage(1 + Math.floor(strings.findIndex((str) => str.index == sel) / page_size), false)
 
-		UpdateDrawStrings()
+		// UpdateDrawStrings()
 
 		console.log("PseudoReload")
 		console.log(curPage)
+		console.log(sel)
 
 		if (sel != -1) {
-			ScrollTo('str' + strings[sel].id)
-			SelectString(sel)
+			ScrollTo('str' + strings[sel].id, sel)
 		}
 	}
 
@@ -296,7 +307,7 @@ export default function Editor() {
 		let strs = SortStrings(FilterStrings(strings))
 		setDrawStrings(strs)
 		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
-		setCurString(null)
+		setCurString(strs[0])
 	}, [filters, sortBy])
 
 	function FindWordsInString(str) {
@@ -305,7 +316,7 @@ export default function Editor() {
 		let dicts = []
 		for (let i = 0; i < dictionary.length; i++) {
 			const d = dictionary[i]
-			for (let f of str.text.matchAll(d.word_key, 'gi')) {
+			for (let f of str.text.matchAll(new RegExp(d.word_key, 'gi'))) {
 				words.push({dict: i, ind: f.index, word: f[0]})
 			}
 		}
@@ -361,8 +372,12 @@ export default function Editor() {
 
 	function FilterStrings(strs) {
 		let draws = strs.filter((str) => {
+			delete str.draw_key
+			delete str.draw_text_f
+			for (let tr of str.translations)
+				delete tr.draw_text
 			for (let filter of filters) {
-				if (filter.is_regex) {
+				if (!filter.is_regex) {
 					filter.value = filter.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 				}
 				let flag = false
@@ -433,13 +448,85 @@ export default function Editor() {
 			return true
 		})
 
+		function BreakIntoWords(text, reg) {
+			let words = []
+			console.log(reg)
+			for (let f of text.matchAll(new RegExp(reg, 'gi'))) {
+				words.push({ind: f.index, word: f[0]})
+			}
+			let cur = 0
+			let arr = []
+			for (let i = 0; i < words.length; i++) {
+				if (words[i].ind < cur)
+					continue
+				arr.push({text: text.substring(cur, words[i].ind)})
+				arr.push({text: words[i].word, f: true})
+
+				cur = words[i].ind + words[i].word.length
+			}
+			arr.push({text: text.substring(cur)})
+
+			return arr
+		}
+		
+		if (filters.find((f) => f.key == "key" || f.key == "orig" || f.key == "trans")) {
+			for (let filter of filters) {
+				if (filter.key == "key") {
+					for (let str of draws) {
+						let draw_key = BreakIntoWords(str.key, filter.value)
+
+						draw_key = draw_key.map((word) => {
+							if (word.f) {
+								return <span style={{ backgroundColor: "rgb(255, 255, 0)"}}>{word.text}</span>
+							}
+							return word.text
+						})
+
+						str.draw_key = draw_key
+					}
+				}
+
+				if (filter.key == "orig") {
+					for (let str of draws) {
+						let draw_text_f = BreakIntoWords(str.text, filter.value)
+						console.log(draw_text_f)
+
+						draw_text_f = draw_text_f.map((word) => {
+							if (word.f) {
+								return <span style={{ backgroundColor: "rgb(255, 255, 0)"}}>{word.text}</span>
+							}
+							return word.text
+						})
+
+						str.draw_text_f = draw_text_f
+					}
+				}
+
+				if (filter.key == "trans") {
+					for (let str of draws) {
+						for (let tr of str.translations) {
+							let draw_text = BreakIntoWords(tr.text, filter.value)
+
+							draw_text = draw_text.map((word) => {
+								if (word.f) {
+									return <span style={{ backgroundColor: "rgb(255, 255, 0)"}}>{word.text}</span>
+								}
+								return word.text
+							})
+
+							tr.draw_text = draw_text
+						}
+					}
+				}
+			}
+		}
+
+		console.log(draws)
+
 		return draws
 	}
 
 	function SortStrings(strs) {
-		if (sortBy == "")
-			return strs 
-		
 		if (sortBy == "last_str_time")
 		return strs.sort((a, b) => {
 			return b.updated_at - a.updated_at
@@ -450,6 +537,26 @@ export default function Editor() {
 			return 	  b.translations.reduce((tm, tr) => Math.max(tm, tr.updated_at), 0)
 					- a.translations.reduce((tm, tr) => Math.max(tm, tr.updated_at), 0)
 		})
+		
+		if (sortBy == "tr_amount")
+		return strs.sort((a, b) => {
+			return 	  b.translations.length
+					- a.translations.length
+		})
+		
+		if (sortBy == "vote_plus_amount")
+		return strs.sort((a, b) => {
+			return 	  ((b.translations?.[0]?.votes_plus?.length || 0) - (b.translations?.[0]?.votes_minus?.length || 0))
+					- ((a.translations?.[0]?.votes_plus?.length || 0) - (a.translations?.[0]?.votes_minus?.length || 0))
+		})
+		
+		if (sortBy == "vote_minus_amount")
+		return strs.sort((a, b) => {
+			return 	  ((a.translations?.[0]?.votes_plus?.length || 0) - (a.translations?.[0]?.votes_minus?.length || 0))
+					- ((b.translations?.[0]?.votes_plus?.length || 0) - (b.translations?.[0]?.votes_minus?.length || 0))
+		})
+
+		return strs
 	}
 
 	async function UpdateTranslation() {
@@ -460,10 +567,12 @@ export default function Editor() {
 		UpdateDrawStrings()
 	}
 
-	function ChangePage(page) {
+	function ChangePage(page, change_str = true) {
 		setCurPage(page)
 		setMiddlePage(page)
-		setCurString(null)
+		if (change_str) {
+			setCurString(drawStrings[(page - 1) * page_size])
+		}
 	}
 
 	async function AddTranslation() {
@@ -487,7 +596,7 @@ export default function Editor() {
 			for (let i = 0; i < strings.length; i++) {
 				strings[i].index = i
 			}
-			setCurString(null)
+			setCurString(strings[Math.min(str_index, strings.length - 1)])
 			setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
 			UpdateDrawStrings()
 		} catch (err) {
@@ -625,6 +734,8 @@ export default function Editor() {
 		}
 
 		setFilters(fls)
+
+		setCurString(drawStrings[0])
 
 		ChangePage(1)
 	}
@@ -814,9 +925,12 @@ export default function Editor() {
 								Сортировать по
 								<InputGroup style={{ marginBottom: "5px" }}>
 									<Form.Select id='filter-status-value' value={sortBy} onChange={(e) => {setSortBy(e.target.value)}}>
-										<option value="">Индексу строки</option>
+										<option value="">-- Индексу строки --</option>
 										<option value="last_tr_time">Времени последнего перевода</option>
 										<option value="last_str_time">Времени последнего изменения</option>
+										<option value="tr_amount">Количеству переводов</option>
+										<option value="vote_plus_amount">Количеству плюсов</option>
+										<option value="vote_minus_amount">Количеству минусов</option>
 									</Form.Select>
 								</InputGroup>
 							</Dropdown.Menu>
@@ -921,13 +1035,21 @@ export default function Editor() {
 			</Container>
 			<Container fluid style={{ height: "80%" }}>
 			{!moveMode 
-				? 	<Row  style={{ height: "100%" }}>
+				? 	
+					<Row  style={{ height: "100%", width: "100%" }}>
+					{loadingStrings &&
+						<div style={{display: "flex", justifyContent: "center"}}>
+						<div style={{marginTop: "10%"}}>
+						<div style={{justifySelf: "center", }}><Spinner></Spinner></div>
+						<h2>Загрузка строк</h2>
+						</div></div>
+					}
 					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "7px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="py-2 d-flex justify-content-between">
+							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "0px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="border d-flex justify-content-between">
 								{userRole?.permissions?.can_manage_strings &&
 									<Dropdown style={{ alignItems: "center", display: "flex" }}>
-										<Dropdown.Toggle variant="outline" data-toggle="dropdown">
+										<Dropdown.Toggle style={{height: "100%"}} variant="outline" data-toggle="dropdown">
 										</Dropdown.Toggle>
 										<Dropdown.Menu>
 											<Dropdown.Item onClick={(e) => {
@@ -949,41 +1071,58 @@ export default function Editor() {
 									</Dropdown>
 								}
 
-								<Col style={{ marginRight: "10px", minWidth: "50%", marginLeft: "5px" }}>
+								<Col style={{ marginRight: "0px", minWidth: "50%", marginLeft: "0px" }}>
 									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
-									<Stack className="border rounded" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap"}}>
+									<Stack className="border-end border-start" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap", paddingLeft: "5px"}}>
 										<div
 											readOnly
 											className="text-left text-break"
-											style={{ paddingTop: "5px", paddingLeft: "10px" }}
+											style={{ paddingTop: "5px" }}
 										>
-											{str?.draw_text || str.text}
+											{str?.draw_text_f || str?.draw_text || str.text}
 										</div>
-										<div className="text-left text-break" style={{position: "relative", bottom: "0", padding: "4px"}}>
+										<div className="text-left text-break" style={{position: "relative", bottom: "0"}}>
 											<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
-												{str.key}
+												{str?.draw_key || str.key}
 											</div>
 											{sections.length > 1 &&
-												<div class="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+												<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
 													{sections[str.sec_ind].name}
 												</div>
 											}
 											<div>
-												<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a>
-												{/* <a href={`${window.location.href}#${str.index}`}>#{str.index + 1}</a> */}
+												<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a>
+												{/* <a href={`${window.location.href}#${str.index + 1}`}>#{str.index + 1}</a> */}
 											</div>	
 										</div>	
 									</Stack>
 								</Col>
 								<Col>
-									<Stack className="border rounded" style={{height: "100%", whiteSpace: "pre-wrap"}}>
-										<div
-											readOnly
-											className="text-left text-break"
-											style={{ paddingTop: "5px", paddingLeft: "10px" }}
-										>
-											{str.translations?.[0]?.text || ""}
-										</div>	
+									<Stack className="border-start" style={{height: "100%", whiteSpace: "pre-wrap"}}>
+										{str.translations.map((tr, ind) => {
+											if (ind == 0) {
+												return <>
+												<Stack style={{paddingLeft: "5px"}}>
+													<div className="text-left text-break" style={{ paddingTop: "5px" }}>
+														{tr?.draw_text || tr.text}
+													</div>	
+													<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+														{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
+													</div>
+												</Stack></>
+											} else {
+												return <>
+												<Stack style={{paddingLeft: "5px", opacity: "0.3"}} className="border-top">
+													<div className="text-left text-break" style={{ paddingTop: "5px" }}>
+														{tr?.draw_text || tr.text}
+													</div>	
+													<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+														{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
+													</div>
+												</Stack></>
+											}
+										})}
+										
 									</Stack>
 									{/* <Form.Control className="d-flex align-items-start"
 										readOnly
@@ -999,7 +1138,7 @@ export default function Editor() {
 
 
 					</Col>
-					<Col className="border-start border-end border-bottom" md={4}>
+					<Col style={{height: "100%", overflowY: "auto"}} className="border-start border-end border-bottom" md={4}>
 					{curString 
 					? <>
 						{!editMode 
@@ -1058,9 +1197,10 @@ export default function Editor() {
 							</>
 							}
 							<h3>Варианты перевода</h3>
+							<div style={{ overflowY: "auto" }}>
 							{curString?.translations?.map((tr, i) =>
 							<>
-								<Container key={tr.id} className="border rounded" style={{ backgroundColor: (tr.id == translationEdit?.id ? "rgb(240, 240, 240)" : "white")}}>
+								<Container key={tr.id} className="border rounded" style={{ backgroundColor: (tr.id == translationEdit?.id ? "rgb(240, 240, 240)" : "white") }}>
 									<div
 										readOnly
 										className="border rounded"
@@ -1068,9 +1208,9 @@ export default function Editor() {
 									>
 										{tr.text}
 									</div>
-									<div>Автор: {members.find((el) => el.user.id == tr.author_id)?.user?.username || "noname"}</div>
+									<div>Автор: {translators.find((el) => el.id == tr.author_id)?.username || "noname"}</div>
 									{ tr.editor_id && 
-										<div>Редактор: {members.find((el) => el.user.id == tr.editor_id)?.user?.username || "noname"}</div>
+										<div>Редактор: {translators.find((el) => el.id == tr.editor_id)?.username || "noname"}</div>
 									}
 									<div>{new Date(tr.updated_at).toLocaleString()}</div>
 
@@ -1122,6 +1262,7 @@ export default function Editor() {
 								</Container>
 							</>
 							)}
+							</div>
 						</>
 						: <>
 							<h6>Текст:</h6>
