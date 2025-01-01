@@ -21,7 +21,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 
 
-import React, { setState, useEffect, useState, formData, useContext } from "react"
+import React, { setState, useEffect, useState, formData, useContext, useRef } from "react"
 import { AuthContext } from "../AuthContext";
 import { FormGroup, FormLabel, OverlayTrigger, Tooltip } from "react-bootstrap"
 import { fetchSomeAPI, fetchProject, fetchStrings, fetchString, fetchSection, fetchSections, fetchUser } from "../APIController"
@@ -292,15 +292,18 @@ export default function Editor() {
 		GetStrings()
 	}, [])
 
+	const textareaTranslate = useRef(null);
 	useEffect(() => {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
 		setEditMode(false)
-		// if (curString && filters.length == 0) {
-		// 	let page = Math.floor((curString?.index || 0) / page_size) + 1
-		// 	setCurPage(page)
-		// 	setMiddlePage(page)
-		// }
+		setTimeout(() => {
+		const t = textareaTranslate.current
+		if (t != null) {
+			t.style.height = "auto"
+			t.style.overflowY = 'hidden'
+			t.style.height = t.scrollHeight + "px"
+		}}, 10)
 	}, [curString])
 
 	useEffect(() => {
@@ -1154,6 +1157,7 @@ export default function Editor() {
 								<Form.Control className="d-flex align-items-start"
 									onChange={translationChange}
 									as="textarea"
+									ref={textareaTranslate}
 									value={inputTranslation}
 									placeholder="Ваш вариант перевода..."
 									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
