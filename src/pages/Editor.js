@@ -213,7 +213,7 @@ export default function Editor() {
 				strs[i].index = i
 				if (window.location.hash.substring(1) && strs[i].index == window.location.hash.substring(1) - 1) {
 					sel = i
-					ChangePage(1 + Math.floor(i / page_size))
+					ChangePage(1 + Math.floor(i / page_size), false)
 				}
 			}
 			console.log(strs)
@@ -571,7 +571,8 @@ export default function Editor() {
 		setCurPage(page)
 		setMiddlePage(page)
 		if (change_str) {
-			setCurString(drawStrings[(page - 1) * page_size])
+			// setCurString(drawStrings[(page - 1) * page_size])
+			ScrollTo('str' + drawStrings[(page - 1) * page_size].id, (page - 1) * page_size)
 		}
 	}
 
