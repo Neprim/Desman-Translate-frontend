@@ -377,13 +377,14 @@ export default function Editor() {
 			for (let tr of str.translations)
 				delete tr.draw_text
 			for (let filter of filters) {
+				let value = filter.value
 				if (!filter.is_regex) {
-					filter.value = filter.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+					value = filter.value.replace(/[\\\/-\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&')
 				}
 				let flag = false
 				switch (filter.key) {
 					case "orig":
-						if (!new RegExp(filter.value, 'i').test(str.text))
+						if (!new RegExp(value, 'i').test(str.text))
 							return false
 						break
 
@@ -391,7 +392,7 @@ export default function Editor() {
 					case "trans":
 						flag = false
 						for (let tr of str.translations) {
-							if (new RegExp(filter.value, 'i').test(tr.text)) {
+							if (new RegExp(value, 'i').test(tr.text)) {
 								flag = true
 								break
 							}
@@ -402,13 +403,13 @@ export default function Editor() {
 
 
 					case "key":
-						if (!new RegExp(filter.value, 'i').test(str.key))
+						if (!new RegExp(value, 'i').test(str.key))
 							return false
 						break
 
 
 					case "status":
-						switch (filter.value) {
+						switch (value) {
 							case "non_tr":
 								if (str.translations.length > 0)
 									return false
@@ -434,7 +435,7 @@ export default function Editor() {
 					case "user":
 						flag = false
 						for (let tr of str.translations) {
-							if (tr.author_id == filter.value || tr.editor_id == filter.value) {
+							if (tr.author_id == value || tr.editor_id == value) {
 								flag = true
 								break
 							}
@@ -471,9 +472,13 @@ export default function Editor() {
 		
 		if (filters.find((f) => f.key == "key" || f.key == "orig" || f.key == "trans")) {
 			for (let filter of filters) {
+				let value = filter.value
+				if (!filter.is_regex) {
+					value = filter.value.replace(/[\\\/-\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&')
+				}
 				if (filter.key == "key") {
 					for (let str of draws) {
-						let draw_key = BreakIntoWords(str.key, filter.value)
+						let draw_key = BreakIntoWords(str.key, value)
 
 						draw_key = draw_key.map((word) => {
 							if (word.f) {
@@ -488,7 +493,7 @@ export default function Editor() {
 
 				if (filter.key == "orig") {
 					for (let str of draws) {
-						let draw_text_f = BreakIntoWords(str.text, filter.value)
+						let draw_text_f = BreakIntoWords(str.text, value)
 						console.log(draw_text_f)
 
 						draw_text_f = draw_text_f.map((word) => {
@@ -505,7 +510,7 @@ export default function Editor() {
 				if (filter.key == "trans") {
 					for (let str of draws) {
 						for (let tr of str.translations) {
-							let draw_text = BreakIntoWords(tr.text, filter.value)
+							let draw_text = BreakIntoWords(tr.text, value)
 
 							draw_text = draw_text.map((word) => {
 								if (word.f) {
