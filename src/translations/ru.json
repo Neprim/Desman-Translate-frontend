@@ -296,6 +296,8 @@
     "editor_missing_translation_warning": "Отсутствует перевод",
     "editor_go_to_dictionary": "Перейти в словарь проекта",
     "editor_strings_loading": "Загрузка строк",
+    "editor_no_strings_1": "Нет строк для отображения",
+    "editor_no_strings_2": "Попробуйте изменить фильтры",
     "editor_edit_string": "Редактировать строку",
     "editor_delete_string": "Удалить строку",
     "editor_add_string": "Добавить строку",

@@ -296,6 +296,8 @@
     "editor_missing_translation_warning": "Missing translation",
     "editor_go_to_dictionary": "Go to project dictionary",
     "editor_strings_loading": "Loading strings",
+    "editor_no_strings_1": "No strings to display",
+    "editor_no_strings_2": "Try to change current filters",
     "editor_edit_string": "Edit string",
     "editor_delete_string": "Delete string",
     "editor_add_string": "Add string",

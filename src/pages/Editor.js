@@ -311,7 +311,7 @@ export default function Editor() {
 		let strs = SortStrings(FilterStrings(strings))
 		setDrawStrings(strs)
 		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
-		setCurString(strs[0])
+		setCurString(strs[0] || null)
 	}, [filters, sortBy])
 
 	function FindWordsInString(str) {
@@ -382,7 +382,6 @@ export default function Editor() {
 				delete tr.draw_text
 			for (let filter of filters) {
 				let value = filter.value
-				console.log(value)
 				if (!filter.is_regex) {
 					value = filter.value.replace(/[\\\/\-\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&')
 				}
@@ -439,8 +438,6 @@ export default function Editor() {
 
 					case "user":
 						flag = false
-						console.log("translator")
-						console.log(value)
 						for (let tr of str.translations) {
 							if (tr.author_id == value || tr.editor_id == value) {
 								flag = true
@@ -458,7 +455,6 @@ export default function Editor() {
 
 		function BreakIntoWords(text, reg) {
 			let words = []
-			console.log(reg)
 			for (let f of text.matchAll(new RegExp(reg, 'gi'))) {
 				words.push({ind: f.index, word: f[0]})
 			}
@@ -533,8 +529,6 @@ export default function Editor() {
 			}
 		}
 
-		console.log(draws)
-
 		return draws
 	}
 
@@ -584,7 +578,8 @@ export default function Editor() {
 		setMiddlePage(page)
 		if (change_str) {
 			// setCurString(drawStrings[(page - 1) * page_size])
-			ScrollTo('str' + drawStrings[(page - 1) * page_size].id, (page - 1) * page_size)
+			if (drawStrings[(page - 1) * page_size]?.id)
+				ScrollTo('str' + drawStrings[(page - 1) * page_size].id, (page - 1) * page_size)
 		}
 	}
 
@@ -1029,289 +1024,304 @@ export default function Editor() {
 			{!moveMode 
 				? 	
 					<Row  style={{ height: "100%", width: "100%" }}>
-					{loadingStrings &&
-						<div style={{display: "flex", justifyContent: "center"}}>
-						<div style={{marginTop: "10%"}}>
-						<div style={{justifySelf: "center", }}><Spinner></Spinner></div>
-						<h2>{getLoc("editor_strings_loading")}</h2>
-						</div></div>
-					}
-					<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
-						{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-							<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "0px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="border d-flex justify-content-between">
-								{userRole?.permissions?.can_manage_strings &&
-									<Dropdown style={{ alignItems: "center", display: "flex" }}>
-										<Dropdown.Toggle style={{height: "100%"}} variant="outline" data-toggle="dropdown">
-										</Dropdown.Toggle>
-										<Dropdown.Menu>
-											<Dropdown.Item onClick={(e) => {
-												setEditMode(true)
-												setInputText(str.text)
-												setInputKey(str.key)
-												setInputContext(str.context)
-												setInputMaxLength(str.max_tr_length)
-											}}>{getLoc("editor_edit_string")}</Dropdown.Item>
-											<Dropdown.Item onClick={(e) => {
-												DeleteString(str.index)
-											}}>{getLoc("editor_delete_string")}</Dropdown.Item>
-											{filters.length == 0 && sections.length == 1 && 
-											<Dropdown.Item onClick={(e) => {
-												AddString(str.index + 1)
-											}}>{getLoc("editor_add_string")}</Dropdown.Item>
-											}
-										</Dropdown.Menu>
-									</Dropdown>
-								}
+					{drawStrings.length
+					? <>
+						<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
+							{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
+								<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "0px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="border d-flex justify-content-between">
+									{userRole?.permissions?.can_manage_strings &&
+										<Dropdown style={{ alignItems: "center", display: "flex" }}>
+											<Dropdown.Toggle style={{height: "100%"}} variant="outline" data-toggle="dropdown">
+											</Dropdown.Toggle>
+											<Dropdown.Menu>
+												<Dropdown.Item onClick={(e) => {
+													setEditMode(true)
+													setInputText(str.text)
+													setInputKey(str.key)
+													setInputContext(str.context)
+													setInputMaxLength(str.max_tr_length)
+												}}>{getLoc("editor_edit_string")}</Dropdown.Item>
+												<Dropdown.Item onClick={(e) => {
+													DeleteString(str.index)
+												}}>{getLoc("editor_delete_string")}</Dropdown.Item>
+												{filters.length == 0 && sections.length == 1 && 
+												<Dropdown.Item onClick={(e) => {
+													AddString(str.index + 1)
+												}}>{getLoc("editor_add_string")}</Dropdown.Item>
+												}
+											</Dropdown.Menu>
+										</Dropdown>
+									}
 
-								<Col style={{ marginRight: "0px", minWidth: "50%", marginLeft: "0px" }}>
-									{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
-									<Stack className="border-end border-start" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap", paddingLeft: "5px"}}>
+									<Col style={{ marginRight: "0px", minWidth: "50%", marginLeft: "0px" }}>
+										{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
+										<Stack className="border-end border-start" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap", paddingLeft: "5px"}}>
+											<div
+												readOnly
+												className="text-left text-break"
+												style={{ paddingTop: "5px" }}
+											>
+												{str?.draw_text_f || str?.draw_text || str.text}
+											</div>
+											<div className="text-left text-break" style={{position: "relative", bottom: "0"}}>
+												<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
+													{str?.draw_key || str.key}
+												</div>
+												{sections.length > 1 &&
+													<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+														{sections[str.sec_ind].name}
+													</div>
+												}
+												<div>
+													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a>
+													{/* <a href={`${window.location.href}#${str.index + 1}`}>#{str.index + 1}</a> */}
+												</div>	
+											</div>	
+										</Stack>
+									</Col>
+									<Col>
+										<Stack className="border-start" style={{height: "100%", whiteSpace: "pre-wrap"}}>
+											{str.translations.map((tr, ind) => {
+												if (ind == 0) {
+													return <>
+													<Stack style={{paddingLeft: "5px"}}>
+														<div className="text-left text-break" style={{ paddingTop: "5px" }}>
+															{tr?.draw_text || tr.text}
+														</div>	
+														<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+															{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
+														</div>
+													</Stack></>
+												} else {
+													return <>
+													<Stack style={{paddingLeft: "5px", opacity: "0.3"}} className="border-top">
+														<div className="text-left text-break" style={{ paddingTop: "5px" }}>
+															{tr?.draw_text || tr.text}
+														</div>	
+														<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
+															{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
+														</div>
+													</Stack></>
+												}
+											})}
+											
+										</Stack>
+										{/* <Form.Control className="d-flex align-items-start"
+											readOnly
+											as="textarea"
+											style={{ paddingTop: "5px", paddingLeft: "10px", height: "100%", wordWrap: "break-word" }}
+											value=
+										>	
+										</Form.Control> */}
+									</Col>
+								<hr style={{ padding: "0px", margin: "0px" }} />
+								</Container>
+							)}
+
+
+						</Col>
+						<Col style={{height: "100%", overflowY: "auto"}} className="border-start border-end border-bottom" md={4}>
+						{curString 
+						? <>
+							{!editMode 
+							? <>
+								{userRole?.permissions?.can_translate &&
+								<>
+									<Form.Control className="d-flex align-items-start"
+										onChange={translationChange}
+										as="textarea"
+										ref={textareaTranslate}
+										value={inputTranslation}
+										placeholder={getLoc("editor_translation_placeholder")}
+										style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+									>
+									</Form.Control>
+									<h6> {curString?.context ? `${getLoc("editor_translation_context")}: ${curString?.context}` : `` }</h6>
+									<div style={{ color: (inputTranslation.length > curString?.max_tr_length ? "red" : "black") }}>
+										{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(${getLoc("editor_translation_max_symbols")} ${curString?.max_tr_length})` : ""}
+										{translateWarning &&
+											<OverlayTrigger
+												placement="top"
+												overlay={
+												<Tooltip>
+													{translateWarning}
+												</Tooltip>
+												}
+											>
+												<Button variant="warning" size="sm"><CiWarning/></Button>
+											</OverlayTrigger>
+										}
+									</div>
+
+								
+									{translationEdit 
+										? 	<>
+												{!loading 
+													? <>
+														<Button variant="outline-success" onClick={() => EditTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_edit_save")} </Button>
+														<Button variant="outline-danger" onClick={() => {
+															setTranslationEdit(null)
+															setInputTranslation("")
+														}}><FaPlus /> {getLoc("editor_translation_edit_cancel")} </Button>
+													</>
+													:  <>
+													<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_edit_save")} </Button>
+													<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_translation_edit_cancel")} </Button>
+													</>
+												}
+											</>
+										: 	<>
+												{!loading 
+													? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_add")} </Button>
+													: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
+												}
+											</>
+									}
+								</>
+								}
+								<h3>{getLoc("editor_translations")}</h3>
+								<div style={{ overflowY: "auto" }}>
+								{curString?.translations?.map((tr, i) =>
+								<>
+									<Container key={tr.id} className="border rounded" style={{ backgroundColor: (tr.id == translationEdit?.id ? "rgb(240, 240, 240)" : "white") }}>
 										<div
 											readOnly
-											className="text-left text-break"
-											style={{ paddingTop: "5px" }}
+											className="border rounded"
+											style={{ marginTop: "10px", wordWrap: "break-word", whiteSpace: "pre-wrap" }}
 										>
-											{str?.draw_text_f || str?.draw_text || str.text}
+											{tr.text}
 										</div>
-										<div className="text-left text-break" style={{position: "relative", bottom: "0"}}>
-											<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
-												{str?.draw_key || str.key}
-											</div>
-											{sections.length > 1 &&
-												<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
-													{sections[str.sec_ind].name}
-												</div>
-											}
-											<div>
-												<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a>
-												{/* <a href={`${window.location.href}#${str.index + 1}`}>#{str.index + 1}</a> */}
-											</div>	
-										</div>	
-									</Stack>
-								</Col>
-								<Col>
-									<Stack className="border-start" style={{height: "100%", whiteSpace: "pre-wrap"}}>
-										{str.translations.map((tr, ind) => {
-											if (ind == 0) {
-												return <>
-												<Stack style={{paddingLeft: "5px"}}>
-													<div className="text-left text-break" style={{ paddingTop: "5px" }}>
-														{tr?.draw_text || tr.text}
-													</div>	
-													<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
-														{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
-													</div>
-												</Stack></>
-											} else {
-												return <>
-												<Stack style={{paddingLeft: "5px", opacity: "0.3"}} className="border-top">
-													<div className="text-left text-break" style={{ paddingTop: "5px" }}>
-														{tr?.draw_text || tr.text}
-													</div>	
-													<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
-														{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
-													</div>
-												</Stack></>
-											}
-										})}
+										<div>{getLoc("editor_translations_author")}: {translators.find((el) => el.id == tr.author_id)?.username || "noname"}</div>
+										{ tr.editor_id && 
+											<div>{getLoc("editor_translations_editor")}: {translators.find((el) => el.id == tr.editor_id)?.username || "noname"}</div>
+										}
+										<div>{new Date(tr.updated_at).toLocaleString()}</div>
+
+										{userRole?.permissions?.can_approve &&
+											(!loading
+												? <Button variant={tr.is_approved ? "success" : "outline-success"} onClick={(e) => ChangeApprove(tr.id, !tr.is_approved)}><FaCheck/></Button>
+												: <Button variant={tr.is_approved ? "success" : "outline-success"} disabled><Spinner size="sm"/></Button>
+											)
+										}
+
+										{(userRole?.permissions?.can_manage_translations || tr.author_id == user?.id) &&
+										(!loading 
+											? <>
+												<Button variant="outline-primary" onClick={(e) => {
+													setInputTranslation(tr.text)
+													setTranslationEdit(tr)
+												}} ><FaPencilAlt/></Button>
+
+												<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} ><FaTrashAlt/></Button>
+											</>
+											: <>
+												<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+												<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+											</>
+										)
+										}
 										
-									</Stack>
-									{/* <Form.Control className="d-flex align-items-start"
-										readOnly
-										as="textarea"
-										style={{ paddingTop: "5px", paddingLeft: "10px", height: "100%", wordWrap: "break-word" }}
-										value=
-									>	
-									</Form.Control> */}
-								</Col>
-							<hr style={{ padding: "0px", margin: "0px" }} />
-							</Container>
-						)}
+										<div>
+											<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_plus.length }>
+											{tr.votes_plus.map((vote) => 
+												<Dropdown.Item href={"/users/" + vote.id}>
+												{vote.username}
+												</Dropdown.Item>
+											)}
+											</DropdownButton>
 
+											<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_plus.find((el) => el.id == user?.id) ? "success" : "outline-success"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_plus.find((el) => el.id == user?.id), false)}><FaArrowUp style={{ marginBottom: "3px" }}/></Button>
 
-					</Col>
-					<Col style={{height: "100%", overflowY: "auto"}} className="border-start border-end border-bottom" md={4}>
-					{curString 
-					? <>
-						{!editMode 
-						? <>
-							{userRole?.permissions?.can_translate &&
-							<>
+											<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_minus.find((el) => el.id == user?.id) ? "danger" : "outline-danger"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_minus.find((el) => el.id == user?.id), true)}><FaArrowDown style={{ marginBottom: "3px" }}/></Button>
+
+											<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_minus.length }>
+											{tr.votes_minus.map((vote) => 
+												<Dropdown.Item href={"/users/" + vote.id}>
+													{vote.username}
+												</Dropdown.Item>
+											)}
+											</DropdownButton>
+										</div>
+									</Container>
+								</>
+								)}
+								</div>
+							</>
+							: <>
+								<h6>{getLoc("editor_string_text")}:</h6>
 								<Form.Control className="d-flex align-items-start"
-									onChange={translationChange}
+									onChange={textChange}
 									as="textarea"
-									ref={textareaTranslate}
-									value={inputTranslation}
-									placeholder={getLoc("editor_translation_placeholder")}
+									value={inputText}
+									placeholder={getLoc("editor_string_text_placeholder")}
 									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
 								>
 								</Form.Control>
-								<h6> {curString?.context ? `${getLoc("editor_translation_context")}: ${curString?.context}` : `` }</h6>
-								<div style={{ color: (inputTranslation.length > curString?.max_tr_length ? "red" : "black") }}>
-									{inputTranslation.length}/{curString?.text.length} {curString?.max_tr_length < 2000 ? `(${getLoc("editor_translation_max_symbols")} ${curString?.max_tr_length})` : ""}
-									{translateWarning &&
-										<OverlayTrigger
-											placement="top"
-											overlay={
-											<Tooltip>
-												{translateWarning}
-											</Tooltip>
-											}
-										>
-											<Button variant="warning" size="sm"><CiWarning/></Button>
-										</OverlayTrigger>
-									}
-								</div>
+								{sections[curString.sec_ind]?.type == "json" &&  <>
+									<h6>{getLoc("editor_string_key")}:</h6>
+									<Form.Control className="d-flex align-items-start"
+										onChange={keyChange}
+										as="textarea"
+										value={inputKey}
+										placeholder={getLoc("editor_string_key_placeholder")}
+										style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+									>
+									</Form.Control>
+								</>}
+								<h6>{getLoc("editor_string_context")}:</h6>
+								<Form.Control className="d-flex align-items-start"
+									onChange={contextChange}
+									as="textarea"
+									value={inputContext}
+									placeholder={getLoc("editor_string_context_placeholder")}
+									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
+								>
+								</Form.Control>
+
+								<h6>{getLoc("editor_string_max_length")}:</h6>
+								<Form.Control type="number" onChange={maxLengthChange} min="1" max="2000" value={inputMaxLength} />
+								{/* <input type="number" id="tentacles" name="tentacles" min="10" max="100" /> */}
 
 							
-								{translationEdit 
-									? 	<>
-											{!loading 
-												? <>
-													<Button variant="outline-success" onClick={() => EditTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_edit_save")} </Button>
-													<Button variant="outline-danger" onClick={() => {
-														setTranslationEdit(null)
-														setInputTranslation("")
-													}}><FaPlus /> {getLoc("editor_translation_edit_cancel")} </Button>
-												</>
-												:  <>
-												<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_edit_save")} </Button>
-												<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_translation_edit_cancel")} </Button>
-												</>
-											}
-										</>
-									: 	<>
-											{!loading 
-												? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_add")} </Button>
-												: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
-											}
-										</>
+								{!loading 
+									? <>
+										<Button variant="outline-success" onClick={() => SaveString()}><FaPlus /> {getLoc("editor_string_edit_save")} </Button>
+										<Button variant="outline-danger" onClick={() => {
+											setEditMode(false)
+										}}><FaPlus /> {getLoc("editor_string_edit_cancel")} </Button>
+									</>
+									:  <>
+									<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_save")} </Button>
+									<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_cancel")} </Button>
+									</>
 								}
 							</>
 							}
-							<h3>{getLoc("editor_translations")}</h3>
-							<div style={{ overflowY: "auto" }}>
-							{curString?.translations?.map((tr, i) =>
-							<>
-								<Container key={tr.id} className="border rounded" style={{ backgroundColor: (tr.id == translationEdit?.id ? "rgb(240, 240, 240)" : "white") }}>
-									<div
-										readOnly
-										className="border rounded"
-										style={{ marginTop: "10px", wordWrap: "break-word", whiteSpace: "pre-wrap" }}
-									>
-										{tr.text}
-									</div>
-									<div>{getLoc("editor_translations_author")}: {translators.find((el) => el.id == tr.author_id)?.username || "noname"}</div>
-									{ tr.editor_id && 
-										<div>{getLoc("editor_translations_editor")}: {translators.find((el) => el.id == tr.editor_id)?.username || "noname"}</div>
-									}
-									<div>{new Date(tr.updated_at).toLocaleString()}</div>
-
-									{userRole?.permissions?.can_approve &&
-										(!loading
-											? <Button variant={tr.is_approved ? "success" : "outline-success"} onClick={(e) => ChangeApprove(tr.id, !tr.is_approved)}><FaCheck/></Button>
-											: <Button variant={tr.is_approved ? "success" : "outline-success"} disabled><Spinner size="sm"/></Button>
-										)
-									}
-
-									{(userRole?.permissions?.can_manage_translations || tr.author_id == user?.id) &&
-									(!loading 
-										? <>
-											<Button variant="outline-primary" onClick={(e) => {
-												setInputTranslation(tr.text)
-												setTranslationEdit(tr)
-											}} ><FaPencilAlt/></Button>
-
-											<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} ><FaTrashAlt/></Button>
-										</>
-										: <>
-											<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
-											<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
-										</>
-									)
-									}
-									
-									<div>
-										<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_plus.length }>
-										{tr.votes_plus.map((vote) => 
-											<Dropdown.Item href={"/users/" + vote.id}>
-											{vote.username}
-											</Dropdown.Item>
-										)}
-										</DropdownButton>
-
-										<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_plus.find((el) => el.id == user?.id) ? "success" : "outline-success"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_plus.find((el) => el.id == user?.id), false)}><FaArrowUp style={{ marginBottom: "3px" }}/></Button>
-
-										<Button disabled={!userRole?.permissions?.can_translate || tr.author_id == user?.id} variant={tr.votes_minus.find((el) => el.id == user?.id) ? "danger" : "outline-danger"} onClick={(e) => ChangeVote(tr.id, !!tr.votes_minus.find((el) => el.id == user?.id), true)}><FaArrowDown style={{ marginBottom: "3px" }}/></Button>
-
-										<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_minus.length }>
-										{tr.votes_minus.map((vote) => 
-											<Dropdown.Item href={"/users/" + vote.id}>
-												{vote.username}
-											</Dropdown.Item>
-										)}
-										</DropdownButton>
-									</div>
-								</Container>
-							</>
-							)}
-							</div>
 						</>
 						: <>
-							<h6>{getLoc("editor_string_text")}:</h6>
-							<Form.Control className="d-flex align-items-start"
-								onChange={textChange}
-								as="textarea"
-								value={inputText}
-								placeholder={getLoc("editor_string_text_placeholder")}
-								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
-							>
-							</Form.Control>
-							{sections[curString.sec_ind]?.type == "json" &&  <>
-								<h6>{getLoc("editor_string_key")}:</h6>
-								<Form.Control className="d-flex align-items-start"
-									onChange={keyChange}
-									as="textarea"
-									value={inputKey}
-									placeholder={getLoc("editor_string_key_placeholder")}
-									style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
-								>
-								</Form.Control>
-							</>}
-							<h6>{getLoc("editor_string_context")}:</h6>
-							<Form.Control className="d-flex align-items-start"
-								onChange={contextChange}
-								as="textarea"
-								value={inputContext}
-								placeholder={getLoc("editor_string_context_placeholder")}
-								style={{ marginTop: "10px", marginBottom: "10px", paddingTop: "5px", paddingLeft: "10px", minHeight: "85px", wordWrap: "break-word" }}
-							>
-							</Form.Control>
-
-							<h6>{getLoc("editor_string_max_length")}:</h6>
-							<Form.Control type="number" onChange={maxLengthChange} min="1" max="2000" value={inputMaxLength} />
-							{/* <input type="number" id="tentacles" name="tentacles" min="10" max="100" /> */}
-
-						
-							{!loading 
-								? <>
-									<Button variant="outline-success" onClick={() => SaveString()}><FaPlus /> {getLoc("editor_string_edit_save")} </Button>
-									<Button variant="outline-danger" onClick={() => {
-										setEditMode(false)
-									}}><FaPlus /> {getLoc("editor_string_edit_cancel")} </Button>
-								</>
-								:  <>
-								<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_save")} </Button>
-								<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_cancel")} </Button>
-								</>
-							}
 						</>
 						}
+						</Col>
 					</>
 					: <>
+						{loadingStrings
+						? <>
+							<div style={{display: "flex", justifyContent: "center"}}>
+							<div style={{marginTop: "10%"}}>
+							<div style={{justifySelf: "center", }}><Spinner></Spinner></div>
+							<h2>{getLoc("editor_strings_loading")}</h2>
+							</div></div>
+						</>
+						: <>
+							<div style={{display: "flex", justifyContent: "center"}}>
+							<div style={{marginTop: "10%"}}>
+							<h2 style={{textAlign: "center"}}>{getLoc("editor_no_strings_1")}</h2>
+							<h2 style={{textAlign: "center"}}>{getLoc("editor_no_strings_2")}</h2>
+							</div></div>
+						</>	
+						}
 					</>
 					}
-					</Col>
 					</Row>
 				: <>
 				<div id="div-strings-to-load" style={{ height: "95%", overflowY: "auto" }}>
