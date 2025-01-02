@@ -3,7 +3,7 @@
 
     "signup_signup": "Регистрация",
     "signup_email": "Электронная почта",
-    "signup_login": "Логин",
+    "signup_username": "Имя пользователя",
     "signup_password": "Пароль",
     "signup_register": "Зарегистрироваться",
     "signup_error_not_email": "Введённое значение не является адресом электронной почты",
@@ -22,7 +22,7 @@
     "signin_username_email": "Имя пользователя/Email",
     "signin_password": "Пароль",
     "signin_forgot_password": "Забыли пароль?",
-    "signin_cry_about_it": "Ну грустно вам.",
+    "signin_sad_for_you": "Ну грустно вам.",
     "signin_password_restore": "Напишите Неприму, чтобы придумал что-нибудь.",
     "signin_remember_me": "Запомнить меня",
     "signin_remember_me_note": "Если выставить, бразуер запомнит авторизацию на 30 дней.",
@@ -191,8 +191,8 @@
     "project_settings_source_lang": "Язык оригинала",
     "project_settings_target_lang": "Язык перевода",
     "project_settings_visibility": "Видимость проекта",
-    "project_settings_visibility_public": "Приватный проект",
-    "project_settings_visibility_private": "Публичный проект",
+    "project_settings_visibility_public": "Публичный проект",
+    "project_settings_visibility_private": "Приватный проект",
     "project_settings_save": "Сохранить",
     "project_settings_delete": "Удалить проект",
 
@@ -328,7 +328,5 @@
     "role_Translator": "Переводчик",
 
     "lang_en": "Английский",
-    "lang_ru": "Русский",
-
-    ".": ""
+    "lang_ru": "Русский"
 }

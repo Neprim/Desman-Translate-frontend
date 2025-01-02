@@ -109,7 +109,7 @@ export default function Signup() {
 
                     <Form.Group className="mb-3">
                         <Form.Label htmlFor="inputLogin">
-                            {getLoc("signup_login")}
+                            {getLoc("signup_username")}
                         </Form.Label>
                         <Form.Control
                             type="text"

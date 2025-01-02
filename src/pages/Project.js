@@ -535,7 +535,7 @@ function Project(props) {
                                     <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>{getLoc("project_project_information")}</h3>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_source_lang")}:</b> {getLoc("lang_" + project?.source_lang)}</div>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div>
-                                    <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString()}</div>
+                                    <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString(localStorage.getItem("lang"))}</div>
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div>
                                     {project?.statistics?.completeness
                                     ?   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: {project?.statistics?.completeness}%</b>
@@ -629,7 +629,7 @@ function Project(props) {
                                                 </>
                                         }
                                         <td>{section?.statistics?.last_update != undefined
-                                            ? <span title={new Date(section?.statistics?.last_update).toLocaleString()}>{TimestampToTimeSince(section?.statistics?.last_update)}</span>
+                                            ? <span title={new Date(section?.statistics?.last_update).toLocaleString(localStorage.getItem("lang"))}>{TimestampToTimeSince(section?.statistics?.last_update)}</span>
                                             : <span><Spinner size="sm"/></span>
                                         }</td>
                                         <td>
@@ -959,8 +959,8 @@ function Project(props) {
                                         </select>
                                         <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_visibility")}</label>
                                         <select className="form-select" defaultValue={project.visibility} id="settings-access">
-                                            <option value="private">{getLoc("project_settings_visibility_public")}</option>
-                                            <option value="public">{getLoc("project_settings_visibility_private")}</option>
+                                            <option value="private">{getLoc("project_settings_visibility_private")}</option>
+                                            <option value="public">{getLoc("project_settings_visibility_public")}</option>
                                         </select>
                                     </form>
                                     <Button variant="primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>{getLoc("project_settings_save")}</Button>

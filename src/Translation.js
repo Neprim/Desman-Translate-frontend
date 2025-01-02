@@ -1,5 +1,8 @@
-const translations = {
-    ru: require("./translations/ru.json")
+export const lang_list = ["ru", "en"]
+
+let translations = {}
+for (let lang of lang_list) {
+    translations[lang] = require(`./translations/${lang}.json`)
 }
 
 if (!localStorage.getItem("lang")) {

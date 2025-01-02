@@ -88,7 +88,7 @@ export default function Login() {
                         <Form.Text id="forgotPassword">
                             <details>
                                 <summary>{getLoc("signin_forgot_password")}</summary>
-                                <strike>{getLoc("signin_cry_about_it")}</strike> {getLoc("signin_password_restore")} 
+                                <strike>{getLoc("signin_sad_for_you")}</strike> {getLoc("signin_password_restore")} 
                             </details>
                         </Form.Text>
                     </Form.Group>
