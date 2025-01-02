@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../images/logo.png"
+import globe from "../images/globe.svg"
 import Button from "react-bootstrap/Button"
 import Navbar from "react-bootstrap/Navbar"
 import Nav from "react-bootstrap/Nav"
@@ -7,7 +8,14 @@ import Container from "react-bootstrap/Container"
 import Form from "react-bootstrap/Form"
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
-import { getLoc } from "../Translation";
+import { getLoc, lang_list } from "../Translation";
+import Dropdown from 'react-bootstrap/Dropdown';
+import Stack from 'react-bootstrap/Stack';
+
+let flags = {}
+for (let lang of lang_list) {
+	flags[lang] = require(`../images/${lang}.svg`)
+}
 
 function Header() {
 	const [input, setInput] = useState("");
@@ -33,6 +41,24 @@ function Header() {
 					</a>
 					<div className="d-flex align-items-center">
 					</div>
+					<Dropdown>
+							<Dropdown.Toggle variant="" bsPrefix="no-damn-caret">
+								<img style={{ width: 56, height: 42 }} className="border" src={flags[localStorage.getItem("lang")]}></img>
+							</Dropdown.Toggle>
+							<Dropdown.Menu style={{ padding: 0, width: "100%" }}>
+								{lang_list.map((lang) => 
+									<Dropdown.Item style={{ width: "100%", padding: "4px" }} onClick={(e) => {
+										localStorage.setItem("lang", lang)
+										window.location.reload()
+									}}>
+										<Stack direction="horizontal">
+											<img style={{ width: 56, height: 42, padding: "0px" }} className="border" src={flags[lang]}></img>
+											<div style={{ margin: "auto", padding: "6px" }}>{getLoc("lang_" + lang)}</div>
+										</Stack>
+									</Dropdown.Item>
+								)}
+							</Dropdown.Menu>
+						</Dropdown>
 				</Container>
 			</header>
 			<Navbar className="py-2 bg-body-tertiary border-bottom">
