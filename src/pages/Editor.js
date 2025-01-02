@@ -382,8 +382,9 @@ export default function Editor() {
 				delete tr.draw_text
 			for (let filter of filters) {
 				let value = filter.value
+				console.log(value)
 				if (!filter.is_regex) {
-					value = filter.value.replace(/[\\\/-\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&')
+					value = filter.value.replace(/[\\\/\-\^\$\*\+\?\.\(\)\|\[\]\{\}]/g, '\\$&')
 				}
 				let flag = false
 				switch (filter.key) {
@@ -438,6 +439,8 @@ export default function Editor() {
 
 					case "user":
 						flag = false
+						console.log("translator")
+						console.log(value)
 						for (let tr of str.translations) {
 							if (tr.author_id == value || tr.editor_id == value) {
 								flag = true
