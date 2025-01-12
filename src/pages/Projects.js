@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/Button'
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
 import { fetchSomeAPI, fetchUser, fetchUserInvites, fetchProject } from "../APIController"
-import { openConnection } from "../WSController"
+// import { openConnection } from "../WSController"
 import { getLoc } from "../Translation"
 
 function Projects() {
@@ -61,30 +61,30 @@ function Projects() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);  
 
-    useEffect(() => {
-        openConnection("/projects", async (mes) => {
-            if (mes.type == "new_invite") {
-                console.log(mes.data)
-                // toast(`Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}`);
-                // return (
-                //       <Modal show={show} onHide={handleClose}>
-                //         <Modal.Header closeButton>
-                //           <Modal.Title>Приглашение</Modal.Title>
-                //         </Modal.Header>
-                //         <Modal.Body>Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}</Modal.Body>
-                //         <Modal.Footer>
-                //           <Button variant="secondary" onClick={handleClose}>
-                //             Закрыть
-                //           </Button>
-                //           <Button variant="primary" onClick={handleClose}>
-                //             Принять приглашение
-                //           </Button>
-                //         </Modal.Footer>
-                //       </Modal>
-                //   );
-            }
-        })
-    }, [])
+    // useEffect(() => {
+    //     openConnection("/projects", async (mes) => {
+    //         if (mes.type == "new_invite") {
+    //             console.log(mes.data)
+    //             // toast(`Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}`);
+    //             // return (
+    //             //       <Modal show={show} onHide={handleClose}>
+    //             //         <Modal.Header closeButton>
+    //             //           <Modal.Title>Приглашение</Modal.Title>
+    //             //         </Modal.Header>
+    //             //         <Modal.Body>Приглашение от пользователя ${mes.data.inviter.username} в проект ${mes.data.project.name}</Modal.Body>
+    //             //         <Modal.Footer>
+    //             //           <Button variant="secondary" onClick={handleClose}>
+    //             //             Закрыть
+    //             //           </Button>
+    //             //           <Button variant="primary" onClick={handleClose}>
+    //             //             Принять приглашение
+    //             //           </Button>
+    //             //         </Modal.Footer>
+    //             //       </Modal>
+    //             //   );
+    //         }
+    //     })
+    // }, [])
 
     useEffect(() => {
         GetProjects()
