@@ -1089,7 +1089,7 @@ export default function Editor() {
 															{tr?.draw_text || tr.text}
 														</div>	
 														<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
-															{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
+															{translators.length && (translators.find((el) => el.id == tr.author_id)?.username || "noname") || ""}
 														</div>
 													</Stack></>
 												} else {
@@ -1099,7 +1099,7 @@ export default function Editor() {
 															{tr?.draw_text || tr.text}
 														</div>	
 														<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
-															{translators.find((el) => el.id == tr.author_id)?.username || "noname"}
+															{translators.length && (translators.find((el) => el.id == tr.author_id)?.username || "noname") || ""}
 														</div>
 													</Stack></>
 												}
@@ -1191,9 +1191,9 @@ export default function Editor() {
 										>
 											{tr.text}
 										</div>
-										<div>{getLoc("editor_translations_author")}: {translators.find((el) => el.id == tr.author_id)?.username || "noname"}</div>
+										<div>{getLoc("editor_translations_author")}: {translators.length && (translators.find((el) => el.id == tr.author_id)?.username || "noname") || ""}</div>
 										{ tr.editor_id && 
-											<div>{getLoc("editor_translations_editor")}: {translators.find((el) => el.id == tr.editor_id)?.username || "noname"}</div>
+											<div>{getLoc("editor_translations_editor")}: {translators.length && (translators.find((el) => el.id == tr.editor_id)?.username || "noname") || ""}</div>
 										}
 										<div>{new Date(tr.updated_at).toLocaleString()}</div>
 

@@ -75,14 +75,14 @@ function Project(props) {
             setMembers(project.members)
             setRoles(project.roles)
             
-            project = await fetchProject(link["project_id"], true, true, true)
-            setProject(project)
-            setMembers(project.members)
-            setRoles(project.roles)
+            // project = await fetchProject(link["project_id"], true, true, true)
+            // setProject(project)
+            // setMembers(project.members)
+            // setRoles(project.roles)
 
-            if (project.statistics) {
-                project.statistics.completeness = project.statistics.strings_amount ? project.statistics.translated_strings_amount / project.statistics.strings_amount * 100 : 0
-                project.statistics.completeness = Math.floor(project.statistics.completeness * 100) / 100
+            if (project.stats) {
+                project.stats.completeness = project.stats.strings_amount ? project.stats.strings_translated / project.stats.strings_amount * 100 : 0
+                project.stats.completeness = Math.floor(project.stats.completeness * 100) / 100
             }
         } catch (err) {
             console.log(err)
@@ -100,11 +100,11 @@ function Project(props) {
             let sections = await fetchSections(link["project_id"], false)
             setSections(sections)
             
-            sections = await fetchSections(link["project_id"], true)
+            // sections = await fetchSections(link["project_id"], true)
             for (let sec of sections) {
-                if (sec.statistics.strings_amount) {
-                    sec.statistics.completeness = sec.statistics.strings_amount ? sec.statistics.translated_strings_amount / sec.statistics.strings_amount * 100 : 0
-                    sec.statistics.completeness = Math.floor(sec.statistics.completeness * 100) / 100
+                if (sec.stats.strings_amount) {
+                    sec.stats.completeness = sec.stats.strings_amount ? sec.stats.strings_translated / sec.stats.strings_amount * 100 : 0
+                    sec.stats.completeness = Math.floor(sec.stats.completeness * 100) / 100
                 }
             }
             setSections(sections)
@@ -537,10 +537,10 @@ function Project(props) {
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div>
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString(localStorage.getItem("lang"))}</div>
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div>
-                                    {project?.statistics?.completeness
-                                    ?   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: {project?.statistics?.completeness}%</b>
+                                    {project?.stats?.completeness
+                                    ?   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: {project?.stats?.completeness}%</b>
                                             <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
-                                                <ProgressBar className="progress" striped animated label={`${project?.statistics?.completeness}%`} style={{ width: project?.statistics?.completeness + '%' }} aria-valuenow={project?.statistics?.completeness} aria-valuemin={0} aria-valuemax={100}/>
+                                                <ProgressBar className="progress" striped animated label={`${project?.stats?.completeness}%`} style={{ width: project?.stats?.completeness + '%' }} aria-valuenow={project?.stats?.completeness} aria-valuemin={0} aria-valuemax={100}/>
                                             </div>
                                         </div>
                                     :   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: <Spinner size="sm"/>%</b></div>
@@ -599,7 +599,7 @@ function Project(props) {
                                     <tr key={section.id}>
                                         <th scope="row">{index + 1}</th>
                                         <td>
-                                        {!section.statistics || section?.statistics?.strings_amount > 0 &&
+                                        {!section.stats || section?.stats?.strings_amount > 0 &&
                                             <>
                                             {user 
                                                 ?
@@ -610,14 +610,14 @@ function Project(props) {
                                             }
                                             </>
                                         }
-                                        {section?.statistics?.strings_amount == 0 &&
+                                        {section?.stats?.strings_amount == 0 &&
                                             section.name
                                         }
                                             
                                         </td>
-                                        {section?.statistics?.strings_amount > 0
-                                            ?   <>{section.statistics.last_update
-                                                    ? <td>{section.statistics.translated_strings_amount} / {section.statistics.strings_amount} ({section.statistics.completeness}%)</td>
+                                        {section?.stats?.strings_amount > 0
+                                            ?   <>{section.stats.last_update
+                                                    ? <td>{section.stats.strings_translated} / {section.stats.strings_amount} ({section.stats.completeness}%)</td>
                                                     : <td><Spinner size="sm"/></td>
                                                 }</>
                                             :   <>   
@@ -628,8 +628,8 @@ function Project(props) {
                                                     </td>
                                                 </>
                                         }
-                                        <td>{section?.statistics?.last_update != undefined
-                                            ? <span title={new Date(section?.statistics?.last_update).toLocaleString(localStorage.getItem("lang"))}>{TimestampToTimeSince(section?.statistics?.last_update)}</span>
+                                        <td>{section?.stats?.last_update != undefined
+                                            ? <span title={new Date(section?.stats?.last_update).toLocaleString(localStorage.getItem("lang"))}>{TimestampToTimeSince(section?.stats?.last_update)}</span>
                                             : <span><Spinner size="sm"/></span>
                                         }</td>
                                         <td>
@@ -642,7 +642,7 @@ function Project(props) {
                                                 <Dropdown.Item onClick={(e) => DownloadSectionTranslation(index)}>
                                                 {getLoc("project_section_download_translation")}
                                                 </Dropdown.Item>
-                                                {userRole?.permissions?.can_translate && section?.statistics?.strings_amount > 0 &&
+                                                {userRole?.permissions?.can_translate && section?.stats?.strings_amount > 0 &&
                                                     <Dropdown.Item onClick={(e) => UploadTranslations(section.id)}>
                                                     {getLoc("project_section_upload_translation")}
                                                     </Dropdown.Item>
