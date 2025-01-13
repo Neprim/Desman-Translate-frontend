@@ -680,12 +680,12 @@ function Project(props) {
                                 {getLoc("project_add_section")}
                                 </Button>
                                 <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); setAddChapterToggle(false)}}>
-                                {getLoc("project_cancel_button")}
+                                {getLoc("project_cancel")}
                                 </Button>
                             </>
                             : <>
                                 <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> {getLoc("project_add_section")}</Button>
-                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel_button")}</Button>
+                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel`")}</Button>
                             </>}
                         </Form>
                     </Tab>
