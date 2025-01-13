@@ -27,6 +27,12 @@ function Search() {
             let projects = await fetchProjects({
                 name: project_name
             })
+            for (let project of projects) {
+                if (project.stats) {
+                    project.stats.completeness = project.stats.strings_amount ? project.stats.strings_translated / project.stats.strings_amount * 100 : 0
+                    project.stats.completeness = Math.floor(project.stats.completeness * 100) / 100
+                }
+            }
             setProjects(projects)
         } catch (err) {
             console.log(err)
@@ -61,6 +67,9 @@ function Search() {
                                         {project.name}
                                     </Link>
                                     <br /> {project.description}
+                                    {project.stats &&
+                                        <div><b>{getLoc("project_project_completeness")}: {project?.stats?.completeness}%</b></div>
+                                    }
                                 </Col>
                             </Row>
                         </Container>
