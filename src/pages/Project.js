@@ -35,6 +35,10 @@ function Project(props) {
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
     const [addChapterToggle, setAddChapterToggle] = useState(false);
 
+    const [statistics, setStatistics] = useState(null)
+    const [curStatSection, setCurStatSection] = useState("--summary--")
+    const [statsLoading, setStatsLoading] = useState(false)
+
     const [requestedInvite, setRequestedInvite] = useState(false);
     
     const [loading, setLoading] = useState(false)
@@ -510,6 +514,54 @@ function Project(props) {
             console.log(err)
         }
     }
+
+    async function GetStatistics() {
+        setStatsLoading(true)
+        try {
+            while (!project) {}
+            while (sections.length == 0) {}
+
+            let stats = await fetchSomeAPI(`/api/projects/${link["project_id"]}/statistics`)
+            console.log(stats)
+            let users = {}
+            for (let user in stats.summary) {
+                users[user] = await fetchUser(user)
+            }
+            let st = {}
+            st["--summary--"] = []
+            for (let user in stats["summary"]) {
+                st["--summary--"].push({
+                    ...stats["summary"][user],
+                    translations_ratio: project.stats.translations_amount ? Math.round(stats["summary"][user].translations / project.stats.translations_amount * 10000) / 100 : 0,
+                    current_ratio: project.stats.strings_translated ? Math.round(stats["summary"][user].current / project.stats.strings_translated * 10000) / 100 : 0,
+                    approves_ratio: project.stats.strings_approved ? Math.round(stats["summary"][user].approves / project.stats.strings_approved * 10000) / 100 : 0,
+                    id: users[user].id,
+                    username: users[user].username,
+                })
+            }
+            for (let sec in stats.sections) {
+                st[sec] = []
+                let section = sections.find((section) => section.id == sec)
+                for (let user in stats.sections[sec]) {
+                    console.log(user)
+                    st[sec].push({
+                        ...stats.sections[sec][user],
+                        translations_ratio: section.stats.translations_amount ? Math.round(stats.sections[sec][user].translations / section.stats.translations_amount * 10000) / 100 : 0,
+                        current_ratio: section.stats.strings_translated ? Math.round(stats.sections[sec][user].current / section.stats.strings_translated * 10000) / 100 : 0,
+                        approves_ratio: section.stats.strings_approved ? Math.round(stats.sections[sec][user].approves / section.stats.strings_approved * 10000) / 100 : 0,
+                        id: users[user].id,
+                        username: users[user].username,
+                    })
+                }
+            }
+
+            setStatistics(st)
+        } catch (err) {
+            console.log(err)
+        }
+        
+        setStatsLoading(false)
+    }
     
     return (
         <>
@@ -520,6 +572,13 @@ function Project(props) {
                     defaultActiveKey={window.location.hash.substring(1) == "dictionary" ? "dictionary" : "project"}
                     id="project-id-tabs"
                     className="mb-3"
+                    onSelect={(e) => {
+                        if (e == "statistics") {
+                            if (!statistics && !statsLoading) {
+                                GetStatistics()
+                            }
+                        }
+                    }}
                 >
                     <Tab eventKey="project" title={getLoc("project_project_tab")}>
                         <Row>
@@ -928,6 +987,63 @@ function Project(props) {
                                 </div>
                             }
                         </div>
+                    </Tab>
+                    <Tab eventKey="statistics" title={getLoc("project_statistics_tab")}>
+                        {statsLoading || !statistics
+						? <>
+							<div style={{display: "flex", justifyContent: "center"}}>
+							<div><div style={{justifySelf: "center", }}><Spinner></Spinner></div>
+							<h2>{getLoc("project_statistics_loading")}</h2>
+							</div></div>
+						</>
+						: <>
+                            <div className="row">
+                                <div className="col-8">
+                                    <h2>{getLoc("project_statistics")}</h2>
+                                    <label htmlFor="statistics-section" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_statistics_section")}</label>
+                                    <Form.Select className="form-select" defaultValue={curStatSection} id="settings-source-lang" onChange={(e) => {console.log(e.target.value)
+                                        setCurStatSection(e.target.value)}}>
+                                        <option value="--summary--">{getLoc("project_statistics_summary")}</option>
+                                        {sections.map((sec) => 
+                                            <option value={sec.id}>{sec.name}</option>
+                                        )}
+                                    </Form.Select>
+                                    <table className="table table-striped align-items-center">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">{getLoc("project_statistics_user")}</th>
+                                                {/* <th scope="col">{getLoc("project_statistics_translated")}<hr/>{getLoc("project_statistics_current")}</th> */}
+                                                {/* <th scope="col">
+                                                    <tr class="border-bottom">{getLoc("project_statistics_translated")}</tr>
+                                                    <tr>{getLoc("project_statistics_current")}</tr>
+                                                </th> */}
+                                                <th scope="col">{getLoc("project_statistics_translated")}</th>
+                                                <th scope="col">{getLoc("project_statistics_current")}</th>
+                                                <th scope="col">{getLoc("project_statistics_approves")}</th>
+                                                <th scope="col">{getLoc("project_statistics_rating")}</th>
+                                                <th scope="col">{getLoc("project_statistics_votes")}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {statistics[curStatSection].map((user, index) =>
+                                                <tr key={user.id}>
+                                                    <td><Link to={"/users/" + user.id} reloadDocument className="nav-link link-primary px-2">
+                                                            {user.username}
+                                                        </Link>
+                                                    </td>
+                                                    <td>{user.translations} ({user.translations_ratio}%)</td>
+                                                    <td>{user.current} ({user.current_ratio}%)</td>
+                                                    <td>{user.approves} ({user.approves_ratio}%)</td>
+                                                    <td>{user.rating[0] - user.rating[1]} (<span style={{color: "green"}}>{user.rating[0]}</span>/<span style={{color: "red"}}>{user.rating[1]}</span>)</td>
+                                                    <td><span style={{color: "green"}}>{user.pluses}</span>/<span style={{color: "red"}}>{user.minuses}</span></td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>	
+						}
                     </Tab>
                     {userRole?.permissions?.can_manage_project &&
                         <Tab eventKey="settings" title={getLoc("project_settings_tab")}>
