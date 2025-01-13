@@ -10,6 +10,7 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import Stack from "react-bootstrap/Stack"
 import { useNavigate } from "react-router-dom"
+import { ProgressBar } from "react-bootstrap";
 
 import api_link from "../App"
 import { fetchProjects, fetchUser } from "../APIController"
@@ -30,6 +31,12 @@ function Home() {
         try {
             let projects = (await fetchUser(user.id, true)).projects || []
             projects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            for (let project of projects) {
+                if (project.stats) {
+                    project.stats.completeness = project.stats.strings_amount ? project.stats.strings_translated / project.stats.strings_amount * 100 : 0
+                    project.stats.completeness = Math.floor(project.stats.completeness * 100) / 100
+                }
+            }
             setRecentProjects(projects)
         } catch (err) {
             console.log(err)
@@ -41,6 +48,12 @@ function Home() {
         try {
             let projects = await fetchProjects(4)
             projects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            for (let project of projects) {
+                if (project.stats) {
+                    project.stats.completeness = project.stats.strings_amount ? project.stats.strings_translated / project.stats.strings_amount * 100 : 0
+                    project.stats.completeness = Math.floor(project.stats.completeness * 100) / 100
+                }
+            }
             setPopularProjects(projects)
         } catch (err) {
             console.log(err)
@@ -84,6 +97,9 @@ function Home() {
                                             {project.name}
                                         </Link>
                                         <br /> {project.description}
+                                        {project.stats &&
+                                            <div><b>{getLoc("project_project_completeness")}: {project?.stats?.completeness}%</b></div>
+                                        }
                                     </Container>
                                 </Stack>
                             </Container>
@@ -103,6 +119,9 @@ function Home() {
                                             {project.name}
                                         </Link>
                                         <br /> {project.description}
+                                        {project.stats &&
+                                            <div><b>{getLoc("project_project_completeness")}: {project?.stats?.completeness}%</b></div>
+                                        }
                                     </Container>
                                 </Stack>
                             </Container>
