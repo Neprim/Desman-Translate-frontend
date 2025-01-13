@@ -685,7 +685,7 @@ function Project(props) {
                             </>
                             : <>
                                 <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> {getLoc("project_add_section")}</Button>
-                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel`")}</Button>
+                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel")}</Button>
                             </>}
                         </Form>
                     </Tab>
