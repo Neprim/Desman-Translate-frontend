@@ -203,6 +203,7 @@
     "project_statistics_user": "User",
     "project_statistics_translated": "Translations",
     "project_statistics_current": "Final translations",
+    "project_statistics_edits": "Edits",
     "project_statistics_approves": "Approves",
     "project_statistics_rating": "Rating",
     "project_statistics_votes": "Votes",

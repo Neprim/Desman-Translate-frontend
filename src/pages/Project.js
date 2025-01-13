@@ -1019,6 +1019,7 @@ function Project(props) {
                                                 </th> */}
                                                 <th scope="col">{getLoc("project_statistics_translated")}</th>
                                                 <th scope="col">{getLoc("project_statistics_current")}</th>
+                                                <th scope="col">{getLoc("project_statistics_edits")}</th>
                                                 <th scope="col">{getLoc("project_statistics_approves")}</th>
                                                 <th scope="col">{getLoc("project_statistics_rating")}</th>
                                                 <th scope="col">{getLoc("project_statistics_votes")}</th>
@@ -1033,6 +1034,7 @@ function Project(props) {
                                                     </td>
                                                     <td>{user.translations} ({user.translations_ratio}%)</td>
                                                     <td>{user.current} ({user.current_ratio}%)</td>
+                                                    <td>{user.edits}</td>
                                                     <td>{user.approves} ({user.approves_ratio}%)</td>
                                                     <td>{user.rating[0] - user.rating[1]} (<span style={{color: "green"}}>{user.rating[0]}</span>/<span style={{color: "red"}}>{user.rating[1]}</span>)</td>
                                                     <td><span style={{color: "green"}}>{user.pluses}</span>/<span style={{color: "red"}}>{user.minuses}</span></td>
