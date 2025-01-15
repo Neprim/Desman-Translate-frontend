@@ -41,24 +41,24 @@ function Header() {
 					</a>
 					<div className="d-flex align-items-center">
 					</div>
-					<Dropdown>
-							<Dropdown.Toggle variant="" bsPrefix="no-damn-caret">
-								<img style={{ width: 56, height: 42 }} className="border" src={flags[localStorage.getItem("lang")]}></img>
-							</Dropdown.Toggle>
-							<Dropdown.Menu style={{ padding: 0, width: "100%" }}>
-								{lang_list.map((lang) => 
-									<Dropdown.Item style={{ width: "100%", padding: "4px" }} onClick={(e) => {
-										localStorage.setItem("lang", lang)
-										window.location.reload()
-									}}>
-										<Stack direction="horizontal">
-											<img style={{ width: 56, height: 42, padding: "0px" }} className="border" src={flags[lang]}></img>
-											<div style={{ margin: "auto", padding: "6px" }}>{getLoc("lang_" + lang)}</div>
-										</Stack>
-									</Dropdown.Item>
-								)}
-							</Dropdown.Menu>
-						</Dropdown>
+					{/* <Dropdown>
+						<Dropdown.Toggle variant="" bsPrefix="no-damn-caret">
+							<img style={{ width: 56, height: 42 }} className="border" src={flags[localStorage.getItem("lang")]}></img>
+						</Dropdown.Toggle>
+						<Dropdown.Menu style={{ padding: 0, width: "100%" }}>
+							{lang_list.map((lang) => 
+								<Dropdown.Item style={{ width: "100%", padding: "4px" }} onClick={(e) => {
+									localStorage.setItem("lang", lang)
+									window.location.reload()
+								}}>
+									<Stack direction="horizontal">
+										<img style={{ width: 56, height: 42, padding: "0px" }} className="border" src={flags[lang]}></img>
+										<div style={{ margin: "auto", padding: "6px" }}>{getLoc("lang_" + lang)}</div>
+									</Stack>
+								</Dropdown.Item>
+							)}
+						</Dropdown.Menu>
+					</Dropdown> */}
 				</Container>
 			</header>
 			<Navbar className="py-2 bg-body-tertiary border-bottom">
