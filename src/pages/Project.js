@@ -586,7 +586,7 @@ function Project(props) {
                                 <img src={project?.cover_url || placeholder} height={250} width={250} alt={getLoc("project_project_cover_stub")} style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
                                 <Stack className="text-left text-break">
                                     <h3>{getLoc("project_project_description")}</h3>
-                                    <p style={{fontSize: "smaller"}}><pre>{project?.description}</pre></p>
+                                    <p style={{fontSize: "smaller",  whiteSpace: "pre-wrap" }}>{project?.description}</p>
                                 </Stack>
                             </Col>
                             {project &&
