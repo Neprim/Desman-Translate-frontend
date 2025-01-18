@@ -27,7 +27,7 @@ function Project(props) {
     const [project, setProject] = useState(null);
     const [dictionary, setDictionary] = useState([]);
     const [members, setMembers] = useState([]);
-    const [sections, setSections] = useState([]);
+    const [sections, setSections] = useState(null);
     const [roles, setRoles] = useState([]);
     const [invites, setInvites] = useState([]);
     const [userRole, setUserRole] = useState(null);
@@ -239,7 +239,7 @@ function Project(props) {
     }, [project, user])
 
     useEffect(() => {
-        if (!project || sections.length)
+        if (!project || sections?.length)
             return
         GetSections()
     }, [project])
@@ -519,7 +519,7 @@ function Project(props) {
         setStatsLoading(true)
         try {
             while (!project) {}
-            while (sections.length == 0) {}
+            while (!sections) {}
 
             let stats = await fetchSomeAPI(`/api/projects/${link["project_id"]}/statistics`)
             console.log(stats)
@@ -654,7 +654,7 @@ function Project(props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sections.map((section, index) =>
+                                {sections?.map((section, index) =>
                                     <tr key={section.id}>
                                         <th scope="row">{index + 1}</th>
                                         <td>
