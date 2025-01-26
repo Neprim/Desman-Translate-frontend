@@ -11,6 +11,8 @@ import { AuthContext } from "../AuthContext";
 import { getLoc, lang_list } from "../Translation";
 import Dropdown from 'react-bootstrap/Dropdown';
 import Stack from 'react-bootstrap/Stack';
+import Badge from "react-bootstrap/Badge"; 
+import { fetchUserInvites } from "../APIController"
 
 let flags = {}
 for (let lang of lang_list) {
@@ -20,6 +22,16 @@ for (let lang of lang_list) {
 function Header() {
 	const [input, setInput] = useState("");
 	const { user, gotUser } = useContext(AuthContext);
+	const [invitedInvites, setInvitedInvites] = useState(0)
+
+	async function GetInvites() {
+		try {
+			let invites = await fetchUserInvites() || []
+			setInvitedInvites(invites.reduce((s, invite) => s + (invite.inviter.id != invite.user.id), 0))
+		} catch (err) {
+			console.log(err)
+		}
+	}
 
 	async function Logout() {
 		await fetch("/api/logout",
@@ -31,6 +43,10 @@ function Header() {
 		})
 		window.location.href = "/";
 	}
+
+	useEffect(() => {
+        GetInvites()
+    }, [user]);
 
 	return (
 		<>
@@ -68,7 +84,11 @@ function Header() {
 							<Link to="/" className="nav-link link-body-emphasis px-2 active" aria-current="page">{getLoc("header_homepage")}</Link>
 						</Nav.Item>
 						<Nav.Item>
-							<Link to="/projects" className="nav-link link-body-emphasis px-2">{getLoc("header_my_projects")}</Link>
+							<Link to="/projects" className="nav-link link-body-emphasis px-2">
+								{getLoc("header_my_projects")} {(invitedInvites || "") &&
+									<Badge pill bg="danger">{invitedInvites}</Badge>
+								}
+							</Link>
 						</Nav.Item>
 						<Nav.Item>
 							<Link to="/search" className="nav-link link-body-emphasis px-2">{getLoc("header_search")}</Link>

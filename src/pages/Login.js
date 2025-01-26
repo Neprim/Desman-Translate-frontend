@@ -49,7 +49,7 @@ export default function Login() {
                     console.log(typeof (data))
                     console.log(data)
                     navigate("../")
-                    window.location.reload(false);
+                    window.location.reload()
                 }
             })
     }

@@ -10,6 +10,7 @@ import Container from "react-bootstrap/Container"
 import Form from "react-bootstrap/Form"
 import placeholder from "../images/placeholder.png"
 import Spinner from 'react-bootstrap/Spinner';
+import Badge from "react-bootstrap/Badge"; 
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -30,6 +31,7 @@ function Project(props) {
     const [sections, setSections] = useState(null);
     const [roles, setRoles] = useState([]);
     const [invites, setInvites] = useState([]);
+    const [requestedInvites, setRequestedInvites] = useState(0)
     const [userRole, setUserRole] = useState(null);
     const [inviteError, setInviteError] = useState(null)
     const [fieldInviteUser, setFieldInviteUser] = useState([]);
@@ -39,7 +41,7 @@ function Project(props) {
     const [curStatSection, setCurStatSection] = useState("--summary--")
     const [statsLoading, setStatsLoading] = useState(false)
 
-    const [requestedInvite, setRequestedInvite] = useState(false);
+    const [requestedInvite, setRequestedInvite] = useState(null);
     
     const [loading, setLoading] = useState(false)
     
@@ -204,6 +206,8 @@ function Project(props) {
             console.log(invites)
             if (invites.find((inv) => inv.project_id == project.id)) {
                 setRequestedInvite(true)
+            } else {
+                setRequestedInvite(false)
             }
         } catch (err) {
             console.log(err)
@@ -220,6 +224,7 @@ function Project(props) {
         try {
             const invites = await fetchProjectInvites(project.id)
             setInvites(invites)
+            setRequestedInvites(invites.reduce((s, invite) => s + (invite.inviter.id == invite.user.id), 0))
         } catch (err) {
             console.log(err)
         }
@@ -608,10 +613,11 @@ function Project(props) {
                                         { userRole
                                             ? <div className="py-2 border-bottom"><b>{getLoc("project_your_role")}:</b> {getLoc("role_" + userRole?.name)}</div>
                                             : !requestedInvite 
-                                                ? <>    
-                                                    <Button onClick={(e) => RequestInvite(e)}>
-                                                    {getLoc("project_request_invite")}
-                                                    </Button>
+                                                ? <> { requestedInvite === false &&
+                                                        <Button onClick={(e) => RequestInvite(e)}>
+                                                        {getLoc("project_request_invite")}
+                                                        </Button>
+                                                    }
                                                 </>
                                                 : <>    
                                                     <Button disabled>
@@ -880,7 +886,10 @@ function Project(props) {
                             </div>
                         </Tab>
                     }
-                    <Tab eventKey="members" title={getLoc("project_members_tab")}>
+                    <Tab eventKey="members" title={<>
+                                {getLoc("project_members_tab")} {(requestedInvites || "") &&
+									<Badge pill bg="danger">{requestedInvites}</Badge>
+								}</>}>
                         <div className="row">
                             <div className="col-8">
                                 <h2>{getLoc("project_members")}</h2>

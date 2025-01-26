@@ -12,6 +12,7 @@ import { AuthContext } from "../AuthContext";
 import { fetchSomeAPI, fetchUser, fetchUserInvites, fetchProject } from "../APIController"
 // import { openConnection } from "../WSController"
 import { getLoc } from "../Translation"
+import Badge from "react-bootstrap/Badge"; 
 
 function Projects() {
 
@@ -19,6 +20,7 @@ function Projects() {
 
     const [projects, setProjects] = useState([]);
     const [invites, setInvites] = useState([]);
+    const [invitedInvites, setInvitedInvites] = useState(0)
 
     async function GetProjects() {
         if (!user)
@@ -40,6 +42,7 @@ function Projects() {
         try {
             let invites = await fetchUserInvites() || []
             setInvites(invites)
+            setInvitedInvites(invites.reduce((s, invite) => s + (invite.inviter.id != invite.user.id), 0))
         } catch (err) {
             console.log(err)
         }
@@ -48,8 +51,7 @@ function Projects() {
     async function ProcessInvitation(invite_id, is_accepted) {
         try {
             await fetchSomeAPI(`/api/invites/${invite_id}`, "POST", { "accept": is_accepted })
-            await GetInvites()
-            GetProjects()
+            window.location.reload()
         } catch (err) {
             console.log(err)
         }
@@ -147,7 +149,10 @@ function Projects() {
                             </div>
                         </div>
                     </Tab>
-                    <Tab eventKey="invitations" title={getLoc("my_projects_invites_tab")}>
+                    <Tab eventKey="invitations" title={<>
+                                {getLoc("my_projects_invites_tab")} {(invitedInvites || "") &&
+									<Badge pill bg="danger">{invitedInvites}</Badge>
+								}</>}>
                         <h2 style={{ marginBottom: 20 }}>{getLoc("my_projects_invites")}</h2>
                         <div className="row">
                             <div className="col-6">
