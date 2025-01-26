@@ -707,7 +707,7 @@ function Project(props) {
                                                     </Dropdown.Item>
                                                 }
                                                     <Dropdown.Item onClick={(e) => DownloadSectionOriginal(index)}>
-                                                    {getLoc("project_section_upload_translation")}
+                                                    {getLoc("project_section_download_original")}
                                                         
                                                     </Dropdown.Item>
                                                 {userRole?.permissions?.can_manage_sections && 
