@@ -7,7 +7,7 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
-import { FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt } from "react-icons/fa"
+import { FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen } from "react-icons/fa"
 import { CiWarning } from "react-icons/ci"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
@@ -297,7 +297,12 @@ export default function Editor() {
 	useEffect(() => {
 		setTranslationEdit(null)
 		setInputTranslation(curString?.text || "")
-		setEditMode(false)
+		if (editMode) {
+			setInputText(curString.text)
+			setInputKey(curString.key)
+			setInputContext(curString.context)
+			setInputMaxLength(curString.max_tr_length)
+		}
 		setTimeout(() => {
 		const t = textareaTranslate.current
 		if (t != null) {
@@ -358,6 +363,8 @@ export default function Editor() {
 	}
 
 	useEffect(() => {
+		if (editMode)
+			return
 		if (!curString || !curString.dicts)
 			return 
 		
@@ -371,8 +378,13 @@ export default function Editor() {
 	}, [inputTranslation])
 
 	function UpdateDrawStrings() {
+		console.log("Ну вроде обновляются")
 		setDrawStrings(SortStrings(FilterStrings(strings)))
 	}
+
+	useEffect(() => {
+		console.log(drawStrings)
+	}, [drawStrings])
 
 	function FilterStrings(strs) {
 		let draws = strs.filter((str) => {
@@ -625,13 +637,15 @@ export default function Editor() {
 				context: inputContext,
 				max_tr_length: inputMaxLength,
 			})
-			strings[curString.index] = {...strings[curString.index], 
+			strings[str_index] = FindWordsInString({...strings[str_index], 
 				text: str.text, 
 				key: str.key,
 				context: str.context, 
 				max_tr_length: str.max_tr_length
-			}
-			setCurString(strings[curString.index])
+			})
+			
+			console.log(strings[str_index])
+			setCurString(strings[str_index])
 			UpdateDrawStrings()
 		} catch (err) {
 			console.log(err)
@@ -925,6 +939,24 @@ export default function Editor() {
 						</Dropdown>
 
 						{userRole?.permissions?.can_manage_strings &&
+						<LinkWithTooltip tooltip={getLoc("editor_edit_mode")}id="tooltip-settings" where="bottom">
+							<Button variant={editMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} onClick={(e) => {
+								if (editMode) {
+									setEditMode(false)
+								} else {
+									setEditMode(true)
+									setTranslationEdit(null)
+									setInputTranslation(curString?.text || "")
+									setInputText(curString.text)
+									setInputKey(curString.key)
+									setInputContext(curString.context)
+									setInputMaxLength(curString.max_tr_length)
+								}
+							}} disabled={!(userRole?.permissions?.can_manage_strings)}><FaPencilAlt style={{ marginBottom: "3px" }} /></Button>
+						</LinkWithTooltip>
+						}
+
+						{userRole?.permissions?.can_manage_strings &&
 						<LinkWithTooltip tooltip={getLoc("editor_move_mode")}id="tooltip-settings" where="bottom">
 							<Button variant={moveMode ? "primary" : "outline-primary"} style={{ marginLeft: "10px" }} onClick={(e) => {
 								setMoveMode(!moveMode)
@@ -1034,13 +1066,13 @@ export default function Editor() {
 											<Dropdown.Toggle style={{height: "100%"}} variant="outline" data-toggle="dropdown">
 											</Dropdown.Toggle>
 											<Dropdown.Menu>
-												<Dropdown.Item onClick={(e) => {
+												{/* <Dropdown.Item onClick={(e) => {
 													setEditMode(true)
 													setInputText(str.text)
 													setInputKey(str.key)
 													setInputContext(str.context)
 													setInputMaxLength(str.max_tr_length)
-												}}>{getLoc("editor_edit_string")}</Dropdown.Item>
+												}}>{getLoc("editor_edit_string")}</Dropdown.Item> */}
 												<Dropdown.Item onClick={(e) => {
 													DeleteString(str.index)
 												}}>{getLoc("editor_delete_string")}</Dropdown.Item>
@@ -1285,14 +1317,23 @@ export default function Editor() {
 							
 								{!loading 
 									? <>
-										<Button variant="outline-success" onClick={() => SaveString()}><FaPlus /> {getLoc("editor_string_edit_save")} </Button>
+										<Button variant={
+											inputText != curString.text ||
+											inputContext != curString.context ||
+											inputKey != curString.key ||
+											inputMaxLength != curString.max_tr_length
+											? "success"
+											: "outline-success"} onClick={() => SaveString()}><FaPlus /> {getLoc("editor_string_edit_save")} </Button>
 										<Button variant="outline-danger" onClick={() => {
-											setEditMode(false)
-										}}><FaPlus /> {getLoc("editor_string_edit_cancel")} </Button>
+											setInputText(curString.text)
+											setInputKey(curString.key)
+											setInputContext(curString.context)
+											setInputMaxLength(curString.max_tr_length)
+										}}><FaPlus /> {getLoc("editor_string_edit_reset")}</Button>
 									</>
 									:  <>
 									<Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_save")} </Button>
-									<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_cancel")} </Button>
+									<Button variant="outline-danger" disabled><Spinner size="sm"/> {getLoc("editor_string_edit_reset")} </Button>
 									</>
 								}
 							</>
