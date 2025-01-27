@@ -11,5 +11,7 @@ if (!localStorage.getItem("lang")) {
 
 export function getLoc(id) {
     const lang = localStorage.getItem("lang")
+    if (id.startsWith("role_"))
+        return translations[lang]?.[id] || translations["ru"]?.[id] || id.substr(5)
     return translations[lang]?.[id] || translations["ru"]?.[id] || "something gone wrong"
 }
