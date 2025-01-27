@@ -81,6 +81,7 @@ function Project(props) {
     async function GetProject() {
         try {
             let project = await fetchProject(link["project_id"], true, true, false)
+            console.log(project)
             setProject(project)
             setMembers(project.members)
             setRoles(project.roles)
@@ -93,6 +94,12 @@ function Project(props) {
             if (project.stats) {
                 project.stats.completeness = project.stats.strings_amount ? project.stats.strings_translated / project.stats.strings_amount * 100 : 0
                 project.stats.completeness = Math.floor(project.stats.completeness * 100) / 100
+                
+                project.stats.pc = project.stats.strings_amount ? project.stats.translations_amount / project.stats.strings_translated : 0
+                project.stats.pc = Math.floor(project.stats.pc * 100) / 100
+                
+                project.stats.approveness = project.stats.strings_amount ? project.stats.strings_approved / project.stats.strings_amount * 100 : 0
+                project.stats.approveness = Math.floor(project.stats.approveness * 100) / 100
             }
         } catch (err) {
             console.log(err)
@@ -118,6 +125,9 @@ function Project(props) {
                 if (sec.stats.strings_amount) {
                     sec.stats.completeness = sec.stats.strings_amount ? sec.stats.strings_translated / sec.stats.strings_amount * 100 : 0
                     sec.stats.completeness = Math.floor(sec.stats.completeness * 100) / 100
+
+                    sec.stats.approveness = sec.stats.strings_amount ? sec.stats.strings_approved / sec.stats.strings_amount * 100 : 0
+                    sec.stats.approveness = Math.floor(sec.stats.approveness * 100) / 100
                 }
             }
             setSections(sections)
@@ -651,13 +661,20 @@ function Project(props) {
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div>
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString(localStorage.getItem("lang"))}</div>
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div>
-                                    {project?.stats?.completeness
-                                    ?   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: {project?.stats?.completeness}%</b>
-                                            <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
-                                                <ProgressBar className="progress" striped animated label={`${project?.stats?.completeness}%`} style={{ width: project?.stats?.completeness + '%' }} aria-valuenow={project?.stats?.completeness} aria-valuemin={0} aria-valuemax={100}/>
+                                    {(sections?.length || "") &&
+                                        <>{project?.stats?.completeness
+                                        ?   <div className="py-2 border-bottom">
+                                                <div style={{display: "flex", justifyContent: "space-between"}}>
+                                                <b>{getLoc("project_project_completeness")}: <abbr title={getLoc("project_project_approves_amount") + " " + project?.stats?.approveness + "%"}>{project?.stats?.completeness}%</abbr></b>
+                                                <b><abbr title={getLoc("project_project_plural_coef_desc")}>{getLoc("project_project_pc")}</abbr> = {project?.stats?.pc}</b>
+                                                </div>
+                                                <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
+                                                    <ProgressBar className="progress" variant="success" striped animated label={`${project?.stats?.approveness}%`} style={{ width: project?.stats?.approveness + '%' }} aria-valuenow={project?.stats?.approveness} aria-valuemin={0} aria-valuemax={100}/>
+                                                    <ProgressBar className="progress" striped animated label={`${project?.stats?.completeness}%`} style={{ width: project?.stats?.completeness - project?.stats?.approveness + '%' }} aria-valuenow={project?.stats?.completeness} aria-valuemin={0} aria-valuemax={100}/>
+                                                </div>
                                             </div>
-                                        </div>
-                                    :   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: <Spinner size="sm"/>%</b></div>
+                                        :   <div className="py-2 border-bottom"><b>{getLoc("project_project_completeness")}: <Spinner size="sm"/>%</b></div>
+                                        }</>
                                     }
                                     {user && <>
                                         { userRole
@@ -745,7 +762,7 @@ function Project(props) {
                                         </td>
                                         {section?.stats?.strings_amount > 0
                                             ?   <>{section.stats.last_update
-                                                    ? <td>{section.stats.strings_translated} / {section.stats.strings_amount} ({section.stats.completeness}%)</td>
+                                                    ? <td><abbr title={getLoc("project_project_approves_amount") + " " + section?.stats?.strings_approved}>{section.stats.strings_translated}</abbr> / {section.stats.strings_amount} ({section.stats.completeness}%)</td>
                                                     : <td><Spinner size="sm"/></td>
                                                 }</>
                                             :   <>   
