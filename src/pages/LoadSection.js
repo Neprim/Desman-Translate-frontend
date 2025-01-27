@@ -196,16 +196,14 @@ export default function LoadSection() {
                             }}
                             onDragEnter={(e) => {
                                 MoveElemTo(e.currentTarget.dataset.position)
-                                console.log(e.currentTarget.dataset.position)
                                 e.preventDefault()
                             }} 
                             onDrop={(e) => {
-                                console.log("hmmm")
                                 setStrings(drawStrings)
                                 e.preventDefault();
                             }}>
-                            <p className="mb-1 fw-semibold">{str.text}</p>
-                            <p className="text-body-secondary mt-0">{str.key && <i> {getLoc("load_section_string_key")}: {str.key}</i>}</p>
+                                <p className="mb-1 fw-semibold">{str.text}</p>
+                                <p className="text-body-secondary mt-0">{str.key && <i> {getLoc("load_section_string_key")}: {str.key}</i>}</p>
                             </Container>
                         )}
                     </div>

@@ -11,6 +11,7 @@ import Form from "react-bootstrap/Form"
 import placeholder from "../images/placeholder.png"
 import Spinner from 'react-bootstrap/Spinner';
 import Badge from "react-bootstrap/Badge"; 
+import ButtonGroup from "react-bootstrap/ButtonGroup"; 
 
 import { useEffect, useState, useContext } from "react"
 import { AuthContext } from "../AuthContext";
@@ -23,25 +24,28 @@ import { getLoc } from "../Translation"
 
 function Project(props) {
 
-    const { user } = useContext(AuthContext);
+    const { user } = useContext(AuthContext)
 
-    const [project, setProject] = useState(null);
-    const [dictionary, setDictionary] = useState([]);
-    const [members, setMembers] = useState([]);
-    const [sections, setSections] = useState(null);
-    const [roles, setRoles] = useState([]);
-    const [invites, setInvites] = useState([]);
+    const [project, setProject] = useState(null)
+    const [dictionary, setDictionary] = useState([])
+    const [members, setMembers] = useState([])
+    const [sections, setSections] = useState(null)
+    const [drawSections, setDrawSections] = useState(null)
+    const [roles, setRoles] = useState([])
+    const [invites, setInvites] = useState([])
     const [requestedInvites, setRequestedInvites] = useState(0)
-    const [userRole, setUserRole] = useState(null);
+    const [userRole, setUserRole] = useState(null)
     const [inviteError, setInviteError] = useState(null)
-    const [fieldInviteUser, setFieldInviteUser] = useState([]);
-    const [addChapterToggle, setAddChapterToggle] = useState(false);
+    const [fieldInviteUser, setFieldInviteUser] = useState([])
+    const [addChapterToggle, setAddChapterToggle] = useState(false)
+    const [rearrangeSectionsToggle, setRearrangeSectionsToggle] = useState(false)
+    const [draggedElem, setDraggedElem] = useState(-1)
 
     const [statistics, setStatistics] = useState(null)
     const [curStatSection, setCurStatSection] = useState("--summary--")
     const [statsLoading, setStatsLoading] = useState(false)
 
-    const [requestedInvite, setRequestedInvite] = useState(null);
+    const [requestedInvite, setRequestedInvite] = useState(null)
     
     const [loading, setLoading] = useState(false)
     
@@ -104,6 +108,9 @@ function Project(props) {
     async function GetSections() {
         try {
             let sections = await fetchSections(link["project_id"], false)
+            for (let i = 0; i < sections.length; i++) {
+                sections[i].num = i;
+            }
             setSections(sections)
             
             // sections = await fetchSections(link["project_id"], true)
@@ -252,6 +259,10 @@ function Project(props) {
     useEffect(() => {
         GetInvites()
     }, [userRole, project])
+
+    useEffect(() => {
+        setDrawSections(sections)
+    }, [sections])
 
     // TODO
     // Поменять всё на ref вместо getElementById
@@ -567,6 +578,40 @@ function Project(props) {
         
         setStatsLoading(false)
     }
+
+    function MoveElemTo(pos) {
+        pos = Number(pos)
+        if (draggedElem != -1) {
+            const elem = sections[draggedElem]
+            if (pos >= draggedElem) {
+                setDrawSections(sections.toSpliced(pos + 1, 0, elem).toSpliced(draggedElem, 1))
+            } else if (pos < draggedElem) {
+                setDrawSections(sections.toSpliced(draggedElem, 1).toSpliced(pos, 0, elem))
+            }
+        }
+    }
+
+    async function SaveRearrange() {
+        setLoading(true)
+        try {
+            await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections`, "PATCH", {sections: sections.map((sec) => sec.id)})
+            let secs = sections
+            for (let i = 0; i < sections.length; i++) {
+                secs[i].num = i;
+            }
+            setSections(secs)
+        } catch (err) {
+            console.log(err)
+        }
+        setLoading(false)
+        setRearrangeSectionsToggle(false)
+    }
+
+    async function ReturnRearrange() {
+        let secs = sections.sort((a, b) => a.num - b.num)
+        setSections(secs)
+        setRearrangeSectionsToggle(false)
+    }
     
     return (
         <>
@@ -660,9 +705,22 @@ function Project(props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sections?.map((section, index) =>
-                                    <tr key={section.id}>
-                                        <th scope="row">{index + 1}</th>
+                                {drawSections?.map((section, index) =>
+                                    <tr key={section.id} data-position={index} draggable={rearrangeSectionsToggle} onDragStart={(e) => {
+                                        setDraggedElem(e.currentTarget.dataset.position)
+                                    }} 
+                                    onDragOver={(e) => {
+                                        e.preventDefault()
+                                    }}
+                                    onDragEnter={(e) => {
+                                        MoveElemTo(e.currentTarget.dataset.position)
+                                        e.preventDefault()
+                                    }} 
+                                    onDrop={(e) => {
+                                        setSections(drawSections)
+                                        e.preventDefault();
+                                    }}>
+                                        <th scope="row">{section.num + 1}</th>
                                         <td>
                                         {!section.stats || section?.stats?.strings_amount > 0 &&
                                             <>
@@ -730,7 +788,13 @@ function Project(props) {
                             </tbody>
                         </table>
                         {userRole?.permissions?.can_manage_sections && 
-                            <Button type="submit" variant="primary" hidden={addChapterToggle} onClick={(e) => setAddChapterToggle(true)}>{getLoc("project_section_add")}</Button>
+                        <Dropdown as={ButtonGroup} hidden={addChapterToggle || rearrangeSectionsToggle}>
+                            <Button type="submit" variant="primary" onClick={(e) => setAddChapterToggle(true)}>{getLoc("project_section_add")}</Button>
+                            <Dropdown.Toggle split variant="primary" id="dropdown-split-basic" />
+                            <Dropdown.Menu>
+                                <Dropdown.Item onClick={(e) => setRearrangeSectionsToggle(true)}>{getLoc("project_rearrange_sections")}</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                         }
                         <Form className="mb-2" id="divAddChapter" hidden={!addChapterToggle}>
                             <Form.Control
@@ -750,6 +814,22 @@ function Project(props) {
                             </>
                             : <>
                                 <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> {getLoc("project_add_section")}</Button>
+                                <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel")}</Button>
+                            </>}
+                        </Form>
+                        <Form className="mb-2" id="divRearrangeSections" hidden={!rearrangeSectionsToggle}>
+                            <h5>{getLoc("project_move_sections_with_mouse")}</h5>
+                            {!loading  
+                            ? <>
+                                <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); SaveRearrange()}}>
+                                {getLoc("project_save")}
+                                </Button>
+                                <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); ReturnRearrange()}}>
+                                {getLoc("project_cancel")}
+                                </Button>
+                            </>
+                            : <>
+                                <Button className="me-2" type="submit" variant="primary" disabled><Spinner size="sm"/> {getLoc("project_save")}</Button>
                                 <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel")}</Button>
                             </>}
                         </Form>
