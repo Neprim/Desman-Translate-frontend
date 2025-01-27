@@ -190,6 +190,7 @@
     "project_settings_handle": "Unique handle",
     "project_settings_name": "Project name",
     "project_settings_description": "Project description",
+    "project_settings_recomendations": "Translators recomendations",
     "project_settings_cover_link": "Project cover link",
     "project_settings_source_lang": "Source language",
     "project_settings_target_lang": "Translation language",

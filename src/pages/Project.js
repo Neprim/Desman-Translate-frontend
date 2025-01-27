@@ -272,6 +272,7 @@ function Project(props) {
                 name:           document.getElementById("settings-name").value,
                 handle:         document.getElementById("settings-handle").value,
                 description:    document.getElementById("settings-description").value,
+                recomendations: document.getElementById("settings-recomendations").value,
                 source_lang:    document.getElementById("settings-source-lang").value,
                 target_lang:    document.getElementById("settings-target-lang").value,
                 visibility:     document.getElementById("settings-access").value,
@@ -635,8 +636,12 @@ function Project(props) {
                             <Col xs={7}>
                                 <img src={project?.cover_url || placeholder} height={250} width={250} alt={getLoc("project_project_cover_stub")} style={{ float: 'left', padding: '10px', margin: '10px 10px 0px 0px' }} className="border rounded" />
                                 <Stack className="text-left text-break">
-                                    <h3>{getLoc("project_project_description")}</h3>
+                                    <h4>{getLoc("project_project_description")}</h4>
                                     <p style={{fontSize: "smaller",  whiteSpace: "pre-wrap" }}>{project?.description}</p>
+                                    {project?.recomendations && <>
+                                        <h4>{getLoc("project_project_recomendations")}</h4>
+                                        <p style={{fontSize: "smaller",  whiteSpace: "pre-wrap" }}>{project?.recomendations}</p>
+                                    </>}
                                 </Stack>
                             </Col>
                             {project &&
@@ -1151,7 +1156,9 @@ function Project(props) {
                                         <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_name")}</label>
                                         <input type="text" className="form-control" id="settings-name" defaultValue={project.name} minLength={4} maxLength={100} />
                                         <label htmlFor="settings-description" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_description")}</label>
-                                        <textarea className="form-control" aria-label="With textarea" id="settings-description" maxLength={1000} defaultValue={project.description} />
+                                        <textarea className="form-control" id="settings-description" maxLength={400} defaultValue={project.description} />
+                                        <label htmlFor="settings-description" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_recomendations")}</label>
+                                        <textarea className="form-control" id="settings-recomendations" maxLength={400} defaultValue={project.recomendations} />
                                         <label htmlFor="settings-cover" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_cover_link")}</label>
                                         <input type="text" className="form-control" id="settings-cover" defaultValue={project.cover_url} maxLength={1000} />
                                         <label htmlFor="settings-source-lang" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_source_lang")}</label>

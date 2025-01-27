@@ -102,7 +102,8 @@
 
     "project_project_tab": "Проект",
     "project_project_cover_stub": "Тут должна быть обложка проекта",
-    "project_project_description": "Описание проекта",
+    "project_project_description": "Описание",
+    "project_project_recomendations": "Указания/советы переводчикам",
     "project_project_information": "Информация",
     "project_project_source_lang": "Язык оригинала",
     "project_project_target_lang": "Язык перевода",
@@ -190,6 +191,7 @@
     "project_settings_handle": "Уникальная ссылка",
     "project_settings_name": "Название проекта",
     "project_settings_description": "Описание проекта",
+    "project_settings_recomendations": "Указания/советы переводчикам",
     "project_settings_cover_link": "Ссылка на обложку проекта",
     "project_settings_source_lang": "Язык оригинала",
     "project_settings_target_lang": "Язык перевода",
