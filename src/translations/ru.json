@@ -1,5 +1,6 @@
 {
     "some_error": "Какая-то ошибка",
+    "go_back": "Назад",
 
     "signup_signup": "Регистрация",
     "signup_email": "Электронная почта",
@@ -131,6 +132,7 @@
     "project_project_pc": "КП",
     "project_section_activity": "Активность",
     "project_section_upload_strings": "Загрузить строки",
+    "project_section_add_strings": "Добавить строки",
     "project_section_download_translation": "Скачать перевод",
     "project_section_download_translation_no_strings": "А строк то нема",
     "project_section_upload_translation": "Загрузить перевод",
@@ -146,6 +148,7 @@
     "project_section_year_ago": "Больше года назад",
     "project_section_add": "Добавить раздел",
     "project_rearrange_sections": "Изменить порядок разделов",
+    "project_rename_sections": "Переименовать разделы",
     "project_save": "Сохранить",
     "project_move_sections_with_mouse": "Перемещайте разделы при помощи мыши",
     "project_add_section": "Добавить",
@@ -228,6 +231,7 @@
     "my_projects_accept": "Принять",
 
     "load_section_load_strings_sections": "Загрузка строк для раздела ",
+    "load_section_attention": "Строки добавляются в конец раздела, и в случае с JSON не проверяется дублирование ключей. Так что осторожней.",
     "load_section_type": "Тип строк",
     "load_section_type_text": "Текст",
     "load_section_type_json": "JSON",

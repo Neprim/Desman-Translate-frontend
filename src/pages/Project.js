@@ -39,6 +39,7 @@ function Project(props) {
     const [fieldInviteUser, setFieldInviteUser] = useState([])
     const [addChapterToggle, setAddChapterToggle] = useState(false)
     const [rearrangeSectionsToggle, setRearrangeSectionsToggle] = useState(false)
+    const [renameSectionsToggle, setRenameSectionsToggle] = useState(false)
     const [draggedElem, setDraggedElem] = useState(-1)
 
     const [statistics, setStatistics] = useState(null)
@@ -602,26 +603,41 @@ function Project(props) {
         }
     }
 
-    async function SaveRearrange() {
+    async function SaveSectionsChanges() {
         setLoading(true)
         try {
-            await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections`, "PATCH", {sections: sections.map((sec) => sec.id)})
-            let secs = sections
-            for (let i = 0; i < sections.length; i++) {
-                secs[i].num = i;
+            if (rearrangeSectionsToggle) {
+                await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections`, "PATCH", {sections: sections.map((sec) => sec.id)})
+                let secs = sections
+                for (let i = 0; i < sections.length; i++) {
+                    secs[i].num = i;
+                }
+                setSections(secs)
             }
-            setSections(secs)
+            if (renameSectionsToggle) {
+                let secs = sections
+                for (let i = 0; i < sections.length; i++) {
+                    if (document.getElementById(`sec_name_${sections[i].id}`).value != sections[i].name) {
+                        secs[i].name = (await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sections[i].id}`, "PATCH", {
+                            name: document.getElementById(`sec_name_${sections[i].id}`).value
+                        })).name
+                    }
+                }
+                setSections(secs)
+            }
         } catch (err) {
             console.log(err)
         }
         setLoading(false)
         setRearrangeSectionsToggle(false)
+        setRenameSectionsToggle(false)
     }
 
-    async function ReturnRearrange() {
+    async function CancelSectionsChanges() {
         let secs = sections.sort((a, b) => a.num - b.num)
         setSections(secs)
         setRearrangeSectionsToggle(false)
+        setRenameSectionsToggle(false)
     }
     
     return (
@@ -665,7 +681,7 @@ function Project(props) {
                                         <>{project?.stats?.completeness
                                         ?   <div className="py-2 border-bottom">
                                                 <div style={{display: "flex", justifyContent: "space-between"}}>
-                                                <b>{getLoc("project_project_completeness")}: <abbr title={getLoc("project_project_approves_amount") + " " + project?.stats?.approveness + "%"}>{project?.stats?.completeness}%</abbr></b>
+                                                <b>{getLoc("project_project_completeness")}: <span title={getLoc("project_project_approves_amount") + " " + project?.stats?.approveness + "%"}>{project?.stats?.completeness}%</span></b>
                                                 <b><abbr title={getLoc("project_project_plural_coef_desc")}>{getLoc("project_project_pc")}</abbr> = {project?.stats?.pc}</b>
                                                 </div>
                                                 <div className="progress-stacked" style={{ margin: '10px 0px 5px 0px' }}>
@@ -747,10 +763,19 @@ function Project(props) {
                                         {!section.stats || section?.stats?.strings_amount > 0 &&
                                             <>
                                             {user 
-                                                ?
-                                                    <Link to={`/projects/${project.id}/editor/${section.id.toString(16)}`} className="link-primary">
-                                                        {section.name}
-                                                    </Link>
+                                                ? <> {renameSectionsToggle 
+                                                        ?   <Form.Control className="d-flex align-items-start"
+                                                                type="text"
+                                                                className="mb-2"
+                                                                defaultValue={section.name}
+                                                                id={`sec_name_${section.id}`}
+                                                            >
+                                                            </Form.Control>
+                                                        :   <Link to={`/projects/${project.id}/editor/${section.id.toString(16)}`} className="link-primary">
+                                                                {section.name}
+                                                            </Link>
+                                                    }
+                                                </>
                                                 :   <>{section.name}</>
                                             }
                                             </>
@@ -762,7 +787,7 @@ function Project(props) {
                                         </td>
                                         {section?.stats?.strings_amount > 0
                                             ?   <>{section.stats.last_update
-                                                    ? <td><abbr title={getLoc("project_project_approves_amount") + " " + section?.stats?.strings_approved}>{section.stats.strings_translated}</abbr> / {section.stats.strings_amount} ({section.stats.completeness}%)</td>
+                                                    ? <td><span title={getLoc("project_project_approves_amount") + " " + section?.stats?.strings_approved}>{section.stats.strings_translated}</span> / {section.stats.strings_amount} ({section.stats.completeness}%)</td>
                                                     : <td><Spinner size="sm"/></td>
                                                 }</>
                                             :   <>   
@@ -784,6 +809,11 @@ function Project(props) {
                                                     <FaBars/>
                                                 </Dropdown.Toggle>
                                                 <Dropdown.Menu>
+                                                {userRole?.permissions?.can_manage_sections && 
+                                                    <Dropdown.Item onClick={(e) => window.location.href = `/projects/${project.id}/sections/${section.id}/load_strings`}>
+                                                        {getLoc("project_section_add_strings")}
+                                                    </Dropdown.Item>
+                                                }
                                                 <Dropdown.Item onClick={(e) => DownloadSectionTranslation(index)}>
                                                 {getLoc("project_section_download_translation")}
                                                 </Dropdown.Item>
@@ -810,10 +840,11 @@ function Project(props) {
                             </tbody>
                         </table>
                         {userRole?.permissions?.can_manage_sections && 
-                        <Dropdown as={ButtonGroup} hidden={addChapterToggle || rearrangeSectionsToggle}>
+                        <Dropdown as={ButtonGroup} hidden={addChapterToggle || rearrangeSectionsToggle || renameSectionsToggle}>
                             <Button type="submit" variant="primary" onClick={(e) => setAddChapterToggle(true)}>{getLoc("project_section_add")}</Button>
                             <Dropdown.Toggle split variant="primary" id="dropdown-split-basic" />
                             <Dropdown.Menu>
+                                <Dropdown.Item onClick={(e) => setRenameSectionsToggle(true)}>{getLoc("project_rename_sections")}</Dropdown.Item>
                                 <Dropdown.Item onClick={(e) => setRearrangeSectionsToggle(true)}>{getLoc("project_rearrange_sections")}</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
@@ -839,14 +870,14 @@ function Project(props) {
                                 <Button type="cancel" variant="outline-secondary" disabled><Spinner size="sm"/> {getLoc("project_cancel")}</Button>
                             </>}
                         </Form>
-                        <Form className="mb-2" id="divRearrangeSections" hidden={!rearrangeSectionsToggle}>
-                            <h5>{getLoc("project_move_sections_with_mouse")}</h5>
+                        <Form className="mb-2" hidden={!(rearrangeSectionsToggle || renameSectionsToggle)}>
+                            {rearrangeSectionsToggle && <h5>{getLoc("project_move_sections_with_mouse")}</h5>}
                             {!loading  
                             ? <>
-                                <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); SaveRearrange()}}>
+                                <Button className="me-2" type="submit" variant="primary" onClick={(e) => {e.preventDefault(); SaveSectionsChanges()}}>
                                 {getLoc("project_save")}
                                 </Button>
-                                <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); ReturnRearrange()}}>
+                                <Button type="cancel" variant="outline-secondary" onClick={(e) => {e.preventDefault(); CancelSectionsChanges()}}>
                                 {getLoc("project_cancel")}
                                 </Button>
                             </>

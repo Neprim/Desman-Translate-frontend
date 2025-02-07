@@ -141,6 +141,9 @@ export default function UploadProjectTranslations() {
     return (
         <>
             <Header />
+            <div style={{margin: "10px", position: "absolute"}}>
+                <Button variant="outline-dark" onClick={() => {window.location.href = `/projects/${link["project_id"]}`}}>{getLoc("go_back")}</Button>
+            </div>
             <Container
                 className="text-left mt-5 mx-auto"
                 style={{

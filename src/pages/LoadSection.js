@@ -142,6 +142,9 @@ export default function LoadSection() {
     return (
         <>
             <Header />
+            <div style={{margin: "10px", position: "absolute"}}>
+                <Button variant="outline-dark" onClick={() => {window.location.href = `/projects/${link["project_id"]}`}}>{getLoc("go_back")}</Button>
+            </div>
             <Container
                 className="text-left mt-5 mx-auto"
                 style={{
@@ -151,14 +154,31 @@ export default function LoadSection() {
             >
                 {section && !strings &&
                     <>
+                    {section.type &&
+                        <p className="text-middle text-break"><i>{getLoc("load_section_attention")}</i></p>
+                    }
                     <h1 style={{ marginBottom: 20 }} className="text-middle text-break">{getLoc("load_section_load_strings_sections")}"{section.name}"</h1>
                     <Form>
                         <Form.Group>
-                            <Form.Label htmlFor="settings-strings-type" className="mt-2">{getLoc("load_section_type")}</Form.Label>
-                            <Form.Select defaultValue="text" id="settings-strings-type">
-                                <option value="text">{getLoc("load_section_type_text")}</option>
-                                <option value="json">{getLoc("load_section_type_json")}</option>
-                            </Form.Select>
+                            {section.type 
+                            ? <>
+                                <Form.Label htmlFor="settings-strings-type" className="mt-2">{getLoc("load_section_type")}: {
+                                    section.type == 'text'
+                                    ? getLoc("upload_section_translations_type_text")
+                                    : getLoc("upload_section_translations_type_json")    
+                                }</Form.Label>
+                                <Form.Select hidden defaultValue={section.type} id="settings-strings-type">
+                                    <option value="text">{getLoc("load_section_type_text")}</option>
+                                    <option value="json">{getLoc("load_section_type_json")}</option>
+                                </Form.Select>
+                            </>
+                            : <>
+                                <Form.Label htmlFor="settings-strings-type" className="mt-2">{getLoc("load_section_type")}</Form.Label>
+                                <Form.Select defaultValue="text" id="settings-strings-type">
+                                    <option value="text">{getLoc("load_section_type_text")}</option>
+                                    <option value="json">{getLoc("load_section_type_json")}</option>
+                                </Form.Select>
+                            </>}
                     </Form.Group>
                     <Form.Group>
                         <Form.Label htmlFor="settings-loaded-strings" className="form-label mt-2">{getLoc("load_section_load_text")}</Form.Label>

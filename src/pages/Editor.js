@@ -378,13 +378,8 @@ export default function Editor() {
 	}, [inputTranslation])
 
 	function UpdateDrawStrings() {
-		console.log("Ну вроде обновляются")
 		setDrawStrings(SortStrings(FilterStrings(strings)))
 	}
-
-	useEffect(() => {
-		console.log(drawStrings)
-	}, [drawStrings])
 
 	function FilterStrings(strs) {
 		let draws = strs.filter((str) => {
@@ -644,7 +639,6 @@ export default function Editor() {
 				max_tr_length: str.max_tr_length
 			})
 			
-			console.log(strings[str_index])
 			setCurString(strings[str_index])
 			UpdateDrawStrings()
 		} catch (err) {

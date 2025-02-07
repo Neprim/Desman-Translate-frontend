@@ -1,5 +1,6 @@
 {
     "some_error": "Some error",
+    "go_back": "Back",
 
     "signup_signup": "Sign up",
     "signup_email": "Email",
@@ -130,6 +131,7 @@
     "project_section_completeness": "Completeness",
     "project_section_activity": "Activity",
     "project_section_upload_strings": "Upload strings",
+    "project_section_add_strings": "Add strings",
     "project_section_download_translation": "Download translation",
     "project_section_download_translation_no_strings": "No strings",
     "project_section_upload_translation": "Upload translation",
@@ -145,6 +147,7 @@
     "project_section_year_ago": "More than a year ago",
     "project_section_add": "Add section",
     "project_rearrange_sections": "Rearrange sections",
+    "project_rename_sections": "Rename sections",
     "project_save": "Save",
     "project_move_sections_with_mouse": "Move sections via mouse",
     "project_add_section": "Add",
@@ -227,6 +230,7 @@
     "my_projects_accept": "Accept",
 
     "load_section_load_strings_sections": "Strings uploading for section ",
+    "load_section_attention": "Strings are appended to the end of the section, and in case of JSON there are no checks for duplicating keys. So be aware.",
     "load_section_type": "Strings type",
     "load_section_type_text": "Text",
     "load_section_type_json": "JSON",
