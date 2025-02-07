@@ -19,6 +19,8 @@ import Stack from 'react-bootstrap/Stack';
 import CloseButton from 'react-bootstrap/CloseButton';
 import Spinner from 'react-bootstrap/Spinner';
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+import Tab from "react-bootstrap/Tab"
+import Tabs from "react-bootstrap/Tabs"
 import { getLoc } from "../Translation"
 
 
@@ -962,38 +964,49 @@ export default function Editor() {
 
 						
 						<Dropdown>
-							<LinkWithTooltip tooltip={getLoc("editor_dictionary")} id="tooltip-settings" where="bottom">
+							<LinkWithTooltip tooltip={getLoc("editor_dictionary_recomendations")} id="tooltip-settings" where="bottom">
 								<Dropdown.Toggle variant="outline-primary" style={{ marginLeft: "10px" }} bsPrefix="no-damn-caret">
 									<FaBook style={{ marginBottom: "3px" }} />
 								</Dropdown.Toggle>
 							</LinkWithTooltip>
 							<Form>
 							<Dropdown.Menu style={{padding: "15px 15px 15px", minWidth: "400px"}}>
-							<table className="table align-items-center">
-								<thead>
-									<tr>
-										<th scope="col">{getLoc("editor_dictionary_word")}</th>
-										<th scope="col">{getLoc("editor_dictionary_translation")}</th>
-										<th scope="col">{getLoc("editor_dictionary_description")}</th>
-									</tr>
-								</thead>
-								<tbody>
-									{dictionary.map((dict, index) =>
-										<tr key={dict.word}>
-											<td>{dict.word}</td>
-											<td>{dict.translate}</td>
-											<td>{dict.desc}</td>
-										</tr>
-									)}
-								</tbody>
-							</table>
-								{userRole?.permissions?.can_manage_strings &&
-									<Link to={`/projects/${link["project_id"]}#dictionary`} className="link-primary">
-										<Button type="submit" variant="primary">
-											{getLoc("editor_go_to_dictionary")}
-										</Button>
-									</Link>
-								}
+								<Tabs defaultActiveKey="dictionary">
+									<Tab eventKey="dictionary" title={getLoc("editor_dictionary")}>
+										<table className="table align-items-center">
+											<thead>
+												<tr>
+													<th scope="col">{getLoc("editor_dictionary_word")}</th>
+													<th scope="col">{getLoc("editor_dictionary_translation")}</th>
+													<th scope="col">{getLoc("editor_dictionary_description")}</th>
+												</tr>
+											</thead>
+											<tbody>
+												{dictionary.map((dict, index) =>
+													<tr key={dict.word}>
+														<td>{dict.word}</td>
+														<td>{dict.translate}</td>
+														<td>{dict.desc}</td>
+													</tr>
+												)}
+											</tbody>
+										</table>
+										{userRole?.permissions?.can_manage_strings &&
+											<Link to={`/projects/${link["project_id"]}#dictionary`} className="link-primary">
+												<Button type="submit" variant="primary">
+													{getLoc("editor_go_to_dictionary")}
+												</Button>
+											</Link>
+										}
+									</Tab>
+									{project?.recomendations && 
+										<Tab eventKey="recomendations" title={getLoc("editor_recomendations")}>
+											<div style={{margin: "5px", whiteSpace: "pre-wrap"}}>
+												{project?.recomendations}
+											</div>
+										</Tab>
+                                    }
+								</Tabs>
 							</Dropdown.Menu>
 							</Form>
 						</Dropdown>
