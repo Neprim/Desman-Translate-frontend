@@ -764,9 +764,8 @@ function Project(props) {
                                             <>
                                             {user 
                                                 ? <> {renameSectionsToggle 
-                                                        ?   <Form.Control className="d-flex align-items-start"
+                                                        ?   <Form.Control className="d-flex align-items-start mb-2"
                                                                 type="text"
-                                                                className="mb-2"
                                                                 defaultValue={section.name}
                                                                 id={`sec_name_${section.id}`}
                                                             >

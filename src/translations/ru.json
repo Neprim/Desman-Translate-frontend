@@ -303,6 +303,7 @@
     "editor_filter_key_contains": "Ключ содержит",
     "editor_filter_orig_contains": "Оригинал содержит",
     "editor_filter_tr_contains": "Перевод содержит",
+    "editor_filter_only_current_tr": "Только текущие переводы",
     "editor_filter_apply": "Применить",
     "editor_filter_reset": "Сбросить",
     "editor_sort": "Сортировка",

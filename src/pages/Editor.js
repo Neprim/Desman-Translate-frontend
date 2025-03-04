@@ -269,6 +269,7 @@ export default function Editor() {
 		setKeyChecked(false)
 		setOrigChecked(false)
 		setTransChecked(false)
+		setOnlyCurrentChecked(false)
 		setUserChecked(false)
 
 		const strs = strings
@@ -409,6 +410,8 @@ export default function Editor() {
 								flag = true
 								break
 							}
+							if (onlyCurrentChecked)
+								break
 						}
 						if (!flag)
 							return false
@@ -532,6 +535,8 @@ export default function Editor() {
 							})
 
 							tr.draw_text = draw_text
+							if (onlyCurrentChecked)
+								break
 						}
 					}
 				}
@@ -793,6 +798,7 @@ export default function Editor() {
 	const [keyChecked, setKeyChecked] = useState(false)
 	const [origChecked, setOrigChecked] = useState(false)
 	const [transChecked, setTransChecked] = useState(false)
+	const [onlyCurrentChecked, setOnlyCurrentChecked] = useState(false)
 	const [userChecked, setUserChecked] = useState(false)
 
 	function ChangeValueAndSetChecked(value, func_v, func_c) {
@@ -874,6 +880,10 @@ export default function Editor() {
 									<InputGroup.Checkbox id='filter-tr-checkbox' checked={transChecked} onChange={(e) => {setTransChecked(e.target.checked)}}/>
 									<Form.Control id='filter-tr-value' value={transValue} onChange={(e) => {ChangeValueAndSetChecked(e.target.value, setTransValue, setTransChecked)}} placeholder={getLoc("editor_filter_tr_contains")} />
 								</InputGroup>
+								<InputGroup style={{ marginBottom: "5px" }} hidden={!transChecked}>
+									<InputGroup.Checkbox id='filter-tr-checkbox' checked={onlyCurrentChecked} onChange={(e) => {setOnlyCurrentChecked(e.target.checked)}}/>
+									<Form.Text style={{ margin: "5px" }}>{getLoc("editor_filter_only_current_tr")}</Form.Text>
+								</InputGroup>
 								<ButtonToolbar className="justify-content-around">
 									<Button type="submit" variant='primary' onClick={(e) => {
 										e.preventDefault()
@@ -902,6 +912,7 @@ export default function Editor() {
 										setKeyChecked(false)
 										setOrigChecked(false)
 										setTransChecked(false)
+										setOnlyCurrentChecked(false)
 										setUserChecked(false)
 
 										UpdateFilters([])

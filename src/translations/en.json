@@ -302,6 +302,7 @@
     "editor_filter_key_contains": "Key contains",
     "editor_filter_orig_contains": "Original contains",
     "editor_filter_tr_contains": "Translation contains",
+    "editor_filter_only_current_tr": "Only current translation",
     "editor_filter_apply": "Apply",
     "editor_filter_reset": "Reset",
     "editor_sort": "Sorting",
