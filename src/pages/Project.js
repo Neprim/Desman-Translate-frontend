@@ -284,8 +284,8 @@ function Project(props) {
                 handle:         document.getElementById("settings-handle").value,
                 description:    document.getElementById("settings-description").value,
                 recomendations: document.getElementById("settings-recomendations").value,
-                source_lang:    document.getElementById("settings-source-lang").value,
-                target_lang:    document.getElementById("settings-target-lang").value,
+                // source_lang:    document.getElementById("settings-source-lang").value,
+                // target_lang:    document.getElementById("settings-target-lang").value,
                 visibility:     document.getElementById("settings-access").value,
                 cover_url:      document.getElementById("settings-cover").value,
             })
@@ -674,8 +674,8 @@ function Project(props) {
                             {project &&
                                 <Col className="border-top border-start rounded py-3" style={{ marginTop: '5px', marginLeft: '0px', marginRight: '20px', paddingLeft: '20px' }}>
                                     <h3 className="py-2 border-bottom" style={{ marginTop: '-10px' }}>{getLoc("project_project_information")}</h3>
-                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_source_lang")}:</b> {getLoc("lang_" + project?.source_lang)}</div>
-                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div>
+                                    {/* <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_source_lang")}:</b> {getLoc("lang_" + project?.source_lang)}</div>
+                                    <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div> */}
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString(localStorage.getItem("lang"))}</div>
                                     {/* <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div> */}
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_visibility")}:</b> {getLoc("project_project_visibility_" + project?.visibility)}</div>
@@ -1211,7 +1211,7 @@ function Project(props) {
                                         <label htmlFor="settings-cover" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_cover_link")}</label>
                                         <input type="text" className="form-control" id="settings-cover" defaultValue={project.cover_url} maxLength={1000} />
                                         <label htmlFor="settings-source-lang" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_source_lang")}</label>
-                                        <select className="form-select" defaultValue={project.source_lang} id="settings-source-lang">
+                                        {/* <select className="form-select" defaultValue={project.source_lang} id="settings-source-lang">
                                             <option value="ru">{getLoc("lang_ru")}</option>
                                             <option value="en">{getLoc("lang_en")}</option>
                                         </select>
@@ -1219,7 +1219,7 @@ function Project(props) {
                                         <select className="form-select" defaultValue={project.target_lang} id="settings-target-lang">
                                             <option value="ru">{getLoc("lang_ru")}</option>
                                             <option value="en">{getLoc("lang_en")}</option>
-                                        </select>
+                                        </select> */}
                                         <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_visibility")}</label>
                                         <select className="form-select" defaultValue={project?.visibility} id="settings-access">
                                             <option value="public">{getLoc("project_settings_visibility_public")}</option>

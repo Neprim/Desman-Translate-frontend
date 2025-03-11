@@ -42,7 +42,8 @@ export default function Create() {
 	console.log(localStorage.getItem("lang"))
 
 	const [langSource, setLangSource] = useState("en")
-	const [langTarget, setLangTarget] = useState(localStorage.getItem("lang") || "ru")
+	// const [langTarget, setLangTarget] = useState(localStorage.getItem("lang") || "ru")
+	const [langTarget, setLangTarget] = useState("en")
 
 	const [visibility, setVisibility] = useState("private")
 
@@ -186,7 +187,7 @@ export default function Create() {
                         </Form.Text>}
 					</Form.Group>
 
-					<Form.Group className="mb-3">
+					{/* <Form.Group className="mb-3">
 						<Form.Label htmlFor="inputSrcLang">{getLoc("create_project_source_lang")}</Form.Label>
 						<Form.Select id="inputSrcLang" defaultValue={langSource} onChange={(e) => setLangSource(e.target.value)}>
 							<option value="ru">{getLoc("lang_ru")}</option>
@@ -200,7 +201,7 @@ export default function Create() {
 						<option value="ru">{getLoc("lang_ru")}</option>
 							<option value="en">{getLoc("lang_en")}</option>
 						</Form.Select>
-					</Form.Group>
+					</Form.Group> */}
 
 					<Form.Group className="mb-3">
 						<Form.Label htmlFor="inputDesc">{getLoc("create_project_cover")}</Form.Label>
