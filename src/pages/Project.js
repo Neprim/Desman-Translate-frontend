@@ -677,7 +677,8 @@ function Project(props) {
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_source_lang")}:</b> {getLoc("lang_" + project?.source_lang)}</div>
                                     <div className="py-2 border-bottom" style={{ marginTop: '-8px' }}><b>{getLoc("project_project_target_lang")}:</b> {getLoc("lang_" + project?.target_lang)}</div>
                                     <div className="py-2 border-bottom"><b>{getLoc("project_project_creation_date")}:</b> {new Date(project?.created_at).toLocaleDateString(localStorage.getItem("lang"))}</div>
-                                    <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div>
+                                    {/* <div className="py-2 border-bottom"><b>{getLoc("project_project_status")}:</b> {getLoc("project_project_status_" + project?.status)}</div> */}
+                                    <div className="py-2 border-bottom"><b>{getLoc("project_project_visibility")}:</b> {getLoc("project_project_visibility_" + project?.visibility)}</div>
                                     {(sections?.length || "") &&
                                         <>{project?.stats?.completeness
                                         ?   <div className="py-2 border-bottom">
@@ -716,7 +717,7 @@ function Project(props) {
                                             {getLoc("project_upload_translation")}
                                         </Button>
                                     }
-                                    {user && sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
+                                    {(userRole?.permissions?.can_translate || project?.visibility == 'public') && sections?.length > 0 && sections.reduce((sum, sec) => sum + (sec.type != 'json'), 0) == 0 &&
                                         <Button onClick={(e) => DownloadProjectTranslation()} disabled={loading}>
                                             {loading && <Spinner size="sm"/>}
                                             {getLoc("project_download_translation")}
@@ -726,7 +727,7 @@ function Project(props) {
                             }
                         </Row>
                         <h2>{getLoc("project_sections")}</h2>
-                        {user &&
+                        {user && (userRole?.permissions?.can_translate || project?.visibility == 'public') &&
                             <Link to={`/projects/${link["project_id"]}/editor`} className="link-primary">
                                 <Button type="submit" variant="primary">
                                     {getLoc("project_editor")}
@@ -763,7 +764,7 @@ function Project(props) {
                                         <td>
                                         {!section.stats || section?.stats?.strings_amount > 0 &&
                                             <>
-                                            {user 
+                                            {user && (userRole?.permissions?.can_translate || project?.visibility == 'public')
                                                 ? <> {renameSectionsToggle 
                                                         ?   <Form.Control className="d-flex align-items-start mb-2"
                                                                 type="text"
@@ -803,7 +804,7 @@ function Project(props) {
                                             : <span><Spinner size="sm"/></span>
                                         }</td>
                                         <td>
-                                        {user &&
+                                        {user && (userRole?.permissions?.can_translate || project?.visibility == 'public') &&
                                             <Dropdown>
                                                 <Dropdown.Toggle data-toggle="dropdown">
                                                     <FaBars/>
@@ -887,7 +888,7 @@ function Project(props) {
                             </>}
                         </Form>
                     </Tab>
-                    {user &&
+                    {user && (userRole?.permissions?.can_translate || project?.visibility == 'public') &&
                         <Tab eventKey="dictionary" title={getLoc("project_dictionary_tab")}>
                             <div className="row">
                                 <div className="col-8">
@@ -1220,9 +1221,10 @@ function Project(props) {
                                             <option value="en">{getLoc("lang_en")}</option>
                                         </select>
                                         <label htmlFor="settings-access" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_settings_visibility")}</label>
-                                        <select className="form-select" defaultValue={project.visibility} id="settings-access">
-                                            <option value="private">{getLoc("project_settings_visibility_private")}</option>
+                                        <select className="form-select" defaultValue={project?.visibility} id="settings-access">
                                             <option value="public">{getLoc("project_settings_visibility_public")}</option>
+                                            <option value="private">{getLoc("project_settings_visibility_private")}</option>
+                                            <option value="closed">{getLoc("project_settings_visibility_closed")}</option>
                                         </select>
                                     </form>
                                     <Button variant="primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>{getLoc("project_settings_save")}</Button>

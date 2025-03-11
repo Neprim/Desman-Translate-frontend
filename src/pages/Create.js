@@ -212,13 +212,13 @@ export default function Create() {
 
 					<Form.Group className="mb-3">
 						<Form.Label className="mt-2">{getLoc("create_project_visibility")}</Form.Label>
-						<Form.Select id="inputVisibility" defaultValue="private" onChange={(e) => setVisibility(e.target.value)}>
-							<option value="private">{getLoc("create_project_visibility_public")}</option>
+						<Form.Select id="inputVisibility" defaultValue="public" onChange={(e) => setVisibility(e.target.value)}>
 							<option value="public">{getLoc("create_project_visibility_private")}</option>
+							<option value="private">{getLoc("create_project_visibility_public")}</option>
+							<option value="closed">{getLoc("create_project_visibility_closed")}</option>
 						</Form.Select>
 						<Form.Text id="visibilityDesc">
-							<div>{getLoc("create_project_visibility_public_description")}</div>
-							<div>{getLoc("create_project_visibility_private_description")}</div>
+							<div>{getLoc(`create_project_visibility_${visibility}_description`)}</div>
                         </Form.Text>
 					</Form.Group>
 					
