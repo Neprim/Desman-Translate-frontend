@@ -99,6 +99,7 @@ function Projects() {
     return (
         <>
             <Header />
+            <title>{getLoc("my_projects_title")}</title>
 
             <div className="container" style={{ marginTop: 50 }}>
 

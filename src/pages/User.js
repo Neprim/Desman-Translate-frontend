@@ -103,6 +103,7 @@ export default function User() {
     return (
         <>
             <Header />
+            <title>{user?.username || getLoc("userpage_title")}</title>
 
             <Container className="container mt-5">
                 <h1 className="my-4">{user?.username}</h1>

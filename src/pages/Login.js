@@ -60,6 +60,7 @@ export default function Login() {
     return (
         <>
             <Header />
+            <title>{getLoc("signin_title")}</title>
             <Container
                 className="text-left mt-5 mx-auto"
                 style={{

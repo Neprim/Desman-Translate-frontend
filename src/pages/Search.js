@@ -42,6 +42,7 @@ function Search() {
     return (
         <>
             <Header />
+            <title>{getLoc("search_title")}</title>
             <Container style={{ marginTop: 20, paddingRight: "5%" }}>
                 <label htmlFor="settings-name" className="form-label" style={{ marginTop: '10px' }}>{getLoc("search_name")}</label>
                 <input type="text" className="form-control" id="settings-name" maxLength={100} onChange={(e) => {FindProjects(e.target.value)}} />

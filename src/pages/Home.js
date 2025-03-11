@@ -79,6 +79,7 @@ function Home() {
     return (
         <>
             <Header />
+            <title>{getLoc("homepage_title")}</title>
             <Container className="mt-5">
                 <Row>
                     <Col sm={6} className="text-left pe-5">

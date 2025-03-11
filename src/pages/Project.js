@@ -643,6 +643,7 @@ function Project(props) {
     return (
         <>
             <Header />
+            <title>{project?.name || getLoc("project_title")}</title>
             <Container style={{ marginTop: 50 }}>
                 <h1 className="my-4 text-break">{project?.name}</h1>
                 <Tabs

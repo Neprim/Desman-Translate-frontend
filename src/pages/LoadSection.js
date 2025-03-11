@@ -142,6 +142,7 @@ export default function LoadSection() {
     return (
         <>
             <Header />
+            <title>{getLoc("load_section_title")}"{section?.name}"</title>
             <div style={{margin: "10px", position: "absolute"}}>
                 <Button variant="outline-dark" onClick={() => {window.location.href = `/projects/${link["project_id"]}`}}>{getLoc("go_back")}</Button>
             </div>

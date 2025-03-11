@@ -812,6 +812,7 @@ export default function Editor() {
 
 	return (
 		<>
+		<title>{project?.name || getLoc("project_project")} - {getLoc("editor_title")}</title>
 		<div style={{ height: "100vh" }}>
 			{/* <header className="fixed-top" expand="lg"> */}
 				<Container fluid className="bg-white py-1 border-bottom d-flex flex-wrap justify-content-between">

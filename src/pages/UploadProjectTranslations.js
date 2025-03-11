@@ -141,6 +141,7 @@ export default function UploadProjectTranslations() {
     return (
         <>
             <Header />
+            <title>{getLoc("upload_project_translations_title")}"{project?.name}"</title>
             <div style={{margin: "10px", position: "absolute"}}>
                 <Button variant="outline-dark" onClick={() => {window.location.href = `/projects/${link["project_id"]}`}}>{getLoc("go_back")}</Button>
             </div>

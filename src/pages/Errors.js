@@ -8,6 +8,7 @@ export function Notfound() {
     return (
         <>
             <Header />
+            <title>{getLoc("errors_404")}</title>
             <Container>
                 <h2 className="mt-5">{getLoc("errors_404")}</h2>
                 <br />
@@ -22,6 +23,7 @@ export function Forbidden() {
     return (
         <>
             <Header />
+            <title>{getLoc("errors_403")}</title>
             <Container>
                 <h2 className="mt-5">{getLoc("errors_403")}</h2>
                 <br />
@@ -36,6 +38,7 @@ export function Unathorized() {
     return (
         <>
             <Header />
+            <title>{getLoc("errors_401")}</title>
             <Container>
                 <h2 className="mt-5">{getLoc("errors_401")}</h2>
                 <br />

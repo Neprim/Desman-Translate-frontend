@@ -77,6 +77,7 @@ export default function EditorSelector() {
     return (
         <>
             <Header />
+            <title>{getLoc("editor_selector_title")}</title>
             <div style={{margin: "10px", position: "absolute"}}>
                 <Button variant="outline-dark" onClick={() => {window.location.href = `/projects/${link["project_id"]}`}}>{getLoc("go_back")}</Button>
             </div>

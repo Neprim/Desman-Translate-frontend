@@ -158,7 +158,7 @@ export default function Create() {
 	return (
 		<>
 			<Header />
-
+			<title>{getLoc("create_title")}</title>
 			<Container className="text-left mt-5 mx-auto" style={{width: '40%', minWidth: '300px' }}>
 				<h1 style={{ marginBottom: '20px' }}>{getLoc("create_new_project")}</h1>
 				<Form>

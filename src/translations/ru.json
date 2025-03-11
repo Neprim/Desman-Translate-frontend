@@ -2,6 +2,7 @@
     "some_error": "Какая-то ошибка",
     "go_back": "Назад",
 
+    "signup_title": "Регистрация",
     "signup_signup": "Регистрация",
     "signup_email": "Электронная почта",
     "signup_username": "Имя пользователя",
@@ -19,6 +20,7 @@
     "signup_error_short_password": "Пароль слишком короткий",
     "signup_error_illegal_symbols_password": "Пароль содержит недопустимые символы",
 
+    "signin_title": "Вход",
     "signin_signin": "Вход",
     "signin_username_email": "Имя пользователя/Email",
     "signin_password": "Пароль",
@@ -47,6 +49,7 @@
     "footer_help": "Поддержка",
     "footer_credits": "© Мяу",
 
+    "homepage_title": "Desman Translate",
     "homepage_recent_projects": "Недавние проекты:",
     "homepage_popular_projects": "Популярные проекты:",
     "homepage_about_1": "Что такое Desman Translate?",
@@ -56,6 +59,7 @@
     "homepage_about_5": "Приятных переводов!",
     "homepage_create_project": "Создать проект",
 
+    "userpage_title": "Пользователь",
     "userpage_user_tab": "Пользователь",
     "userpage_about_you": "О вас",
     "userpage_about_user": "О пользователе",
@@ -74,9 +78,11 @@
     "userpage_gender_female": "Женский",
     "userpage_save": "Сохранить",
 
+    "search_title": "Поиск проектов",
     "search_name": "Название",
     "search_results": "Результаты поиска",
 
+    "create_title": "Создание проекта",
     "create_error_name_required": "Поле названия проекта должно быть заполнено",
     "create_error_name_not_unique": "Название проекта должно быть уникально",
     "create_error_short_name": "Название проекта слишком короткое (не меньше 4 символов)",
@@ -101,6 +107,7 @@
     "create_project_visibility_private_description": "Приватные проекты могут видеть только участники проекта.",
     "create_project_create": "Создать проект",
 
+    "project_title": "Проект",
     "project_project_tab": "Проект",
     "project_project_cover_stub": "Тут должна быть обложка проекта",
     "project_project_description": "Описание",
@@ -220,6 +227,7 @@
     "project_statistics_rating": "Рейтинг",
     "project_statistics_votes": "Поставленные голоса",
 
+    "my_projects_title": "Мои проекты",
     "my_projects_my_projects_tab": "Мои проекты",
     "my_projects_my_projects": "Мои проекты",
     "my_projects_create_project": "Создать проект",
@@ -230,6 +238,7 @@
     "my_projects_cancel": "Отменить",
     "my_projects_accept": "Принять",
 
+    "load_section_title": "Загрузка строк для раздела ",
     "load_section_load_strings_sections": "Загрузка строк для раздела ",
     "load_section_attention": "Строки добавляются в конец раздела, и в случае с JSON не проверяется дублирование ключей. Так что осторожней.",
     "load_section_type": "Тип строк",
@@ -248,6 +257,7 @@
     "load_section_error_too_many_strings": "Слишком большой объём строк, в одной главе может быть не больше 10000 строк.",
     "load_section_error_empty_strings": "Нельзя загружать пустые строки.",
 
+    "upload_section_title": "Загрузка переводов для ",
     "upload_section_translations_load_strings_sections": "Загрузка переводов для раздела ",
     "upload_section_translations_type": "Тип строк",
     "upload_section_translations_type_text": "Текст",
@@ -268,6 +278,7 @@
     "upload_section_translations_error_no_strings": "Отсутствуют строки для загрузки",
     "upload_section_translations_error_empty_translations": "Нельзя загружать пустые переводы.",
 
+    "upload_project_translations_title": "Загрузка переводов для проекта ",
     "upload_project_translations_attention": "Утилита полунаколенная, потому может работать не так, если есть пересечения по ключам между разделами. Ну и не будет работать, если разделы не типа JSON.",
     "upload_project_translations_load_strings_sections": "Загрузка переводов для проекта ",
     "upload_project_translations_load_text": "Текст для загрузки",
@@ -285,10 +296,13 @@
     "upload_project_translations_error_no_strings": "Отсутствуют строки для загрузки",
     "upload_project_translations_error_empty_translations": "Нельзя загружать пустые переводы.",
 
+    "editor_selector_title": "Редактор",
     "editor_selector_sections_choose": "Выбор разделов для редактора",
     "editor_selector_choose_all": "Выбрать все",
     "editor_selector_choose": "Выбрать",
 
+    "editor_title": "Редактор",
+    "project_project": "Проект",
     "editor_back_to_project": "Вернуться к проекту",
     "editor_current_chapter": "Раздел",
     "editor_all_chapters": "Все разделы",

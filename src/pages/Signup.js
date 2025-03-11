@@ -90,6 +90,7 @@ export default function Signup() {
     return (
         <>
             <Header />
+            <title>{getLoc("signup_title")}</title>
             <Container
                 className="text-left mt-5 mx-auto"
                 style={{
