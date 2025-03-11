@@ -55,6 +55,7 @@ function Search() {
                                 style={{ marginTop: 5 }}
                             >
                                 <Col sm={2} xs={5}>
+                                    <Link to={"/projects/" + project?.handle} className="link-primary">
                                     <img
                                         width={60}
                                         height={60}
@@ -62,6 +63,7 @@ function Search() {
                                         alt="thumbnail"
                                         style={{ marginRight: 10 }}
                                     />
+                                    </Link>
                                 </Col>
                                 <Col className="text-left">
                                     <Link to={"/projects/" + project.handle} className="link-primary">

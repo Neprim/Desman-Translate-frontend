@@ -128,6 +128,7 @@ function Projects() {
                                             style={{ marginTop: 5 }} 
                                             key={project.id}>
                                             <div className="col-auto">
+                                                <Link to={"/projects/" + project?.handle} className="link-primary">
                                                 <img
                                                     width={60}
                                                     height={60}
@@ -135,6 +136,7 @@ function Projects() {
                                                     alt="thumbnail"
                                                     style={{ marginRight: 10 }}
                                                 />
+                                                </Link>
                                             </div>
                                             <div className="col text-left">
                                                 <b>
@@ -164,6 +166,7 @@ function Projects() {
                                             style={{ marginTop: 5 }}
                                         >
                                             <div className="col-auto">
+                                                <Link to={"/projects/" + invite.project?.handle} className="link-primary">
                                                 <img
                                                     width={60}
                                                     height={60}
@@ -171,6 +174,7 @@ function Projects() {
                                                     alt="thumbnail"
                                                     style={{ marginRight: 10 }}
                                                 />
+                                                </Link>
                                             </div>
                                             <div className="col text-left">
                                                 <a>

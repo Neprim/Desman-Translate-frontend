@@ -87,12 +87,14 @@ function Home() {
                         {recentProjects.map((project, i) =>
                             <Container className="text-left pb-2" key={project.id}>
                                 <Stack direction="horizontal" gap="10" className="border rounded p-3 mt-1">
+                                    <Link to={"/projects/" + project?.handle} className="link-primary">
                                     <img
                                         width={60}
                                         height={60}
                                         src={project?.cover_url || placeholder}
                                         alt="thumbnail"
                                     />
+                                    </Link>
                                     <Container className="text-left text-break">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
@@ -110,11 +112,13 @@ function Home() {
                         {popularProjects.map((project, i) =>
                             <Container className="text-left pb-2" key={project.id}>
                                 <Stack direction="horizontal" gap="10" className="border rounded p-3 mt-1">
+                                    <Link to={"/projects/" + project?.handle} className="link-primary">
                                     <img
                                         width={60}
                                         height={60}
                                         src={project?.cover_url || placeholder}
                                         alt="thumbnail"/>
+                                    </Link>
                                     <Container className="text-left text-break">
                                         <Link to={"/projects/" + project.handle} className="link-primary">
                                             {project.name}
