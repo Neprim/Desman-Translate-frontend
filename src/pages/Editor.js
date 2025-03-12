@@ -5,9 +5,10 @@ import Form from "react-bootstrap/Form"
 import InputGroup from "react-bootstrap/InputGroup";
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
+import placeholder from "../images/placeholder.png";
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
-import { FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen } from "react-icons/fa"
+import { FaRegCommentAlt , FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen, FaMinus } from "react-icons/fa"
 import { CiWarning } from "react-icons/ci"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
@@ -199,9 +200,27 @@ export default function Editor() {
 			let strs = []
 			for (let i = 0; i < sec_ids.length; i++) {
 				const id = sec_ids[i]
+				let coms = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${id}/comments`)
+				let strs_coms = {}
+				let id_coms = {}
+				for (let com of coms) {
+					id_coms[com.id] = com
+					trs[com.author_id] = 1
+					if (com.reply != -1) {
+						if (!id_coms[com.reply].replies)
+							id_coms[com.reply].replies = []
+						id_coms[com.reply].replies.push(com)
+					} else {
+						if (!strs_coms[com.string_id])
+							strs_coms[com.string_id] = []
+						strs_coms[com.string_id].push(com)
+					}
+				}
+
 				let strs_t = await fetchStrings(link["project_id"], id, true, true)
 				for (let str of strs_t) {
 					str.sec_ind = i
+					str.comments = strs_coms[str.id] || []
 					strs.push(str)
 					for (let tr of str.translations) {
 						trs[tr.author_id] = 1
@@ -786,6 +805,165 @@ export default function Editor() {
 		setLoading(false)
 	}
 
+	function OpenComments(str) {
+		strings[str.index].show_comments = true
+		str.show_comments = true
+		UpdateDrawStrings()
+	}
+
+	function CloseComments(str) {
+		strings[str.index].show_comments = false
+		str.show_comments = false
+		UpdateDrawStrings()
+	}
+
+	async function PostComment(text, str, reply = -1) {
+		setLoading(true)
+		try {
+			let com = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sections[str.sec_ind].id}/strings/${str.id}/comments`, "POST", { text: text, reply: reply?.id || -1, })
+			if (reply != -1) {
+				if (!reply.replies)
+					reply.replies = []
+				reply.replies.push(com)
+			} else {
+				strings[str.index].comments.push(com)
+			}
+			UpdateDrawStrings()
+		} catch (err) {
+			console.log(err)
+		}
+		setLoading(false)
+	}
+
+	async function EditComment(text, str, comment) {
+		setLoading(true)
+		try {
+			let com = await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sections[str.sec_ind].id}/strings/${str.id}/comments/${comment.id}`, "PATCH", { text: text, })
+			comment.text = com.text
+			comment.updated_at = com.updated_at
+			UpdateDrawStrings()
+		} catch (err) {
+			console.log(err)
+		}
+		setLoading(false)
+	}
+
+	async function DeleteComment(comment, str) {
+		setLoading(true)
+		try {
+			await fetchSomeAPI(`/api/projects/${link["project_id"]}/sections/${sections[str.sec_ind].id}/strings/${str.id}/comments/${comment.id}`, "DELETE")
+			comment.text = ""
+			UpdateDrawStrings()
+		} catch (err) {
+			console.log(err)
+		}
+		setLoading(false)
+	}
+
+	function DrawComment(com, str, depth = 0) {
+		const author = translators.find(tr => tr.id == com.author_id)
+		return <>
+		<Container id={`comment-${com.id}`} style={{ marginLeft: depth * 8 + "px" }} className={(depth ? 'border-start' : "")}>
+			<Container style={{ marginLeft: "6px", padding: "8px", position: "relative" }}>
+				{com.text != ""
+				?	<><div>{com.text}</div>
+					<div style={{ color: "rgb(148, 148, 148)", fontSize: "smaller" }}>
+						<img src={author?.avatar_url || placeholder} width="20px" height="20px"></img>
+						<Link to={"/users/" + author?.id} style={{ color: "inherit", marginLeft: "4px", marginRight: "4px" }}>{author?.username}</Link>
+
+						<span>{new Date(com?.updated_at).toLocaleString()}</span>
+
+						<a href="#" style={{ color: "inherit", marginLeft: "4px", marginRight: "12px" }} onClick={(e) => {
+							if (com.author_id == user?.id)
+								document.getElementById(`comment-${com.id}-edit`).hidden = true
+							document.getElementById(`comment-${com.id}-reply`).hidden = false
+						}}>{getLoc("editor_comments_reply")}</a>
+
+						{com.author_id == user?.id &&
+							<a href="#" style={{ color: "inherit", marginLeft: "4px", marginRight: "12px" }} onClick={(e) => {
+								document.getElementById(`comment-${com.id}-edit`).hidden = false
+								document.getElementById(`comment-${com.id}-reply`).hidden = true
+							}}>{getLoc("editor_comments_edit")}</a>
+						}
+
+						{(com.author_id == user?.id || userRole?.permissions?.can_manage_strings) &&
+							<FaTrash onClick={(e) => {
+								if (window.confirm(getLoc("editor_are_you_sure"))) {
+									if (com.author_id == user?.id)
+										document.getElementById(`comment-${com.id}-edit`).hidden = false
+									document.getElementById(`comment-${com.id}-reply`).hidden = false
+									DeleteComment(com, str)
+								}
+							}}/>
+						}
+					</div>
+					{com.author_id == user?.id &&
+						<div id={`comment-${com.id}-edit`} style={{ marginLeft: "8px", marginTop: "8px", marginBottom: "8px" }} hidden>
+							<Form.Control className="d-flex align-items-start"
+								as="textarea"
+								placeholder={getLoc("editor_comments_placeholder")}
+								defaultValue={com.text}
+								style={{ wordWrap: "break-word", marginBottom: "4px" }}
+								id={`comment-input-edit-${com.id}`}
+							>
+							</Form.Control>
+							<Button variant="outline-warning" className="comment-button" onClick={() => {
+								const input = document.getElementById(`comment-input-edit-${com.id}`)
+								if (input.value != "") {
+									EditComment(input.value, str, com)
+									document.getElementById(`comment-${com.id}-edit`).hidden = true
+								}
+							}}>{getLoc("editor_comments_save")} </Button>
+							<Button variant="outline-danger" className="comment-button" onClick={() => {
+								document.getElementById(`comment-${com.id}-edit`).hidden = true
+							}}>{getLoc("editor_comments_cancel")} </Button>
+						</div>
+					}
+					<div id={`comment-${com.id}-reply`} style={{ marginLeft: "8px", marginTop: "8px", marginBottom: "8px" }} hidden>
+						<Form.Control className="d-flex align-items-start"
+							as="textarea"
+							placeholder={getLoc("editor_comments_placeholder")}
+							style={{ wordWrap: "break-word", marginBottom: "4px" }}
+							id={`comment-input-comment-${com.id}`}
+						>
+						</Form.Control>
+						<Button variant="outline-success" className="comment-button" onClick={() => {
+							const input = document.getElementById(`comment-input-comment-${com.id}`)
+							if (input.value != "") {
+								PostComment(input.value, str, com)
+								document.getElementById(`comment-${com.id}-reply`).hidden = true
+							}
+						}}>{getLoc("editor_comments_add")} </Button>
+						<Button variant="outline-danger" className="comment-button" onClick={() => {
+							document.getElementById(`comment-${com.id}-reply`).hidden = true
+						}}>{getLoc("editor_comments_cancel")} </Button>
+					</div>
+					</>
+				: 	<><div>
+						<i style={{ color: "rgb(148, 148, 148)" }}>{getLoc("editor_comments_deleted_comment")}</i>
+					</div></>
+				}
+				{com?.replies?.length &&
+					<div style={{ position: "absolute", left: "-24px", bottom: "0px", margin: "10px" }}>
+						<a onClick={(e) => {
+							let thread = document.getElementById(`comment-child-${com.id}`)
+							thread.hidden = !thread.hidden
+							e.currentTarget.children[0].hidden = thread.hidden
+							e.currentTarget.children[1].hidden = !thread.hidden
+						}}>
+							<div><FaMinus></FaMinus></div>
+							<div hidden><FaPlus></FaPlus></div>
+						</a>
+					</div>
+				}
+			</Container>
+			<Container id={`comment-child-${com.id}`}>
+				{com?.replies?.map(com => DrawComment(com, str, depth + 1))}
+			</Container>
+		</Container>
+		</>
+	}
+
 	
 
 	const [statusValue, setStatusValue] = useState("non_tr")
@@ -1079,21 +1257,16 @@ export default function Editor() {
 					? <>
 						<Col className="border-bottom" style={{ height: "100%", padding: "0px", overflowY: "auto" }} >
 							{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
-								<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "0px", paddingLeft: "0px", minHeight: "100px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="border d-flex justify-content-between">
+								<>
+								<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "0px", paddingLeft: "0px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="border d-flex justify-content-between">
 									{userRole?.permissions?.can_manage_strings &&
 										<Dropdown style={{ alignItems: "center", display: "flex" }}>
 											<Dropdown.Toggle style={{height: "100%"}} variant="outline" data-toggle="dropdown">
 											</Dropdown.Toggle>
 											<Dropdown.Menu>
-												{/* <Dropdown.Item onClick={(e) => {
-													setEditMode(true)
-													setInputText(str.text)
-													setInputKey(str.key)
-													setInputContext(str.context)
-													setInputMaxLength(str.max_tr_length)
-												}}>{getLoc("editor_edit_string")}</Dropdown.Item> */}
 												<Dropdown.Item onClick={(e) => {
-													DeleteString(str.index)
+													if (window.confirm(getLoc("editor_are_you_sure")))
+														DeleteString(str.index)
 												}}>{getLoc("editor_delete_string")}</Dropdown.Item>
 												{filters.length == 0 && sections.length == 1 && 
 												<Dropdown.Item onClick={(e) => {
@@ -1103,8 +1276,7 @@ export default function Editor() {
 											</Dropdown.Menu>
 										</Dropdown>
 									}
-
-									<Col style={{ marginRight: "0px", minWidth: "50%", marginLeft: "0px" }}>
+									<Col style={{ marginRight: "0px", minWidth: "50%", marginLeft: "0px", paddingBottom: "4px" }}>
 										{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
 										<Stack className="border-end border-start" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap", paddingLeft: "5px"}}>
 											<div
@@ -1118,14 +1290,13 @@ export default function Editor() {
 												<div style={{color: "rgb(148, 148, 148)", fontStyle: "italic"}}>
 													{str?.draw_key || str.key}
 												</div>
-												{sections.length > 1 &&
-													<div className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic" }}>
-														{sections[str.sec_ind].name}
-													</div>
-												}
 												<div>
-													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a>
-													{/* <a href={`${window.location.href}#${str.index + 1}`}>#{str.index + 1}</a> */}
+													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a> 
+													{sections.length > 1 &&
+														<span className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic", marginLeft: "4px" }}>
+															{sections[str.sec_ind].name}
+														</span>
+													}
 												</div>	
 											</div>	
 										</Stack>
@@ -1167,6 +1338,37 @@ export default function Editor() {
 									</Col>
 								<hr style={{ padding: "0px", margin: "0px" }} />
 								</Container>
+								{str.show_comments &&
+									<Container>
+									{str.comments.map(com => 
+										DrawComment(com, str)
+									)}
+									<div style={{ marginLeft: "8px", marginTop: "8px", marginBottom: "8px" }}>
+										<Form.Control className="d-flex align-items-start"
+											as="textarea"
+											placeholder={getLoc("editor_comments_placeholder")}
+											style={{ wordWrap: "break-word", marginBottom: "4px" }}
+											id={`comment-input-string-${str.id}`}
+										>
+										</Form.Control>
+										{!loading 
+										? 	<><Button variant="outline-success" className="comment-button" onClick={async () => {
+												const input = document.getElementById(`comment-input-string-${str.id}`)
+												if (input.value != "") {
+													await PostComment(input.value, str)
+													input.value = ""
+												}
+											}}>{getLoc("editor_comments_add")} </Button>
+											<Button variant="outline-danger" className="comment-button" onClick={() => {CloseComments(str)}}>{getLoc("editor_comments_close")} </Button></>
+										
+										: 	<><Button variant="outline-success" className="comment-button"><Spinner animation="border" role="output" size="sm"/> {getLoc("editor_comments_add")} </Button>
+											<Button variant="outline-danger" className="comment-button"><Spinner animation="border" role="output" size="sm"/> {getLoc("editor_comments_close")}</Button></>
+										}
+									</div>
+									</Container>
+								}
+								
+								</>
 							)}
 
 
@@ -1222,10 +1424,16 @@ export default function Editor() {
 												}
 											</>
 										: 	<>
+												<div style={{ display: "flex", justifyContent: "space-between" }}>
 												{!loading 
 													? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_add")} </Button>
 													: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
 												}
+												{curString?.show_comments
+													? <Button variant="warning" onClick={() => CloseComments(curString)}><FaRegCommentAlt></FaRegCommentAlt> {getLoc("editor_comments")}</Button>
+													: <Button variant="outline-warning" onClick={() => OpenComments(curString)}><FaRegCommentAlt></FaRegCommentAlt> {getLoc("editor_comments")}</Button>
+												}
+												</div>
 											</>
 									}
 								</>
@@ -1263,7 +1471,10 @@ export default function Editor() {
 													setTranslationEdit(tr)
 												}} ><FaPencilAlt/></Button>
 
-												<Button variant="outline-primary" onClick={(e) => DeleteTranslation(curString.id, tr.id)} ><FaTrashAlt/></Button>
+												<Button variant="outline-primary" onClick={(e) => {
+													if (window.confirm(getLoc("editor_are_you_sure")))
+														DeleteTranslation(curString.id, tr.id)
+												}} ><FaTrashAlt/></Button>
 											</>
 											: <>
 												<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
