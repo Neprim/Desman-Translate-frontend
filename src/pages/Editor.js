@@ -8,7 +8,7 @@ import Col from "react-bootstrap/Col"
 import placeholder from "../images/placeholder.png";
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
-import { FaRegCommentAlt , FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen, FaMinus } from "react-icons/fa"
+import { FaRegCommentAlt, FaCommentAlt, FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen, FaMinus } from "react-icons/fa"
 import { CiWarning } from "react-icons/ci"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
@@ -964,6 +964,14 @@ export default function Editor() {
 		</>
 	}
 
+	function GetCommentsAmount(coms) {
+		let am = coms?.length
+		for (let com of coms) {
+			am += GetCommentsAmount(com?.replies || [])
+		}
+		return am
+	}
+
 	
 
 	const [statusValue, setStatusValue] = useState("non_tr")
@@ -1430,8 +1438,10 @@ export default function Editor() {
 													: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
 												}
 												{curString?.show_comments
-													? <Button variant="warning" onClick={() => CloseComments(curString)}><FaRegCommentAlt></FaRegCommentAlt> {getLoc("editor_comments")}</Button>
-													: <Button variant="outline-warning" onClick={() => OpenComments(curString)}><FaRegCommentAlt></FaRegCommentAlt> {getLoc("editor_comments")}</Button>
+													? <Button variant="warning" onClick={() => CloseComments(curString)}>
+														{curString.comments?.length ? <><FaCommentAlt/> ({GetCommentsAmount(curString?.comments || [])})</> : <FaRegCommentAlt/>} {getLoc("editor_comments")}</Button>
+													: <Button variant="outline-warning" onClick={() => OpenComments(curString)}>
+														{curString.comments?.length ? <><FaCommentAlt/> ({GetCommentsAmount(curString?.comments || [])})</> : <FaRegCommentAlt/>} {getLoc("editor_comments")}</Button>
 												}
 												</div>
 											</>
