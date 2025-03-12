@@ -828,7 +828,10 @@ function Project(props) {
                                                         
                                                     </Dropdown.Item>
                                                 {userRole?.permissions?.can_manage_sections && 
-                                                    <Dropdown.Item onClick={(e) => DeleteSection(section.id)}>
+                                                    <Dropdown.Item onClick={(e) => {
+                                                        if (window.confirm(getLoc("project_are_you_sure")))
+                                                            DeleteSection(section.id)
+                                                    }}>
                                                         {getLoc("project_section_delete")}
                                                     </Dropdown.Item>
                                                 }
@@ -1055,10 +1058,16 @@ function Project(props) {
                                                 }
                                                 <td>0</td>
                                                 {(!roles[member.role_id].permissions.can_manage_members && userRole?.permissions?.can_manage_members || (userRole?.permissions.is_owner && user?.id != member.user.id)) &&
-                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>{getLoc("project_members_kick")}</button></td>
+                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { 
+                                                        if (window.confirm(getLoc("project_are_you_sure")))
+                                                            KickMember(member.user.id) 
+                                                    } }>{getLoc("project_members_kick")}</button></td>
                                                 }
                                                 {user?.id == member.user.id && project.owner_id != user?.id && 
-                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { KickMember(member.user.id) } }>{getLoc("project_members_leave")}</button></td>
+                                                    <td style={{ display: 'inline-flexbox' }}><button type="button" className="btn btn-outline-danger" style={{ padding: '0px 5px' }} onClick={ function (e) { 
+                                                        if (window.confirm(getLoc("project_are_you_sure")))
+                                                            KickMember(member.user.id) 
+                                                    } }>{getLoc("project_members_leave")}</button></td>
                                                 }
                                                 <td></td>
                                             </tr>
@@ -1229,7 +1238,10 @@ function Project(props) {
                                     </form>
                                     <Button variant="primary" type="submit" style={{ marginTop: '20px' }} onClick={SubmitChanges}>{getLoc("project_settings_save")}</Button>
                                     { userRole?.permissions?.is_owner && 
-                                    <div><Button variant="danger" type="submit" style={{ marginTop: '20px' }} onClick={DeleteProject}>{getLoc("project_settings_delete")}</Button></div>
+                                    <div><Button variant="danger" type="submit" style={{ marginTop: '20px' }} onClick={() => {
+                                        if (window.confirm(getLoc("project_are_you_sure")))
+                                            DeleteProject()
+                                    }}>{getLoc("project_settings_delete")}</Button></div>
                                     }
                                 </div>
                             </div>
