@@ -57,7 +57,7 @@ function Header() {
 					</a>
 					<div className="d-flex align-items-center">
 					</div>
-					{/* <Dropdown>
+					<Dropdown>
 						<Dropdown.Toggle variant="" bsPrefix="no-damn-caret">
 							<img style={{ width: 56, height: 42 }} className="border" src={flags[localStorage.getItem("lang")]}></img>
 						</Dropdown.Toggle>
@@ -74,7 +74,7 @@ function Header() {
 								</Dropdown.Item>
 							)}
 						</Dropdown.Menu>
-					</Dropdown> */}
+					</Dropdown>
 				</Container>
 			</header>
 			<Navbar className="py-2 bg-body-tertiary border-bottom">
