@@ -5,7 +5,7 @@ import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import { useEffect, useState, useContext } from "react"
 // import { AuthContext } from "../AuthContext";
-import { fetchSection, fetchSomeAPI } from "../APIController";
+import { fetchSection, fetchSomeAPI, fetchStrings } from "../APIController";
 import { Link, useParams } from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
 import { getLoc } from "../Translation";
@@ -15,6 +15,7 @@ export default function LoadSection() {
     // const { user } = useContext(AuthContext);
 
     const [section, setSection] = useState(null)
+    const [stringsExists, setStringsExists] = useState(true)
     const [sectionType, setSectionType] = useState('text')
     const [stringsError, setStringsError] = useState(null)
     const [strings, setStrings] = useState(null)
@@ -31,6 +32,9 @@ export default function LoadSection() {
     async function GetSection() {
         try {
             const sec = await fetchSection(link['project_id'], link['section_id'])
+            fetchStrings(link['project_id'], link['section_id']).then((strs) => {
+                setStringsExists(strs.length > 0)
+            })
             setSection(sec)
         } catch (err) {
             console.log(err)
@@ -161,7 +165,7 @@ export default function LoadSection() {
                     <h1 style={{ marginBottom: 20 }} className="text-middle text-break">{getLoc("load_section_load_strings_sections")}"{section.name}"</h1>
                     <Form>
                         <Form.Group>
-                            {section.type 
+                            {stringsExists
                             ? <>
                                 <Form.Label htmlFor="settings-strings-type" className="mt-2">{getLoc("load_section_type")}: {
                                     section.type == 'text'
