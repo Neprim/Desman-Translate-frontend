@@ -106,7 +106,7 @@
     "create_project_visibility_closed": "Закрытый проект",
     "create_project_visibility_public_description": "В публичных проектах все пользователи видят всю информацию, но участвовать в переводе могут только участники проекта.",
     "create_project_visibility_private_description": "В приватных проектах не-участники не видят строки и переводы, но могут подать заявку на вступление.",
-    "create_project_visibility_closed_description": "Приватные проекты могут видеть только участники проекта.",
+    "create_project_visibility_closed_description": "Закрытые проекты могут видеть только участники проекта.",
     "create_project_create": "Создать проект",
 
     "project_title": "Проект",
