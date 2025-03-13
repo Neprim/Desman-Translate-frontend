@@ -1150,7 +1150,7 @@ function Project(props) {
 						</>
 						: <>
                             <div className="row">
-                                <div className="col-8">
+                                <div className="col-12">
                                     <h2>{getLoc("project_statistics")}</h2>
                                     <label htmlFor="statistics-section" className="form-label" style={{ marginTop: '10px' }}>{getLoc("project_statistics_section")}</label>
                                     <Form.Select className="form-select" defaultValue={curStatSection} id="settings-source-lang" onChange={(e) => {console.log(e.target.value)
@@ -1175,6 +1175,7 @@ function Project(props) {
                                                 <th scope="col">{getLoc("project_statistics_approves")}</th>
                                                 <th scope="col">{getLoc("project_statistics_rating")}</th>
                                                 <th scope="col">{getLoc("project_statistics_votes")}</th>
+                                                <th scope="col">{getLoc("project_statistics_comments")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1190,6 +1191,7 @@ function Project(props) {
                                                     <td>{user.approves} ({user.approves_ratio}%)</td>
                                                     <td>{user.rating[0] - user.rating[1]} (<span style={{color: "green"}}>{user.rating[0]}</span>/<span style={{color: "red"}}>{user.rating[1]}</span>)</td>
                                                     <td><span style={{color: "green"}}>{user.pluses}</span>/<span style={{color: "red"}}>{user.minuses}</span></td>
+                                                    <td>{user.comments}</td>
                                                 </tr>
                                             )}
                                         </tbody>
