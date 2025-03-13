@@ -319,6 +319,7 @@
     "editor_sort_by_translations_amount": "Number of translations",
     "editor_sort_by_votes_plus": "Number of positive votes",
     "editor_sort_by_votes_minus": "Number of negative votes",
+    "editor_sort_by_comments_amount": "Number of comments",
     "editor_edit_mode": "Strings editor mode",
     "editor_move_mode": "Move mode",
     "editor_dictionary_recomendations": "Dictionary/Recomendations",

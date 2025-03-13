@@ -594,6 +594,12 @@ export default function Editor() {
 			return 	  ((a.translations?.[0]?.votes_plus?.length || 0) - (a.translations?.[0]?.votes_minus?.length || 0))
 					- ((b.translations?.[0]?.votes_plus?.length || 0) - (b.translations?.[0]?.votes_minus?.length || 0))
 		})
+		
+		if (sortBy == "comments_amount")
+		return strs.sort((a, b) => {
+			return 	  GetCommentsAmount(b?.comments || [])
+					- GetCommentsAmount(a?.comments || [])
+		})
 
 		return strs
 	}
@@ -1126,6 +1132,7 @@ export default function Editor() {
 										<option value="tr_amount">{getLoc("editor_sort_by_translations_amount")}</option>
 										<option value="vote_plus_amount">{getLoc("editor_sort_by_votes_plus")}</option>
 										<option value="vote_minus_amount">{getLoc("editor_sort_by_votes_minus")}</option>
+										<option value="comments_amount">{getLoc("editor_sort_by_comments_amount")}</option>
 									</Form.Select>
 								</InputGroup>
 							</Dropdown.Menu>
