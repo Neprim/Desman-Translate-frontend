@@ -196,6 +196,8 @@ export default function Editor() {
 				sec_ids = link["sections_list"].split("_").map((x) => parseInt(x, 16))
 			}
 			let trs = {}
+			if (user)
+				trs[user.id] = 1
 
 			let strs = []
 			for (let i = 0; i < sec_ids.length; i++) {
