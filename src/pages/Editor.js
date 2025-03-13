@@ -1267,23 +1267,40 @@ export default function Editor() {
 							{drawStrings.slice((curPage - 1) * page_size, curPage * page_size).map((str, i) =>
 								<>
 								<Container id={`str${str.id}`} onClick={ async (e) => SelectString(str.index) } key={str.id} fluid style={{ margin: "0px", padding: "0px", paddingLeft: "0px", backgroundColor: (str.index == curString?.index ? "rgb(240, 240, 240)" : "white") }} className="border d-flex justify-content-between">
-									{userRole?.permissions?.can_manage_strings &&
-										<Dropdown style={{ alignItems: "center", display: "flex" }}>
-											<Dropdown.Toggle style={{height: "100%"}} variant="outline" data-toggle="dropdown">
-											</Dropdown.Toggle>
-											<Dropdown.Menu>
-												<Dropdown.Item onClick={(e) => {
-													if (window.confirm(getLoc("editor_are_you_sure")))
-														DeleteString(str.index)
-												}}>{getLoc("editor_delete_string")}</Dropdown.Item>
-												{filters.length == 0 && sections.length == 1 && 
-												<Dropdown.Item onClick={(e) => {
-													AddString(str.index + 1)
-												}}>{getLoc("editor_add_string")}</Dropdown.Item>
+									<Col style={{ maxWidth: "4%", display: "flex", flexFlow: "column" }}>
+										{userRole?.permissions?.can_manage_strings ?
+											<Dropdown style={{ alignItems: "center", flexGrow: "1" }}>
+												<Dropdown.Toggle style={{height: "100%", width: "100%"}} variant="outline" data-toggle="dropdown">
+												</Dropdown.Toggle>
+												<Dropdown.Menu>
+													<Dropdown.Item onClick={(e) => {
+														if (window.confirm(getLoc("editor_are_you_sure")))
+															DeleteString(str.index)
+													}}>{getLoc("editor_delete_string")}</Dropdown.Item>
+													{filters.length == 0 && sections.length == 1 && 
+													<Dropdown.Item onClick={(e) => {
+														AddString(str.index + 1)
+													}}>{getLoc("editor_add_string")}</Dropdown.Item>
+													}
+												</Dropdown.Menu>
+											</Dropdown>
+											: <div style={{flexGrow: "1"}}></div>
+										}
+										<div style={{ width: "100%", display: "flex", justifyContent: "center" }} onClick={(e) => {
+											if (str.show_comments)
+												CloseComments(str)
+											else
+												OpenComments(str)
+										}}>
+											<div style={{ marginBottom: "10px", marginTop: "10px" }}>
+												{str.show_comments
+													? <FaCommentAlt/>
+													: <FaRegCommentAlt/>
 												}
-											</Dropdown.Menu>
-										</Dropdown>
-									}
+											<span style={{fontSize: "smaller"}}> {str.comments?.length && GetCommentsAmount(str.comments || []) || ""}</span>
+											</div>
+										</div>
+									</Col>
 									<Col style={{ marginRight: "0px", minWidth: "50%", marginLeft: "0px", paddingBottom: "4px" }}>
 										{/* <Form.Check.Label>{str.key}</Form.Check.Label> */}
 										<Stack className="border-end border-start" style={{height: "100%", position: "relative", whiteSpace: "pre-wrap", paddingLeft: "5px"}}>
@@ -1436,12 +1453,6 @@ export default function Editor() {
 												{!loading 
 													? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_add")} </Button>
 													: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
-												}
-												{curString?.show_comments
-													? <Button variant="warning" onClick={() => CloseComments(curString)}>
-														{curString.comments?.length ? <><FaCommentAlt/> ({GetCommentsAmount(curString?.comments || [])})</> : <FaRegCommentAlt/>} {getLoc("editor_comments")}</Button>
-													: <Button variant="outline-warning" onClick={() => OpenComments(curString)}>
-														{curString.comments?.length ? <><FaCommentAlt/> ({GetCommentsAmount(curString?.comments || [])})</> : <FaRegCommentAlt/>} {getLoc("editor_comments")}</Button>
 												}
 												</div>
 											</>
