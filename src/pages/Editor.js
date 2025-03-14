@@ -874,7 +874,7 @@ export default function Editor() {
 		<Container id={`comment-${com.id}`} style={{ marginLeft: depth * 8 + "px" }} className={(depth ? 'border-start' : "")}>
 			<Container style={{ marginLeft: "6px", padding: "8px", position: "relative" }}>
 				{com.text != ""
-				?	<><div>{com.text}</div>
+				?	<><div className="text-break">{com.text}</div>
 					<div style={{ color: "rgb(148, 148, 148)", fontSize: "smaller" }}>
 						<img src={author?.avatar_url || placeholder} width="20px" height="20px"></img>
 						<Link to={"/users/" + author?.id} style={{ color: "inherit", marginLeft: "4px", marginRight: "4px" }}>{author?.username}</Link>
@@ -911,6 +911,7 @@ export default function Editor() {
 								as="textarea"
 								placeholder={getLoc("editor_comments_placeholder")}
 								defaultValue={com.text}
+								maxLength={400}
 								style={{ wordWrap: "break-word", marginBottom: "4px" }}
 								id={`comment-input-edit-${com.id}`}
 							>
@@ -930,6 +931,7 @@ export default function Editor() {
 					<div id={`comment-${com.id}-reply`} style={{ marginLeft: "8px", marginTop: "8px", marginBottom: "8px" }} hidden>
 						<Form.Control className="d-flex align-items-start"
 							as="textarea"
+							maxLength={400}
 							placeholder={getLoc("editor_comments_placeholder")}
 							style={{ wordWrap: "break-word", marginBottom: "4px" }}
 							id={`comment-input-comment-${com.id}`}
@@ -1380,6 +1382,7 @@ export default function Editor() {
 									<div style={{ marginLeft: "8px", marginTop: "8px", marginBottom: "8px" }}>
 										<Form.Control className="d-flex align-items-start"
 											as="textarea"
+											maxLength={400}
 											placeholder={getLoc("editor_comments_placeholder")}
 											style={{ wordWrap: "break-word", marginBottom: "4px" }}
 											id={`comment-input-string-${str.id}`}
