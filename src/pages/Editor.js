@@ -1486,11 +1486,18 @@ export default function Editor() {
 										>
 											{tr.text}
 										</div>
-										<div>{getLoc("editor_translations_author")}: {translators.length && (translators.find((el) => el.id == tr.author_id)?.username || "noname") || ""}</div>
-										{ tr.editor_id && 
-											<div>{getLoc("editor_translations_editor")}: {translators.length && (translators.find((el) => el.id == tr.editor_id)?.username || "noname") || ""}</div>
-										}
-										<div>{new Date(tr.updated_at).toLocaleString()}</div>
+										<div style={{ display: "flex", justifyContent: "space-between" }}>
+											<div>
+												<div>{getLoc("editor_translations_author")}: {translators.length && (translators.find((el) => el.id == tr.author_id)?.username || "noname") || ""}</div>
+												{ tr.editor_id && 
+													<div>{getLoc("editor_translations_editor")}: {translators.length && (translators.find((el) => el.id == tr.editor_id)?.username || "noname") || ""}</div>
+												}
+												<div>{new Date(tr.updated_at).toLocaleString()}</div>
+											</div>
+											<Button variant="outline-secondary" onClick={(e) => {
+												setInputTranslation(tr.text)
+											}}><FaRegCopy /></Button>
+										</div>
 
 										{userRole?.permissions?.can_approve &&
 											(!loading
@@ -1517,9 +1524,6 @@ export default function Editor() {
 												<Button variant="outline-danger" disabled><Spinner size="sm"/></Button>
 											</>
 										)}
-										<Button variant="outline-secondary" onClick={(e) => {
-											setInputTranslation(tr.text)
-										}}><FaRegCopy /></Button>
 										
 										<div>
 											<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_plus.length }>
