@@ -592,14 +592,14 @@ export default function Editor() {
 		
 		if (sortBy == "vote_plus_amount")
 		return strs.sort((a, b) => {
-			return 	  ((b.translations?.[0]?.votes_plus?.length || 0) - (b.translations?.[0]?.votes_minus?.length || 0))
-					- ((a.translations?.[0]?.votes_plus?.length || 0) - (a.translations?.[0]?.votes_minus?.length || 0))
+			return 	  b.translations.reduce((tm, tr) => tm + tr.votes_plus?.length, 0)
+					- a.translations.reduce((tm, tr) => tm + tr.votes_plus?.length, 0)
 		})
 		
 		if (sortBy == "vote_minus_amount")
 		return strs.sort((a, b) => {
-			return 	  ((a.translations?.[0]?.votes_plus?.length || 0) - (a.translations?.[0]?.votes_minus?.length || 0))
-					- ((b.translations?.[0]?.votes_plus?.length || 0) - (b.translations?.[0]?.votes_minus?.length || 0))
+			return 	  b.translations.reduce((tm, tr) => tm + tr.votes_minus?.length, 0)
+					- a.translations.reduce((tm, tr) => tm + tr.votes_minus?.length, 0)
 		})
 		
 		if (sortBy == "comments_amount")
@@ -619,6 +619,7 @@ export default function Editor() {
 		UpdateDrawStrings()
 	}
 
+	// TODO Баг со сменой страницы при сортировке.
 	function ChangePage(page, change_str = true) {
 		setCurPage(page)
 		setMiddlePage(page)
