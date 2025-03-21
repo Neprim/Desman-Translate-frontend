@@ -8,7 +8,7 @@ import Col from "react-bootstrap/Col"
 import placeholder from "../images/placeholder.png";
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import { useNavigate } from "react-router-dom"
-import { FaRegCommentAlt, FaCommentAlt, FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen, FaMinus } from "react-icons/fa"
+import { FaRegCommentAlt, FaCommentAlt, FaCog, FaFilter, FaSortAmountDownAlt, FaBookOpen, FaEyeSlash, FaPlus, FaCheck, FaCode, FaRegTrashAlt, FaArrowUp, FaArrowDown, FaUndo, FaRedo, FaBook, FaPencilAlt, FaTrash, FaTrashAlt, FaArrowsAlt, FaPen, FaMinus, FaCopy, FaRegCopy } from "react-icons/fa"
 import { CiWarning } from "react-icons/ci"
 import { BsReplyFill, BsChatLeftText, BsGlobe } from "react-icons/bs"
 import { Link, useParams } from "react-router-dom";
@@ -1466,6 +1466,9 @@ export default function Editor() {
 													? <Button variant="outline-success" onClick={() => AddTranslation()} disabled={inputTranslation.length > curString?.max_tr_length}><FaPlus /> {getLoc("editor_translation_add")} </Button>
 													: <Button variant="outline-success" disabled><Spinner size="sm"/> {getLoc("editor_translation_add")} </Button>
 												}
+												<Button variant="outline-secondary" onClick={(e) => {
+													setInputTranslation(curString.text)
+												}}><FaCopy /></Button>
 												</div>
 											</>
 									}
@@ -1504,17 +1507,19 @@ export default function Editor() {
 													setTranslationEdit(tr)
 												}} ><FaPencilAlt/></Button>
 
-												<Button variant="outline-primary" onClick={(e) => {
+												<Button variant="outline-danger" onClick={(e) => {
 													if (window.confirm(getLoc("editor_are_you_sure")))
 														DeleteTranslation(curString.id, tr.id)
 												}} ><FaTrashAlt/></Button>
 											</>
 											: <>
 												<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
-												<Button variant="outline-primary" disabled><Spinner size="sm"/></Button>
+												<Button variant="outline-danger" disabled><Spinner size="sm"/></Button>
 											</>
-										)
-										}
+										)}
+										<Button variant="outline-secondary" onClick={(e) => {
+											setInputTranslation(tr.text)
+										}}><FaRegCopy /></Button>
 										
 										<div>
 											<DropdownButton as={ButtonGroup} variant="" title={ tr.votes_plus.length }>
