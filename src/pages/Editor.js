@@ -143,7 +143,6 @@ export default function Editor() {
 	async function GetDictionary() {
         try {
             let dict = await fetchSomeAPI(`/api/projects/${link["project_id"]}/dictionary`)
-            console.log(dict)
             dictionary = dict
 
 			for (let dict of dictionary) {
@@ -283,20 +282,22 @@ export default function Editor() {
 		}, 100)
 	}
 
-	function PseudoReload(sel) {
-		setFilters([])
-		setSortBy("")
-		setStatusChecked(false)
-		setKeyChecked(false)
-		setOrigChecked(false)
-		setTransChecked(false)
-		setOnlyCurrentChecked(false)
-		setUserChecked(false)
 
-		const strs = strings
-		setDrawStrings(strs)
+	window.onhashchange = () => {
+		console.log("hash change")
+		PseudoReload()
+	}
+	function PseudoReload() {
+		let sel = -1
+		if (window.location.hash.substring(1)) {
+			sel = window.location.hash.substring(1) - 1
+		}
 
-		ChangePage(1 + Math.floor(strings.findIndex((str) => str.index == sel) / page_size), false)
+		// const strs = strings
+		// setDrawStrings(strs)
+
+		if (curPage != 1 + Math.floor(strings.findIndex((str) => str.index == sel) / page_size))
+			ChangePage(1 + Math.floor(strings.findIndex((str) => str.index == sel) / page_size), false)
 
 		// UpdateDrawStrings()
 
@@ -336,11 +337,16 @@ export default function Editor() {
 		}}, 10)
 	}, [curString])
 
-	useEffect(() => {
+	function ResetToFirstPage() {
 		let strs = SortStrings(FilterStrings(strings))
 		setDrawStrings(strs)
 		setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
 		setCurString(strs[0] || null)
+		ChangePage(1)
+	}
+
+	useEffect(() => {
+		ResetToFirstPage()
 	}, [filters, sortBy])
 
 	function FindWordsInString(str) {
@@ -530,7 +536,6 @@ export default function Editor() {
 				if (filter.key == "orig") {
 					for (let str of draws) {
 						let draw_text_f = BreakIntoWords(str.text, value)
-						console.log(draw_text_f)
 
 						draw_text_f = draw_text_f.map((word) => {
 							if (word.f) {
@@ -619,8 +624,9 @@ export default function Editor() {
 		setMiddlePage(page)
 		if (change_str) {
 			// setCurString(drawStrings[(page - 1) * page_size])
-			if (drawStrings[(page - 1) * page_size]?.id)
-				ScrollTo('str' + drawStrings[(page - 1) * page_size].id, (page - 1) * page_size)
+			if (drawStrings[(page - 1) * page_size]?.id) {
+				ScrollTo('str' + drawStrings[(page - 1) * page_size].id, drawStrings[(page - 1) * page_size].index)
+			}
 		}
 	}
 
@@ -762,11 +768,14 @@ export default function Editor() {
 	}
 
 	function UpdateFilters(fls) {
+		
 		setFilters(fls)
+		// ResetToFirstPage()
+	}
 
-		setCurString(drawStrings[0])
-
-		ChangePage(1)
+	function UpdateSortBy(by) {
+		setSortBy(by)
+		// ResetToFirstPage()
 	}
 
 	function MoveElemTo(pos) {
@@ -1129,7 +1138,9 @@ export default function Editor() {
 							<Dropdown.Menu style={{ padding: "15px 15px 15px", minWidth: "300px"}}>
 								{getLoc("editor_sort_by")}
 								<InputGroup style={{ marginBottom: "5px" }}>
-									<Form.Select id='filter-status-value' value={sortBy} onChange={(e) => {setSortBy(e.target.value)}}>
+									<Form.Select id='filter-status-value' value={sortBy} onChange={(e) => {
+										UpdateSortBy(e.target.value)
+									}}>
 										<option value="">-- {getLoc("editor_sort_by_index")} --</option>
 										<option value="last_tr_time">{getLoc("editor_sort_by_last_translation_time")}</option>
 										<option value="last_str_time">{getLoc("editor_sort_by_last_string_change_time")}</option>
@@ -1327,7 +1338,19 @@ export default function Editor() {
 													{str?.draw_key || str.key}
 												</div>
 												<div>
-													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {PseudoReload(str.index)}}>#{str.index + 1}</a> 
+													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {
+														//PseudoReload(str.index)
+														if (filters.length || sortBy != "") {
+															setFilters([])
+															setSortBy("")
+															setStatusChecked(false)
+															setKeyChecked(false)
+															setOrigChecked(false)
+															setTransChecked(false)
+															setOnlyCurrentChecked(false)
+															setUserChecked(false)
+														}
+													}}>#{str.index + 1}</a> 
 													{sections.length > 1 &&
 														<span className="cutoff" style={{ color: "rgb(148, 148, 148)", fontStyle: "italic", marginLeft: "4px" }}>
 															{sections[str.sec_ind].name}
