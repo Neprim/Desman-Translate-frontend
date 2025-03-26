@@ -24,6 +24,8 @@ import Tab from "react-bootstrap/Tab"
 import Tabs from "react-bootstrap/Tabs"
 import { getLoc } from "../Translation"
 
+import localforage from "localforage";
+
 
 import React, { setState, useEffect, useState, formData, useContext, useRef } from "react"
 import { AuthContext } from "../AuthContext";
@@ -96,6 +98,19 @@ export default function Editor() {
 	const [draggedElem, setDraggedElem] = useState(-1)
 
 	const [translateWarning, setTranslateWarning] = useState("")
+	
+	function SaveData() {
+		localStorage.setItem("data_is_cached", true)
+		localforage.setItem("cached_data", JSON.stringify({
+			strings: strings,
+			project: project,
+			sections: sections,
+			members: members,
+			translators: translators,
+			roles: roles,
+			userRole: userRole,
+		}))
+	}
 	
 	const link = useParams()
 
@@ -175,13 +190,65 @@ export default function Editor() {
     }
 
 	useEffect(() => {
-        GetProject()
+		let data = localStorage.getItem("data_is_cached")
+		if (data) {
+			setLoadingStrings(true)
+
+			localforage.getItem("cached_data").then((data) => {
+				data = JSON.parse(data)
+	
+				strings = data.strings
+				
+				setProject(data.project)
+				setSections(data.sections)
+				setSections(data.sections)
+				setMembers(data.members)
+				setTranslators(data.translators)
+				setRoles(data.roles)
+				setUserRole(data.userRole)
+				
+				UpdateLoadedStrings()
+				
+				localforage.removeItem("cached_data")
+			})
+			localStorage.removeItem("data_is_cached")
+		} else {
+			GetProject()
+			GetStrings()
+		}
 		GetDictionary()
     }, [])
-
+	
 	useEffect(() => {
         GetUserRole();
     }, [project, user])
+
+	function UpdateLoadedStrings() {
+		if (dictionary.length) {
+			FindWordsInStrings()
+		}
+
+		let sel = -1
+
+		for (let i = 0; i < strings.length; i++) {
+			strings[i].index = i
+			if (window.location.hash.substring(1) && strings[i].index == window.location.hash.substring(1) - 1) {
+				sel = i
+				ChangePage(1 + Math.floor(i / page_size), false)
+			}
+		}
+
+		setMaxPage(Math.max(1, Math.ceil(strings.length / page_size)))
+		
+		setLoadingStrings(false)
+		UpdateDrawStrings()
+
+		if (sel != -1) {
+			ScrollTo('str' + strings[sel].id, sel)
+		} else {
+			SelectString(0)
+		}
+	}
 
 	async function GetStrings() {
 		setLoading(true)
@@ -230,34 +297,9 @@ export default function Editor() {
 					}
 				}
 			}
-			let sel = -1
-
-			for (let i = 0; i < strs.length; i++) {
-				strs[i].index = i
-				if (window.location.hash.substring(1) && strs[i].index == window.location.hash.substring(1) - 1) {
-					sel = i
-					ChangePage(1 + Math.floor(i / page_size), false)
-				}
-			}
-			console.log(strs)
-
-			setMaxPage(Math.max(1, Math.ceil(strs.length / page_size)))
-
 			strings = strs
-			console.log(strings)
 
-			if (dictionary.length) {
-				FindWordsInStrings()
-			}
-			
-			setLoadingStrings(false)
-			UpdateDrawStrings()
-
-			if (sel != -1) {
-				ScrollTo('str' + strings[sel].id, sel)
-			} else {
-				SelectString(0)
-			}
+			UpdateLoadedStrings()
 
 			let trs_e = []
 			for (let tr in trs) {
@@ -284,7 +326,6 @@ export default function Editor() {
 
 
 	window.onhashchange = () => {
-		console.log("hash change")
 		PseudoReload()
 	}
 	function PseudoReload() {
@@ -301,9 +342,9 @@ export default function Editor() {
 
 		// UpdateDrawStrings()
 
-		console.log("PseudoReload")
-		console.log(curPage)
-		console.log(sel)
+		// console.log("PseudoReload")
+		// console.log(curPage)
+		// console.log(sel)
 
 		if (sel != -1) {
 			ScrollTo('str' + strings[sel].id, sel)
@@ -313,10 +354,6 @@ export default function Editor() {
 	function SelectString(str_index) {
 		setCurString(strings[str_index])
 	}
-
-	useEffect(() => {
-		GetStrings()
-	}, [])
 
 	const textareaTranslate = useRef(null);
 	useEffect(() => {
@@ -406,6 +443,9 @@ export default function Editor() {
 		}
 		setTranslateWarning(warn)
 	}, [inputTranslation])
+
+	useEffect(() => {
+	}, [drawStrings])
 
 	function UpdateDrawStrings() {
 		setDrawStrings(SortStrings(FilterStrings(strings)))
@@ -1339,8 +1379,19 @@ export default function Editor() {
 													{str?.draw_key || str.key}
 												</div>
 												<div>
-													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} onClick={(e) => {
+													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} target="_blank" onClick={(e) => {
 														//PseudoReload(str.index)
+														if (
+															e.ctrlKey || 
+															e.shiftKey || 
+															e.metaKey
+														) {
+															SaveData()
+															return
+														}
+														e.preventDefault()
+
+														window.location.hash = str.index + 1
 														if (filters.length || sortBy != "") {
 															setFilters([])
 															setSortBy("")
