@@ -338,6 +338,7 @@
     "editor_delete_string": "Delete string",
     "editor_are_you_sure": "Are you sure?",
     "editor_add_string": "Add string",
+    "editor_are_you_sure_missing_dict_translation": "Are you sure you want to add translation without some word from dictionary?",
     "editor_translation_placeholder": "Your translation...",
     "editor_translation_context": "Context",
     "editor_translation_max_symbols": "max",

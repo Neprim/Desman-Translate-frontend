@@ -355,6 +355,7 @@
     "editor_delete_string": "Удалить строку",
     "editor_are_you_sure": "Вы уверены?",
     "editor_add_string": "Добавить строку",
+    "editor_are_you_sure_missing_dict_translation": "Вы уверены, что хотите добавить перевод с отсутствующим словом из словаря?",
     "editor_translation_placeholder": "Ваш вариант перевода...",
     "editor_translation_context": "Контекст",
     "editor_translation_max_symbols": "макс.",
