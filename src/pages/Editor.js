@@ -773,6 +773,11 @@ export default function Editor() {
 	}
 	
 	async function EditTranslation() {
+		if (translateWarning) {
+			if (!window.confirm(getLoc("editor_are_you_sure_missing_dict_translation"))) {
+				return
+			}
+		}
 		setLoading(true)
 		try {
 			const sec = sections[curString.sec_ind]
