@@ -99,9 +99,9 @@ export default function Editor() {
 
 	const [translateWarning, setTranslateWarning] = useState("")
 	
-	function SaveData() {
+	async function SaveData() {
 		localStorage.setItem("data_is_cached", true)
-		localforage.setItem("cached_data", JSON.stringify({
+		await localforage.setItem("cached_data", JSON.stringify({
 			strings: strings,
 			project: project,
 			sections: sections,
@@ -1398,14 +1398,14 @@ export default function Editor() {
 													{str?.draw_key || str.key}
 												</div>
 												<div>
-													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} target="_blank" onClick={(e) => {
+													<a href={`/projects/${link["project_id"]}/editor/${link["sections_list"]}#${str.index + 1}`} target="_blank" onClick={async (e) => {
 														//PseudoReload(str.index)
 														if (
 															e.ctrlKey || 
 															e.shiftKey || 
 															e.metaKey
 														) {
-															SaveData()
+															await SaveData()
 															return
 														}
 														e.preventDefault()
