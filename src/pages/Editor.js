@@ -950,14 +950,14 @@ export default function Editor() {
 
 						<span>{new Date(com?.updated_at).toLocaleString()}</span>
 
-						<a href="#" style={{ color: "inherit", marginLeft: "4px", marginRight: "12px" }} onClick={(e) => {
+						<a style={{ color: "inherit", marginLeft: "4px", marginRight: "12px" }} onClick={(e) => {
 							if (com.author_id == user?.id)
 								document.getElementById(`comment-${com.id}-edit`).hidden = true
 							document.getElementById(`comment-${com.id}-reply`).hidden = false
 						}}>{getLoc("editor_comments_reply")}</a>
 
 						{com.author_id == user?.id &&
-							<a href="#" style={{ color: "inherit", marginLeft: "4px", marginRight: "12px" }} onClick={(e) => {
+							<a style={{ color: "inherit", marginLeft: "4px", marginRight: "12px" }} onClick={(e) => {
 								document.getElementById(`comment-${com.id}-edit`).hidden = false
 								document.getElementById(`comment-${com.id}-reply`).hidden = true
 							}}>{getLoc("editor_comments_edit")}</a>
