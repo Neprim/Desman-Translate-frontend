@@ -398,12 +398,13 @@ export default function Editor() {
 		}
 		words = words.sort((a, b) => a.ind - b.ind)
 		let cur = 0
+		console.log(words)
 		for (let i = 0; i < words.length; i++) {
 			if (words[i].ind < cur)
 				continue
 			draw_text.push({text: str.text.substring(cur, words[i].ind)})
 			draw_text.push({text: words[i].word, desc: dictionary[words[i].dict].desc})
-			dicts.push(i)
+			dicts.push(words[i].dict)
 
 			cur = words[i].ind + words[i].word.length
 		}
@@ -434,7 +435,7 @@ export default function Editor() {
 			return
 		if (!curString || !curString.dicts)
 			return 
-		
+
 		let warn = ""
 		for (let i of curString.dicts) {
 			if (!inputTranslation.match(dictionary[i]?.translate_key)) {
