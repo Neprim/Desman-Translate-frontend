@@ -678,6 +678,14 @@ export default function Editor() {
 				return
 			}
 		}
+		for (const tr of curString?.translations) {
+			if (tr.text == inputTranslation) {
+				if (!window.confirm(getLoc("editor_are_you_sure_existing_translation"))) {
+					return
+				}
+				break
+			}
+		}
 		setLoading(true)
 		try {
 			const sec = sections[curString.sec_ind]
